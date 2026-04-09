@@ -190,12 +190,14 @@ const fk=n=>n>=1e3?"$"+(n/1e3).toFixed(1)+"K":"$"+Math.round(n);
 const cb={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:"#fff",titleColor:"#1A2B3C",bodyColor:"#3D5066",borderColor:"#EEF2F7",borderWidth:1,cornerRadius:8,padding:12,bodyFont:{family:"DM Sans"},titleFont:{family:"DM Sans",weight:700}}},scales:{x:{grid:{display:false},ticks:{font:{family:"DM Sans",size:11},color:"#8A9BAE"}},y:{grid:{color:"#EEF2F7"},ticks:{font:{family:"DM Sans",size:11},color:"#8A9BAE"}}}};
 const lgd={display:true,position:"bottom",labels:{font:{family:"DM Sans",size:11},boxWidth:12,padding:14,color:"#3D5066"}};
 
-// CSV Parser
+// CSV Parser - handles quoted fields with commas like "$1,076.38"
 function parseCSV(text){
   if(!text||text.length<5)return[];
+  // Split into lines respecting quotes
   const lines=[];let cur="";let inQ=false;
-  for(let i=0;i<text.length;i++){const c=text[i];if(c==='"')inQ=!inQ;else if(c==="\n"&&!inQ){lines.push(cur);cur="";}else if(c==="\r"&&!inQ)continue;else cur+=c;}
+  for(let i=0;i<text.length;i++){const c=text[i];if(c==='"'){inQ=!inQ;cur+=c;}else if(c==="\n"&&!inQ){lines.push(cur);cur="";}else if(c==="\r"&&!inQ)continue;else cur+=c;}
   if(cur)lines.push(cur);
+  // Split each line into cells respecting quotes
   return lines.map(line=>{const cols=[];let cell="";let q=false;
   for(let i=0;i<line.length;i++){const c=line[i];if(c==='"')q=!q;else if(c===","&&!q){cols.push(cell);cell="";}else cell+=c;}
   cols.push(cell);return cols;});
@@ -397,7 +399,7 @@ function buildSales(){window._s=1;renderLB("lb-sales");
     if(f&&f!=="All"){d=d.filter(s=>{const ag=s.ag.trim();if(f==="ISoto")return ag==="ISoto"||ag==="Ivan Soto"||ag==="Ivan";return ag.includes(f);});}
     document.getElementById("sl-tbl").innerHTML=`<thead><tr><th>Tracking ID</th><th>Customer</th><th>Agent</th><th>Date</th><th>Revenue</th><th>Discount</th></tr></thead><tbody>${d.slice(0,60).map(s=>`<tr><td style="color:var(--teal);font-weight:600">${s.id}</td><td>${s.c}</td><td style="font-weight:500">${s.ag}</td><td style="color:var(--gray)">${s.d}</td><td style="font-weight:600">${fmt(s.r)}</td><td>${s.co?`<span class="tg" style="background:var(--teal-mist);color:var(--teal)">${s.co}</span>`:"—"}</td></tr>`).join("")}</tbody>`;
   }
-  rST("All");document.getElementById("agent-filter").addEventListener("change",e=>rST(e.target.value));
+  rST("All");document.getElementById("agent-filter").onchange=e=>rST(e.target.value);
 }
 
 // ═══ KPI ═══
@@ -421,7 +423,12 @@ function buildKPI(){window._k=1;
 function renderAg(){
   const ag=document.getElementById("kpi-ag").value,wi=+document.getElementById("kpi-wk").value;
   const d=D.kpi[ag];if(!d)return;
-  const km=["Assigned Conversations","Messages Sent (excl. replies)","Replies Sent","First Reply Time (hrs)","Handle Time (min)","SLA Breaches","Satisfaction %","Calls Answered","Calls Placed","Missed Calls","Dialpad Time (hrs)","Days Worked","Time Usage","General Efficiency"];
+  const km=["Assigned Conversations","Total Messages","Messages Sent (excl. replies)","Replies Sent","First Reply Time (hrs)","Handle Time (min)","SLA Breaches","Satisfaction %","Calls Answered","Calls Placed","Missed Calls","Dialpad Time (hrs)","Days Worked","Time Usage","General Efficiency"];
+  // Compute Total Messages = Replies + Messages excl replies
+  if(d.kpis["Replies Sent"]&&d.kpis["Messages Sent (excl. replies)"]){
+    const rv=d.kpis["Replies Sent"].v,mv=d.kpis["Messages Sent (excl. replies)"].v;
+    d.kpis["Total Messages"]={v:rv.map((r,i)=>(r||0)+(mv[i]||0)),t:null,p:"Front"};
+  }
   document.getElementById("kpi-cards").innerHTML=km.map(n=>{const m=d.kpis[n];if(!m)return"";
     const v=m.v[wi];const pv=wi>0?m.v[wi-1]:null;
     // Format value
