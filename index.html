@@ -7,9 +7,19 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-:root{--teal:#2AACB8;--teal-mist:#F0FAFB;--coral:#E8967A;--coral-dark:#D4604A;--navy:#0D2137;--slate:#3D5066;--gray:#8A9BAE;--bg:#F4F6F9;--card:#fff;--border:#EEF2F7;--text:#1A2B3C;--green:#2D8A2D;--green-bg:#E8F8E8}
+:root{--teal:#2AACB8;--teal-mist:#F0FAFB;--coral:#E8967A;--coral-dark:#D4604A;--navy:#0D2137;--slate:#3D5066;--gray:#8A9BAE;--bg:#F4F6F9;--card:#fff;--border:#EEF2F7;--text:#1A2B3C;--green:#2D8A2D}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;overflow:hidden}
+
+/* Loading overlay */
+#loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--navy);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s}
+#loading-overlay.done{opacity:0;pointer-events:none}
+.load-brand{font-size:32px;font-weight:800;color:var(--teal);margin-bottom:8px}
+.load-sub{font-size:14px;color:#5A7A8A;margin-bottom:30px}
+.load-bar{width:300px;height:4px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden}
+.load-fill{height:100%;background:var(--teal);border-radius:2px;transition:width .3s;width:0%}
+.load-status{color:var(--gray);font-size:12px;margin-top:12px}
+
 .sidebar{width:230px;background:var(--navy);color:#fff;display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;bottom:0;z-index:100}
 .sidebar-brand{padding:28px 22px 22px;border-bottom:1px solid rgba(255,255,255,.06)}
 .brand-top{font-size:22px;font-weight:800;color:var(--teal);line-height:1.1}.brand-bottom{font-size:22px;font-weight:800;color:#fff;line-height:1.1}.brand-sub{font-size:9px;color:#5A7A8A;margin-top:6px;text-transform:uppercase;letter-spacing:2px}
@@ -34,32 +44,24 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .cd{background:var(--card);border-radius:12px;padding:24px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
 .ct{font-size:16px;font-weight:700;margin-bottom:3px}.csb{font-size:12px;color:var(--gray);margin-bottom:18px}
 .cw{position:relative;width:100%}.cw canvas{width:100%!important}
-/* Leaderboard */
 .lr{display:flex;align-items:center;gap:12px;margin-bottom:13px}
 .lrk{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
 .lrk.g{background:var(--teal);color:#fff}.lrk.s{background:#45C4CF;color:#fff}.lrk.d{background:var(--border);color:var(--slate)}
-.ln{width:140px;font-size:13px;font-weight:500}
-.lb{flex:1;height:12px;background:var(--bg);border-radius:6px;overflow:hidden}
-.lf{height:100%;border-radius:6px;transition:width 1s cubic-bezier(.22,1,.36,1)}
-.la{width:85px;font-size:14px;font-weight:700;text-align:right}
-.li{opacity:.45}
-.lt{margin-top:14px;padding-top:14px;border-top:2px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-/* Tables */
+.ln{width:140px;font-size:13px;font-weight:500}.lb{flex:1;height:12px;background:var(--bg);border-radius:6px;overflow:hidden}
+.lf{height:100%;border-radius:6px;transition:width 1s cubic-bezier(.22,1,.36,1)}.la{width:85px;font-size:14px;font-weight:700;text-align:right}
+.li{opacity:.45}.lt{margin-top:14px;padding-top:14px;border-top:2px solid var(--border);display:flex;justify-content:space-between;align-items:center}
 .tw{overflow-x:auto;max-height:420px;overflow-y:auto}
 .tb{width:100%;border-collapse:collapse;font-size:12px}
 .tb thead{position:sticky;top:0;background:#fff;z-index:1}
 .tb th{padding:10px 12px;text-align:left;color:var(--gray);font-weight:600;border-bottom:2px solid var(--border);font-size:11px;white-space:nowrap}
-.tb td{padding:8px 12px;border-bottom:1px solid #F8F9FB}
-.tb tbody tr:nth-child(even){background:#FAFBFC}.tb tbody tr:hover{background:var(--teal-mist)}
+.tb td{padding:8px 12px;border-bottom:1px solid #F8F9FB}.tb tbody tr:nth-child(even){background:#FAFBFC}.tb tbody tr:hover{background:var(--teal-mist)}
 .tg{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600}
-/* Schedule */
 .st{width:100%;border-collapse:collapse;font-size:12px}
 .st th{padding:9px 10px;text-align:center;color:var(--gray);font-weight:600;border-bottom:2px solid var(--border);font-size:11px}
 .st th:first-child{text-align:left}.st th.ty{color:var(--teal);border-bottom-color:var(--teal);background:var(--teal-mist)}
 .st td{padding:8px 10px;text-align:center;color:var(--slate);border-bottom:1px solid #F8F9FB}
 .st td:first-child{text-align:left;font-weight:600;white-space:nowrap}.st td.ty{background:var(--teal-mist);font-weight:600}
 .rd{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
-/* KPI */
 .kt{display:flex;gap:0;margin-bottom:22px;border-bottom:2px solid var(--border)}
 .ktb{padding:10px 22px;font-size:13px;font-weight:600;color:var(--gray);border:none;background:0 0;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-2px}
 .ktb.active{color:var(--teal);border-bottom-color:var(--teal)}
@@ -69,20 +71,26 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .kn{font-size:12px;font-weight:600;color:var(--slate)}
 .kp{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:2px 7px;border-radius:3px}
 .kp.front{background:#E8F0FE;color:#3B6CE7}.kp.dialpad{background:#FEF3E8;color:#D4860A}.kp.general{background:var(--teal-mist);color:var(--teal)}.kp.efficiency{background:#FEE8E8;color:#D43B3B}
-.kv{font-size:26px;font-weight:800;line-height:1}.ktar{font-size:11px;color:var(--gray);margin-top:4px}
+.kv-num{font-size:26px;font-weight:800;line-height:1}.ktar{font-size:11px;color:var(--gray);margin-top:4px}
 .ks{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
 .ks.good{background:#2D8A2D}.ks.warn{background:#D4860A}.ks.bad{background:#D43B3B}
 .dsc{background:var(--bg);border-radius:10px;padding:16px 20px}
 .dsl{font-size:10px;color:var(--gray);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
 .dsv{font-size:22px;font-weight:800;margin-top:4px}.dss{font-size:11px;color:var(--gray);margin-top:2px}
 .inf-a{color:var(--coral-dark);font-weight:600}.inf-o{color:#3B6CE7;font-weight:600}
-.loading{text-align:center;padding:40px;color:var(--gray);font-size:14px}
 @keyframes fu{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:1100px){.g2,.gs,.gl{grid-template-columns:1fr}}
 @media(max-width:768px){.sidebar{width:60px}.sidebar span:not(.icon),.brand-bottom,.brand-sub,.sidebar-footer{display:none}.sidebar-brand{padding:20px 12px;text-align:center}.nav-btn{padding:12px 0;justify-content:center}.main{margin-left:60px;padding:20px 16px}.stats-row{flex-direction:column}}
 </style>
 </head>
 <body>
+<!-- LOADING SCREEN -->
+<div id="loading-overlay">
+<div class="load-brand">Memory Ventures</div>
+<div class="load-sub">CS Dashboard</div>
+<div class="load-bar"><div class="load-fill" id="load-fill"></div></div>
+<div class="load-status" id="load-status">Connecting to Google Sheets...</div>
+</div>
 <aside class="sidebar">
 <div class="sidebar-brand"><div class="brand-top">Memory</div><div class="brand-bottom">Ventures</div><div class="brand-sub">CS Dashboard</div></div>
 <nav class="sidebar-nav">
@@ -92,13 +100,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 <button class="nav-btn" data-page="schedule"><span class="icon">◆</span> <span>Schedule & Attendance</span></button>
 <button class="nav-btn" data-page="ops"><span class="icon">○</span> <span>Daily Operations</span></button>
 </nav>
-<div class="sidebar-footer"><span id="sf-week">Loading...</span></div>
+<div class="sidebar-footer"><span id="sf-ver">v1.0</span></div>
 </aside>
 <div class="main">
 
 <div id="page-home" class="page active">
 <div class="page-header"><div><h1>Team Overview</h1><p>CS team at a glance</p></div></div>
-<div class="stats-row" id="home-stats"><div class="sc"><div class="sl">Loading</div><div class="sv">...</div></div></div>
+<div class="stats-row" id="home-stats"></div>
 <div class="gs"><div class="cd"><div class="ct">Weekly Schedule</div><div class="csb" id="home-sched-label"></div><div style="overflow-x:auto"><table class="st" id="home-sched-tbl"></table></div></div>
 <div class="cd"><div class="ct">PTO Earned</div><div class="csb">Earned so far out of 15 annual days</div><div id="pto-box"></div></div></div>
 <div class="g2"><div class="cd"><div class="ct">Commission Leaderboard</div><div class="csb">All-time cumulative earnings</div><div id="lb-home"></div></div>
@@ -106,29 +114,29 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 </div>
 
 <div id="page-sales" class="page">
-<div class="page-header"><div><h1>Sales & Commissions</h1><p>Commission tracking, revenue contributions, and sales performance</p></div>
+<div class="page-header"><div><h1>Sales & Commissions</h1><p>Commission tracking, revenue, sales performance</p></div>
 <select class="sel" id="agent-filter"><option value="All">All Agents</option><option value="AJimenez">Angel Jimenez</option><option value="VDuran">Vanessa Duran</option><option value="LTona">Luisa Tona</option><option value="ISoto">Ivan Soto</option><option value="FSoto">Fatima Soto</option></select></div>
 <div class="stats-row" id="sales-stats"></div>
 <div class="gl"><div class="cd"><div class="ct">Commission Leaderboard</div><div class="csb">All-time cumulative</div><div id="lb-sales"></div></div>
 <div class="cd"><div class="ct">Monthly Commission Trend</div><div class="csb">Full history</div><div class="cw"><canvas id="ch-comm" height="300"></canvas></div></div></div>
-<div class="cd" style="margin-bottom:22px"><div class="ct">Revenue Contributed by Agent</div><div class="csb">Stacked by month</div><div class="cw"><canvas id="ch-rev-ag" height="300"></canvas></div></div>
-<div class="cd" style="margin-bottom:22px"><div class="ct">Average Order Value by Agent</div><div class="csb">Revenue ÷ Orders — Does agent-assisted selling increase order value?</div><div class="cw"><canvas id="ch-aov" height="280"></canvas></div></div>
-<div class="gs"><div class="cd"><div class="ct">Discount Tier Breakdown</div><div class="csb">Orders per commission bracket</div><div class="cw"><canvas id="ch-tier" height="280"></canvas></div></div>
-<div class="cd"><div class="ct">Product Mix</div><div class="csb">ALC vs KIT per agent</div><div id="pm-box"></div></div></div>
-<div class="cd"><div class="ct">Recent Sales Log</div><div class="csb">Latest orders</div><div class="tw"><table class="tb" id="sl-tbl"></table></div></div>
+<div class="cd" style="margin-bottom:22px"><div class="ct">Revenue by Agent</div><div class="csb">Stacked by month</div><div class="cw"><canvas id="ch-rev-ag" height="300"></canvas></div></div>
+<div class="cd" style="margin-bottom:22px"><div class="ct">Average Order Value by Agent</div><div class="csb">Revenue ÷ Orders</div><div class="cw"><canvas id="ch-aov" height="280"></canvas></div></div>
+<div class="gs"><div class="cd"><div class="ct">Discount Tier Breakdown</div><div class="csb">Orders per bracket</div><div class="cw"><canvas id="ch-tier" height="280"></canvas></div></div>
+<div class="cd"><div class="ct">Product Mix</div><div class="csb">ALC vs KIT</div><div id="pm-box"></div></div></div>
+<div class="cd"><div class="ct">Sales Log</div><div class="csb">Recent orders</div><div class="tw"><table class="tb" id="sl-tbl"></table></div></div>
 </div>
 
 <div id="page-kpi" class="page">
-<div class="page-header"><div><h1>Agent KPIs</h1><p>Weekly performance metrics</p></div>
+<div class="page-header"><div><h1>Agent KPIs</h1><p>Weekly performance</p></div>
 <div style="display:flex;gap:10px;flex-wrap:wrap" id="kpi-ctrls">
 <select class="sel" id="kpi-ag"><option>Angel Jimenez</option><option>Ivan Soto</option><option>Fatima Soto</option><option>Luisa Tona</option><option>Vanessa Duran</option></select>
 <select class="sel" id="kpi-wk"></select></div></div>
 <div class="kt"><button class="ktb active" data-v="agent">Agent View</button><button class="ktb" data-v="dept">Department</button><button class="ktb" data-v="inf">Infractions & PTO</button></div>
 <div id="kv-agent"><div class="kg" id="kpi-cards"></div>
-<div class="g2"><div class="cd"><div class="ct">Front Performance</div><div class="csb">Replies & reply time</div><div class="cw"><canvas id="ch-kf" height="260"></canvas></div></div>
+<div class="g2"><div class="cd"><div class="ct">Front Performance</div><div class="csb">Replies, messages & reply time</div><div class="cw"><canvas id="ch-kf" height="260"></canvas></div></div>
 <div class="cd"><div class="ct">Dialpad Activity</div><div class="csb">Calls answered, placed, missed</div><div class="cw"><canvas id="ch-kd" height="260"></canvas></div></div></div>
 <div class="cd" style="margin-top:20px"><div class="ct">Infraction Summary</div><div class="csb">By quarter</div><div id="kpi-inf-sum"></div></div></div>
-<div id="kv-dept" style="display:none"><div class="cd" style="margin-bottom:22px"><div class="ct">Department Weekly Summary</div><div class="csb" id="dept-sub"></div><div class="kg" id="dept-cards"></div></div>
+<div id="kv-dept" style="display:none"><div class="cd" style="margin-bottom:22px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div><div class="ct">Department Weekly Summary</div><div class="csb" style="margin-bottom:0" id="dept-sub"></div></div><select class="sel" id="dept-wk-sel"></select></div><div class="kg" id="dept-cards"></div></div>
 <div class="cd"><div class="ct">Online Rating & Public Perception</div><div class="csb">External reviews</div><div id="dept-rat"></div></div></div>
 <div id="kv-inf" style="display:none"><div class="g2"><div class="cd"><div class="ct">Infraction Log</div><div class="csb">All records</div><div style="max-height:500px;overflow-y:auto"><table class="tb" id="inf-tbl"></table></div></div>
 <div class="cd"><div class="ct">PTO History</div><div class="csb">All entries</div><div style="max-height:500px;overflow-y:auto"><table class="tb" id="pto-tbl"></table></div></div></div>
@@ -136,16 +144,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 </div>
 
 <div id="page-schedule" class="page">
-<div class="page-header"><div><h1>Schedule & Attendance</h1><p>Rotations, breaks, hours worked</p></div></div>
-<div class="cd" style="margin-bottom:22px"><div class="ct">Current Week Schedule</div><div class="csb" id="sched-sub">Loading from Google Sheets...</div><div style="overflow-x:auto"><table class="st" id="sched-tbl"></table></div></div>
+<div class="page-header"><div><h1>Schedule & Attendance</h1><p>Rotations, breaks, hours</p></div></div>
+<div class="cd" style="margin-bottom:22px"><div class="ct">Current Week Schedule</div><div class="csb" id="sched-sub">Loading...</div><div style="overflow-x:auto"><table class="st" id="sched-tbl"></table></div></div>
 <div class="gs"><div class="cd"><div class="ct">Lunch & Break Schedule</div><div class="csb">Mon–Thu / Friday (EST)</div><div id="lunch-box"></div></div>
 <div class="cd"><div class="ct">Hours Worked — Last 12 Weeks</div><div class="csb">Target: 38.35 hrs/week</div><div class="cw"><canvas id="ch-hrs" height="260"></canvas></div></div></div>
 </div>
 
 <div id="page-ops" class="page">
-<div class="page-header"><div><h1>Daily Operations</h1><p>Issues tracker and operational insights</p></div></div>
+<div class="page-header"><div><h1>Daily Operations</h1><p>Issues tracker</p></div></div>
 <div class="stats-row" id="ops-stats"></div>
-<div class="g2"><div class="cd"><div class="ct">Issues & Department in Charge of Reviewing</div><div class="csb">All-time breakdown</div><div class="cw"><canvas id="ch-dept" height="250"></canvas></div></div>
+<div class="g2"><div class="cd"><div class="ct">Issues & Department in Charge of Reviewing</div><div class="csb">All-time</div><div class="cw"><canvas id="ch-dept" height="250"></canvas></div></div>
 <div class="cd"><div class="ct">Top Issue Categories</div><div class="csb">Most frequent</div><div class="cw"><canvas id="ch-cat" height="250"></canvas></div></div></div>
 <div class="cd" style="margin-top:20px"><div class="ct">Recent Issues Log</div><div class="csb">Filterable</div>
 <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
@@ -156,9 +164,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 
 </div>
 <script>
-// ═══════════════════════════════════════════════════════
-// GOOGLE SHEETS CSV URLS
-// ═══════════════════════════════════════════════════════
+const VER="v1.1 — Apr 2026";
 const URLS={
   salesOverview:"https://docs.google.com/spreadsheets/d/e/2PACX-1vSMwoSny4boAvjEA1o3fbUB_1ccMyr0TOhtw3JJoXVJ1KpvlaNOfXEe6bQMvbOi-s1w75bOifS2Uvkt/pub?gid=599922517&single=true&output=csv",
   salesLog:"https://docs.google.com/spreadsheets/d/e/2PACX-1vSMwoSny4boAvjEA1o3fbUB_1ccMyr0TOhtw3JJoXVJ1KpvlaNOfXEe6bQMvbOi-s1w75bOifS2Uvkt/pub?gid=589829049&single=true&output=csv",
@@ -171,15 +177,16 @@ const URLS={
   kpiLuisa:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1521800009&single=true&output=csv",
   kpiVanessa:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1407071428&single=true&output=csv",
   schedule:"https://docs.google.com/spreadsheets/d/e/2PACX-1vQINTKfEREAnt10bxY_UG9I5GbSANCx6Doq-BGG23MzD1wR2IDfrRc84UEIZlhkYcLuov70Ug2_Pf1x/pub?output=csv",
-  frontRecords:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTWF963vZC_H_A9nrbVL8Flpuwp5Te3aeOo1TxaLAs0pRU-E5GgqSOgW4MO9vGCkML4A4Q_XT37hePv/pub?gid=269820540&single=true&output=csv",
   issues:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTWF963vZC_H_A9nrbVL8Flpuwp5Te3aeOo1TxaLAs0pRU-E5GgqSOgW4MO9vGCkML4A4Q_XT37hePv/pub?gid=89929469&single=true&output=csv",
 };
-
 const AC={"Angel Jimenez":"#2AACB8","Vanessa Duran":"#E8967A","Luisa Tona":"#3B6CE7","Ivan Soto":"#6C5CE7","Khamal Tehfeh":"#999","Fatima Soto":"#2D8A2D"};
 const INACTIVE=["Khamal Tehfeh","Vanessa Duran"];
+
+// Number parser - handles $1,076.38 and 78.40% and plain numbers
+function pn(s){if(!s)return 0;let c=String(s).replace(/\$/g,"").replace(/,/g,"").replace(/%/g,"").replace(/"/g,"").trim();if(c==="-"||c===""||c==="N/A")return 0;const v=parseFloat(c);return isNaN(v)?0:v;}
+
 const fmt=n=>"$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
 const fk=n=>n>=1e3?"$"+(n/1e3).toFixed(1)+"K":"$"+Math.round(n);
-const pn=s=>{if(!s)return 0;const c=String(s).replace(/[$,%]/g,"").replace(/"/g,"").trim();return parseFloat(c)||0;};
 const cb={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:"#fff",titleColor:"#1A2B3C",bodyColor:"#3D5066",borderColor:"#EEF2F7",borderWidth:1,cornerRadius:8,padding:12,bodyFont:{family:"DM Sans"},titleFont:{family:"DM Sans",weight:700}}},scales:{x:{grid:{display:false},ticks:{font:{family:"DM Sans",size:11},color:"#8A9BAE"}},y:{grid:{color:"#EEF2F7"},ticks:{font:{family:"DM Sans",size:11},color:"#8A9BAE"}}}};
 const lgd={display:true,position:"bottom",labels:{font:{family:"DM Sans",size:11},boxWidth:12,padding:14,color:"#3D5066"}};
 
@@ -187,174 +194,165 @@ const lgd={display:true,position:"bottom",labels:{font:{family:"DM Sans",size:11
 function parseCSV(text){
   if(!text||text.length<5)return[];
   const lines=[];let cur="";let inQ=false;
-  for(let i=0;i<text.length;i++){const c=text[i];if(c==='"'){inQ=!inQ;}else if(c==="\n"&&!inQ){lines.push(cur);cur="";}else if(c==="\r"&&!inQ){continue;}else{cur+=c;}}
+  for(let i=0;i<text.length;i++){const c=text[i];if(c==='"')inQ=!inQ;else if(c==="\n"&&!inQ){lines.push(cur);cur="";}else if(c==="\r"&&!inQ)continue;else cur+=c;}
   if(cur)lines.push(cur);
   return lines.map(line=>{const cols=[];let cell="";let q=false;
-  for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){q=!q;}else if(c===","&&!q){cols.push(cell);cell="";}else{cell+=c;}}
+  for(let i=0;i<line.length;i++){const c=line[i];if(c==='"')q=!q;else if(c===","&&!q){cols.push(cell);cell="";}else cell+=c;}
   cols.push(cell);return cols;});
 }
 
 async function fetchCSV(url,name){
-  try{
-    const r=await fetch(url,{redirect:'follow'});
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    const t=await r.text();
-    if(t.includes('<!DOCTYPE')||t.includes('<html'))throw new Error('Got HTML instead of CSV');
-    const parsed=parseCSV(t);
-    console.log('✅ '+name+': '+parsed.length+' rows');
-    return parsed;
-  }catch(e){
-    console.error('❌ '+name+': '+e.message);
-    return [];
-  }
+  const el=document.getElementById("load-status");
+  const bar=document.getElementById("load-fill");
+  if(el)el.textContent="Loading "+name+"...";
+
+  async function tryFetch(u){const r=await fetch(u,{redirect:'follow'});if(!r.ok)throw new Error('HTTP '+r.status);const t=await r.text();if(t.includes('<!DOCTYPE'))throw new Error('HTML response');return parseCSV(t);}
+
+  try{const p=await tryFetch(url);console.log("✅ "+name+": "+p.length+" rows");return p;}catch(e){}
+  try{const proxy="https://corsproxy.io/?"+encodeURIComponent(url);const p=await tryFetch(proxy);console.log("✅ "+name+" (proxy): "+p.length+" rows");return p;}catch(e2){console.error("❌ "+name+": failed");return [];}
 }
 
-// ═══════════════════════════════════════════════════════
-// DATA STORE
-// ═══════════════════════════════════════════════════════
-const D={agents:[],monthlyComm:[],revData:[],codeTiers:[],productMix:[],salesLog:[],weeklyDept:{},kpi:{},infractions:[],ptoLog:[],issues:[],schedule:[]};
+const D={agents:[],monthlyComm:[],revData:[],salesLog:[],weeklyDept:{},weeklyRaw:[],kpi:{},infractions:[],ptoLog:[],issues:[],schedule:[]};
 
-// ═══════════════════════════════════════════════════════
-// LOAD ALL DATA
-// ═══════════════════════════════════════════════════════
 async function loadAll(){
-  const dbg=document.getElementById("home-stats");
-  dbg.innerHTML='<div class="sc" style="flex:none;width:100%"><div class="sl">Loading data from Google Sheets...</div><div class="sv">⟳</div><div class="ss" id="load-status">Fetching 12 data sources...</div></div>';
-
-  let results;
-  try{
-    results=await Promise.all([
-      fetchCSV(URLS.commOverview,'commOverview'),
-      fetchCSV(URLS.salesOverview,'salesOverview'),
-      fetchCSV(URLS.salesLog,'salesLog'),
-      fetchCSV(URLS.weekly,'weekly'),
-      fetchCSV(URLS.generalData,'generalData'),
-      fetchCSV(URLS.kpiAngel,'kpiAngel'),
-      fetchCSV(URLS.kpiIvan,'kpiIvan'),
-      fetchCSV(URLS.kpiFatima,'kpiFatima'),
-      fetchCSV(URLS.kpiLuisa,'kpiLuisa'),
-      fetchCSV(URLS.kpiVanessa,'kpiVanessa'),
-      fetchCSV(URLS.schedule,'schedule'),
-      fetchCSV(URLS.issues,'issues')
-    ]);
-  }catch(e){
-    dbg.innerHTML='<div class="sc" style="flex:none;width:100%;border-left-color:#D4604A"><div class="sl">Error Loading Data</div><div class="sv" style="font-size:16px;color:#D4604A">'+e.message+'</div><div class="ss">Check browser console (F12) for details</div></div>';
-    console.error('LoadAll failed:',e);
-    return;
+  const names=["commOverview","salesOverview","salesLog","weekly","generalData","kpiAngel","kpiIvan","kpiFatima","kpiLuisa","kpiVanessa","schedule","issues"];
+  const urls=[URLS.commOverview,URLS.salesOverview,URLS.salesLog,URLS.weekly,URLS.generalData,URLS.kpiAngel,URLS.kpiIvan,URLS.kpiFatima,URLS.kpiLuisa,URLS.kpiVanessa,URLS.schedule,URLS.issues];
+  const bar=document.getElementById("load-fill");
+  const results=[];
+  for(let i=0;i<urls.length;i++){
+    results.push(await fetchCSV(urls[i],names[i]));
+    if(bar)bar.style.width=((i+1)/urls.length*100)+"%";
   }
-
   const [commOv,salesOv,salesLg,weekly,genData,kA,kI,kF,kL,kV,sched,issues]=results;
-  const loadSummary='Loaded: comm='+commOv.length+' sales='+salesOv.length+' log='+salesLg.length+' weekly='+weekly.length+' gen='+genData.length+' kA='+kA.length+' sched='+sched.length+' issues='+issues.length;
-  console.log(loadSummary);
 
-  // Parse Commission Overview
-  for(let i=2;i<=8;i++){if(commOv[i]&&commOv[i][0]){
-    const n=commOv[i][0],t=pn(commOv[i][1]);
-    if(n&&n!=="Totals")D.agents.push({name:n,total:t,off:INACTIVE.includes(n),sup:n==="Luisa Tona",
-      tiers:{t0:+commOv[i][2]||0,t25:+commOv[i][3]||0,t30:+commOv[i][4]||0,t35:+commOv[i][5]||0,t40:+commOv[i][6]||0},
-      alc:+commOv[i][7]||0,kit:+commOv[i][8]||0,orders:+commOv[i][9]||0});
-    if(n==="Totals")D.teamTotal=t;
-  }}
-  // Monthly commissions
-  for(let i=1;i<commOv.length;i++){const r=commOv[i];if(r&&r[12]&&r[13]!==undefined){
-    const dt=r[12];if(dt&&dt.includes("/"))D.monthlyComm.push({m:dt,a:pn(r[13]),l:pn(r[14]),i:pn(r[15]),k:pn(r[16]),v:pn(r[17]),f:pn(r[18])});
-  }}
+  // ═══ PARSE COMMISSION OVERVIEW ═══
+  // Rows 2-7 = agents, row 8 = totals. Col 0=name, 1=total, 2-6=tiers, 7=ALC, 8=KIT, 9=orders
+  for(let i=2;i<=7;i++){const r=commOv[i];if(!r||!r[0])continue;
+    const n=r[0].trim();D.agents.push({name:n,total:pn(r[1]),off:INACTIVE.includes(n),sup:n==="Luisa Tona",
+      tiers:{t0:pn(r[2]),t25:pn(r[3]),t30:pn(r[4]),t35:pn(r[5]),t40:pn(r[6])},
+      alc:pn(r[7]),kit:pn(r[8]),orders:pn(r[9])});
+  }
+  if(commOv[8])D.teamTotal=pn(commOv[8][1]);
 
-  // Sales Overview (revenue)
-  for(let i=2;i<salesOv.length;i++){const r=salesOv[i];if(r&&r[1]&&r[2]){
-    const o=+r[2]||0;if(o===0&&pn(r[3])===0)continue;
-    D.revData.push({m:r[1],AJ:pn(r[3]),LT:pn(r[5]),IS:pn(r[7]),VD:pn(r[9]),FS:pn(r[11]),AJo:+r[2]||0,LTo:+r[4]||0,ISo:+r[6]||0,VDo:+r[8]||0,FSo:+r[10]||0});
-  }}
-
-  // Sales Log
-  for(let i=1;i<Math.min(salesLg.length,200);i++){const r=salesLg[i];if(r&&r[0]){
-    D.salesLog.push({id:r[0],c:r[1]||"",ag:r[3]||"",v:r[5]||"",d:r[11]||"",r:pn(r[13]),co:r[14]||""});
-  }}
-
-  // Weekly dept summary
-  if(weekly.length>8){D.weeklyDept={week:weekly[0]?.[5]||"",pto:pn(weekly[2]?.[1]),inf:pn(weekly[3]?.[1]),avail:pn(weekly[4]?.[1]),spent:pn(weekly[5]?.[1]),pct:weekly[6]?.[1]||"",
-    metrics:[],ratings:[]};
-    for(let i=8;i<30;i++){const r=weekly[i];if(r&&r[0]&&r[1])D.weeklyDept.metrics.push({platform:r[0],kpi:r[1],target:r[2]||"",value:r[3]||"",time:r[4]||""});}
-    for(let i=8;i<14;i++){const r=weekly[i];if(r&&r[8]&&r[9])D.weeklyDept.ratings.push({source:r[8],rate:r[9],change:r[10]||"0"});}
+  // Monthly commissions: cols 12-18 starting from row 1
+  for(let i=1;i<commOv.length;i++){const r=commOv[i];if(!r||!r[12])continue;
+    const dt=r[12].trim();if(!dt.includes("/"))continue;
+    const vals={m:dt,a:pn(r[13]),l:pn(r[14]),i:pn(r[15]),k:pn(r[16]),v:pn(r[17]),f:pn(r[18])};
+    if(vals.a+vals.l+vals.i+vals.k+vals.v+vals.f>0)D.monthlyComm.push(vals);
   }
 
-  // KPI agent data
+  // ═══ PARSE SALES OVERVIEW ═══
+  // Row 0: headers. Col 0=year, 1=date, 2=AJorders, 3=AJrev, 4=LTorders, 5=LTrev, etc
+  for(let i=2;i<salesOv.length;i++){const r=salesOv[i];if(!r||!r[1])continue;
+    const rev=pn(r[3])+pn(r[5])+pn(r[7])+pn(r[9])+pn(r[11]);
+    const ord=pn(r[2])+pn(r[4])+pn(r[6])+pn(r[8])+pn(r[10]);
+    if(rev===0&&ord===0)continue;
+    D.revData.push({m:r[1],AJ:pn(r[3]),LT:pn(r[5]),IS:pn(r[7]),VD:pn(r[9]),FS:pn(r[11]),AJo:pn(r[2]),LTo:pn(r[4]),ISo:pn(r[6]),VDo:pn(r[8]),FSo:pn(r[10])});
+  }
+
+  // ═══ PARSE SALES LOG ═══
+  // Col 0=trackingID, 1=customer, 3=agent, 5=verified, 11=orderDate, 13=revenue, 14=code
+  for(let i=1;i<Math.min(salesLg.length,300);i++){const r=salesLg[i];if(!r||!r[0])continue;
+    D.salesLog.push({id:r[0],c:r[1]||"",ag:r[3]||"",d:r[11]||"",r:pn(r[13]),co:r[14]||""});
+  }
+
+  // ═══ PARSE WEEKLY DEPT ═══
+  D.weeklyRaw=weekly;
+  if(weekly.length>8){
+    const pctRaw=weekly[6]?.[1]||"";
+    D.weeklyDept={week:weekly[0]?.[5]||"",pto:pn(weekly[2]?.[1]),inf:pn(weekly[3]?.[1]),
+      avail:pn(weekly[4]?.[1]),spent:pn(weekly[5]?.[1]),pct:pctRaw,metrics:[],ratings:[]};
+    for(let i=9;i<=25;i++){const r=weekly[i];if(r&&(r[0]||r[1]))D.weeklyDept.metrics.push({platform:r[0]||"",kpi:r[1]||"",target:r[2]||"",done:r[3]||"",time:r[4]||""});}
+    for(let i=9;i<=12;i++){const r=weekly[i];if(r&&r[8]&&r[9])D.weeklyDept.ratings.push({source:r[8],rate:r[9],change:r[10]||"0"});}
+  }
+
+  // ═══ PARSE KPI AGENT SHEETS ═══
   const kpiSheets={"Angel Jimenez":kA,"Ivan Soto":kI,"Fatima Soto":kF,"Luisa Tona":kL,"Vanessa Duran":kV};
-  const KPI_ROWS={5:["Days Worked",5,"General"],7:["Hours/Week",38.35,"General"],9:["Assigned Conversations",null,"Front"],11:["Replies Sent",null,"Front"],12:["First Reply Time (hrs)",4,"Front"],13:["Handle Time (min)",4,"Front"],15:["SLA Breaches",2,"Front"],16:["Satisfaction %",.9,"Front"],21:["Dialpad Available",null,"Dialpad"],22:["Dialpad Occupied",null,"Dialpad"],29:["Calls Placed",null,"Dialpad"],30:["Calls Answered",null,"Dialpad"],31:["Missed Calls",0,"Dialpad"],34:["Dialpad Time (hrs)",6,"Dialpad"],52:["Time Usage %",.95,"Efficiency"]};
+  // Row mapping: {csvRow: [name, target, platform]}
+  const KR={5:["Days Worked",5,"General"],7:["Hours/Week",38.35,"General"],
+    9:["Assigned Conversations",null,"Front"],10:["Messages Sent (excl. replies)",null,"Front"],
+    11:["Replies Sent",null,"Front"],12:["First Reply Time (hrs)",4,"Front"],
+    13:["Handle Time (min)",4,"Front"],15:["SLA Breaches",2,"Front"],
+    16:["Satisfaction %",90,"Front"],
+    29:["Calls Placed",null,"Dialpad"],30:["Calls Answered",null,"Dialpad"],31:["Missed Calls",0,"Dialpad"],
+    34:["Dialpad Time (hrs)",6,"Dialpad"],
+    53:["Time Usage",95,"Efficiency"],72:["General Efficiency",100,"Efficiency"]};
 
   for(const[name,rows]of Object.entries(kpiSheets)){
     if(!rows||rows.length<10)continue;
     const dates=[];const hdr=rows[4]||[];
     for(let j=4;j<hdr.length;j++){if(hdr[j])dates.push(hdr[j]);}
     const kpis={};
-    for(const[ri,[kn,tgt,plat]]of Object.entries(KPI_ROWS)){
+    for(const[ri,[kn,tgt,plat]]of Object.entries(KR)){
       const r=rows[+ri];if(!r)continue;
-      const vals=[];for(let j=4;j<4+dates.length;j++){vals.push(r[j]!==undefined?pn(r[j]):null);}
+      const vals=[];
+      for(let j=4;j<4+dates.length;j++){
+        let raw=r[j]!==undefined?r[j]:"";
+        // Handle percentage values - Satisfaction and Time Usage come as "78.40%" from sheet
+        if(String(raw).includes("%")){vals.push(pn(raw));}
+        else{vals.push(pn(raw));}
+      }
       kpis[kn]={v:vals,t:tgt,p:plat};
     }
-    // Infractions from rows 74-79
+    // Infractions from rows 75-80
     const inf={};
-    for(let ri=75;ri<=79;ri++){const r=rows[ri];if(r&&r[0]){inf[r[0]]=[pn(r[1]),pn(r[2])];}}
+    for(let ri=76;ri<=80;ri++){const r=rows[ri];if(r&&r[0]){inf[r[0].trim()]=[pn(r[1]),pn(r[2])];}}
+    // Agent info from row 1
     D.kpi[name]={dates,kpis,inf,commission:pn(rows[1]?.[2]),pto:pn(rows[1]?.[3])};
   }
 
-  // General Data (infractions + PTO)
+  // ═══ PARSE GENERAL DATA (infractions + PTO) ═══
   for(let i=2;i<genData.length;i++){const r=genData[i];
     if(r&&r[0]&&r[1]&&r[0].includes("/"))D.infractions.push({date:r[0],agent:r[1],type:r[2]||"",val:pn(r[3]),comment:r[4]||"",ticket:r[5]||""});
     if(r&&r[7]&&r[8]&&r[7].includes("/"))D.ptoLog.push({date:r[7],agent:r[8],comment:r[9]||""});
   }
 
-  // Schedule
+  // ═══ SCHEDULE ═══
   D.schedule=sched;
 
-  // Issues
+  // ═══ ISSUES ═══
   for(let i=2;i<issues.length;i++){const r=issues[i];
     if(r&&r[1]&&r[2])D.issues.push({day:r[0]||"",date:r[1],dept:r[2],desc:r[3]||"",freq:r[4]||"",impact:r[5]||"",mgmt:r[10]||""});
   }
 
+  // Hide loading, show dashboard
+  document.getElementById("loading-overlay").classList.add("done");
+  document.getElementById("sf-ver").innerHTML=VER;
   renderHome();
 }
 
-// ═══════════════════════════════════════════════════════
-// RENDER HOME
-// ═══════════════════════════════════════════════════════
+// ═══ LEADERBOARD ═══
+function renderLB(id){
+  const s=[...D.agents].sort((a,b)=>b.total-a.total);const mx=s[0]?.total||1;
+  document.getElementById(id).innerHTML=s.map((a,i)=>`<div class="lr${a.off?' li':''}"><div class="lrk ${i<1?'g':i<2?'s':'d'}">${i+1}</div><div class="ln">${a.name}${a.sup?'<span style="font-size:9px;color:var(--teal);margin-left:4px;font-weight:700">SUP</span>':''}${a.off?'<span style="font-size:9px;color:var(--gray);margin-left:4px">inactive</span>':''}</div><div class="lb"><div class="lf" style="width:${(a.total/mx*100).toFixed(1)}%;background:${AC[a.name]}"></div></div><div class="la">${fmt(a.total)}</div></div>`).join("")+`<div class="lt"><span style="font-size:13px;font-weight:600;color:var(--gray)">Team Total</span><span style="font-size:20px;font-weight:800;color:var(--teal)">${fmt(D.teamTotal||0)}</span></div>`;
+}
+
+// ═══ HOME ═══
 function renderHome(){
-  const lastRev=D.revData[D.revData.length-1];
-  const totalRev=lastRev?(lastRev.AJ+lastRev.LT+lastRev.IS+lastRev.VD+lastRev.FS):0;
-  const totalOrd=lastRev?(lastRev.AJo+lastRev.LTo+lastRev.ISo+lastRev.VDo+lastRev.FSo):0;
-  const activeCount=D.agents.filter(a=>!a.off).length;
-  const pctStr=D.weeklyDept.pct||"—";
+  const lr=D.revData.length?D.revData[D.revData.length-1]:null;
+  const tRev=lr?(lr.AJ+lr.LT+lr.IS+lr.VD+lr.FS):0;
+  const tOrd=lr?(lr.AJo+lr.LTo+lr.ISo+lr.VDo+lr.FSo):0;
+  const act=D.agents.filter(a=>!a.off&&!a.sup).length;
+  document.getElementById("home-stats").innerHTML=`<div class="sc"><div class="sl">Latest Month Revenue</div><div class="sv">${fmt(tRev)}</div><div class="ss">${lr?.m||""} — ${Math.round(tOrd)} orders</div></div><div class="sc"><div class="sl">Team Commissions</div><div class="sv">${fmt(D.teamTotal||0)}</div><div class="ss">All-time total</div></div><div class="sc"><div class="sl">Active Agents</div><div class="sv">${act} + 1</div><div class="ss">${act} Agents + Supervisor (Luisa)</div></div><div class="sc"><div class="sl">Time Utilization</div><div class="sv">${D.weeklyDept.pct||"—"}</div><div class="ss">Week of ${D.weeklyDept.week||""}</div></div>`;
 
-  document.getElementById("home-stats").innerHTML=`
-    <div class="sc"><div class="sl">Latest Month Revenue</div><div class="sv">${fmt(totalRev)}</div><div class="ss">${lastRev?.m||""} — ${totalOrd} orders</div></div>
-    <div class="sc"><div class="sl">Team Commissions</div><div class="sv">${fmt(D.teamTotal||0)}</div><div class="ss">All-time total</div></div>
-    <div class="sc"><div class="sl">Active Agents</div><div class="sv">${activeCount-1} + 1</div><div class="ss">${activeCount-1} Agents + Supervisor (Luisa)</div></div>
-    <div class="sc"><div class="sl">Time Utilization</div><div class="sv">${pctStr}</div><div class="ss">Week of ${D.weeklyDept.week||""}</div></div>`;
-
-  document.getElementById("sf-week").innerHTML=`Week of ${D.weeklyDept.week||"..."}<br><span style="color:var(--gray)">Utilization: ${pctStr}</span>`;
-
-  // Leaderboard
   renderLB("lb-home");
 
-  // PTO
-  const ptoEarned=D.agents.filter(a=>!a.off||a.name==="Vanessa Duran").map(a=>{const k=D.kpi[a.name];const pto=k?k.pto:0;return{n:a.name.split(" ")[0],e:pto,c:AC[a.name]};});
-  document.getElementById("pto-box").innerHTML=ptoEarned.map(p=>`<div style="display:flex;align-items:center;gap:12px;margin-bottom:11px"><div style="width:80px;font-size:12px;font-weight:500">${p.n}</div><div style="flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden"><div style="height:100%;width:${(p.e/15*100)}%;background:${p.c};border-radius:4px"></div></div><div style="width:55px;font-size:11px;font-weight:700;text-align:right">${p.e} / 15</div></div>`).join("");
+  // PTO from agent KPI sheets (row 1, col 3 = Available PTO as integer days)
+  const ptoData=Object.entries(D.kpi).map(([n,k])=>({n:n.split(" ")[0],e:k.pto,c:AC[n]})).filter(p=>p.e>0||p.n);
+  document.getElementById("pto-box").innerHTML=ptoData.map(p=>`<div style="display:flex;align-items:center;gap:12px;margin-bottom:11px"><div style="width:80px;font-size:12px;font-weight:500">${p.n}</div><div style="flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden"><div style="height:100%;width:${Math.min((p.e/15*100),100)}%;background:${p.c};border-radius:4px"></div></div><div style="width:55px;font-size:11px;font-weight:700;text-align:right">${p.e} / 15</div></div>`).join("");
 
-  // Schedule from live data
+  // Schedule
   if(D.schedule.length>2){
-    const title=D.schedule[0]?.[1]||"Current Week";
-    document.getElementById("home-sched-label").textContent=title;
-    const dy=new Date().getDay();const tc=dy===0||dy===6?5:dy-1;
-    const days=D.schedule[1]||[];
+    document.getElementById("home-sched-label").textContent=D.schedule[0]?.[1]||"";
+    const dy=new Date().getDay(),tc=dy===0||dy===6?5:dy-1,days=D.schedule[1]||[];
     let h="<thead><tr><th style='text-align:left'>Role</th>";
     for(let j=1;j<=6;j++)h+=`<th class="${j-1===tc?'ty':''}">${days[j]||""}</th>`;
     h+="</tr></thead><tbody>";
-    for(let i=2;i<=7;i++){const r=D.schedule[i];if(!r||!r[0])continue;
-      h+=`<tr><td><span class="rd" style="background:${r[0].includes("Chat")||r[0].includes("Live")?"#6C5CE7":r[0].includes("Hybrid")?"var(--coral)":"var(--teal)"}"></span>${r[0]}</td>`;
-      for(let j=1;j<=6;j++)h+=`<td class="${j-1===tc?'ty':''}">${r[j]||""}</td>`;
-      h+="</tr>";}
-    h+="</tbody>";
-    document.getElementById("home-sched-tbl").innerHTML=h;
+    for(let i=2;i<=7;i++){const r=D.schedule[i];if(!r||(!r[0]&&!r[6]))continue;
+      const role=r[0]||"";
+      h+=`<tr><td>${role?`<span class="rd" style="background:${role.includes("Chat")?"#6C5CE7":role.includes("Hybrid")?"var(--coral)":"var(--teal)"}"></span>${role}`:""}</td>`;
+      for(let j=1;j<=6;j++)h+=`<td class="${j-1===tc?'ty':''}">${r[j]||""}</td>`;h+="</tr>";}
+    h+="</tbody>";document.getElementById("home-sched-tbl").innerHTML=h;
   }
 
   // Revenue chart
@@ -363,14 +361,7 @@ function renderHome(){
   }
 }
 
-function renderLB(id){
-  const s=[...D.agents].sort((a,b)=>b.total-a.total);const mx=s[0]?.total||1;
-  document.getElementById(id).innerHTML=s.map((a,i)=>`<div class="lr${a.off?' li':''}"><div class="lrk ${i<1?'g':i<2?'s':'d'}">${i+1}</div><div class="ln">${a.name}${a.sup?'<span style="font-size:9px;color:var(--teal);margin-left:4px;font-weight:700">SUP</span>':''}${a.off?'<span style="font-size:9px;color:var(--gray);margin-left:4px">inactive</span>':''}</div><div class="lb"><div class="lf" style="width:${(a.total/mx*100).toFixed(1)}%;background:${AC[a.name]}"></div></div><div class="la">${fmt(a.total)}</div></div>`).join("")+`<div class="lt"><span style="font-size:13px;font-weight:600;color:var(--gray)">Team Total</span><span style="font-size:20px;font-weight:800;color:var(--teal)">${fmt(D.teamTotal||0)}</span></div>`;
-}
-
-// ═══════════════════════════════════════════════════════
-// NAV
-// ═══════════════════════════════════════════════════════
+// ═══ NAV ═══
 document.querySelectorAll(".nav-btn[data-page]").forEach(b=>{b.addEventListener("click",()=>{
   document.querySelectorAll(".nav-btn").forEach(x=>x.classList.remove("active"));b.classList.add("active");
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
@@ -381,52 +372,41 @@ document.querySelectorAll(".nav-btn[data-page]").forEach(b=>{b.addEventListener(
   if(b.dataset.page==="ops"&&!window._o)buildOps();
 })});
 
-// ═══════════════════════════════════════════════════════
-// SALES
-// ═══════════════════════════════════════════════════════
-function buildSales(){window._s=1;
-  renderLB("lb-sales");
-  const lastRev=D.revData[D.revData.length-1];
-  const totalRev=lastRev?(lastRev.AJ+lastRev.LT+lastRev.IS+lastRev.VD+lastRev.FS):0;
-  const totalOrd=lastRev?(lastRev.AJo+lastRev.LTo+lastRev.ISo+lastRev.VDo+lastRev.FSo):0;
-  document.getElementById("sales-stats").innerHTML=`<div class="sc"><div class="sl">Total Commissions</div><div class="sv">${fmt(D.teamTotal||0)}</div><div class="ss">All agents</div></div><div class="sc"><div class="sl">Total Orders</div><div class="sv">${D.agents.reduce((s,a)=>s+a.orders,0)}</div><div class="ss">${D.agents.reduce((s,a)=>s+a.alc,0)} ALC + ${D.agents.reduce((s,a)=>s+a.kit,0)} KIT</div></div><div class="sc"><div class="sl">Latest Month</div><div class="sv">${fmt(totalRev)}</div><div class="ss">${totalOrd} orders</div></div>`;
-
-  // Format monthly labels
-  const mLabels=D.monthlyComm.map(d=>{const p=d.m.split("/");return(+p[0])+"/"+p[1].slice(-2);});
-  const an=["Angel Jimenez","Vanessa Duran","Luisa Tona","Ivan Soto","Khamal Tehfeh","Fatima Soto"];
-  const keys=["a","v","l","i","k","f"];
-  new Chart(document.getElementById("ch-comm"),{type:"line",data:{labels:mLabels,datasets:an.map((n,idx)=>({label:n,data:D.monthlyComm.map(d=>d[keys[idx]]),borderColor:AC[n],borderWidth:2,pointRadius:0,tension:.3,fill:false}))},options:{...cb,plugins:{...cb.plugins,legend:lgd,tooltip:{...cb.plugins.tooltip,mode:"index",intersect:false,callbacks:{label:c=>" "+c.dataset.label+": "+fmt(c.parsed.y)}}},scales:{...cb.scales,x:{...cb.scales.x,ticks:{...cb.scales.x.ticks,maxTicksLimit:10}},y:{...cb.scales.y,ticks:{...cb.scales.y.ticks,callback:v=>"$"+v}}}}});
-
+// ═══ SALES ═══
+function buildSales(){window._s=1;renderLB("lb-sales");
+  const lr=D.revData.length?D.revData[D.revData.length-1]:null;
+  const tRev=lr?(lr.AJ+lr.LT+lr.IS+lr.VD+lr.FS):0;
+  const tOrd=lr?(lr.AJo+lr.LTo+lr.ISo+lr.VDo+lr.FSo):0;
+  document.getElementById("sales-stats").innerHTML=`<div class="sc"><div class="sl">Total Commissions</div><div class="sv">${fmt(D.teamTotal||0)}</div><div class="ss">All agents</div></div><div class="sc"><div class="sl">Total Orders</div><div class="sv">${D.agents.reduce((s,a)=>s+a.orders,0)}</div><div class="ss">${D.agents.reduce((s,a)=>s+a.alc,0)} ALC + ${D.agents.reduce((s,a)=>s+a.kit,0)} KIT</div></div><div class="sc"><div class="sl">Latest Month</div><div class="sv">${fmt(tRev)}</div><div class="ss">${Math.round(tOrd)} orders</div></div>`;
+  const mLbl=D.monthlyComm.map(d=>{const p=d.m.split("/");return p[0]+"/"+p[1].slice(-2);});
+  const an=[["Angel Jimenez","a"],["Vanessa Duran","v"],["Luisa Tona","l"],["Ivan Soto","i"],["Khamal Tehfeh","k"],["Fatima Soto","f"]];
+  new Chart(document.getElementById("ch-comm"),{type:"line",data:{labels:mLbl,datasets:an.map(([n,k])=>({label:n,data:D.monthlyComm.map(d=>d[k]),borderColor:AC[n],borderWidth:2,pointRadius:0,tension:.3,fill:false}))},options:{...cb,plugins:{...cb.plugins,legend:lgd,tooltip:{...cb.plugins.tooltip,mode:"index",intersect:false,callbacks:{label:c=>" "+c.dataset.label+": "+fmt(c.parsed.y)}}},scales:{...cb.scales,x:{...cb.scales.x,ticks:{...cb.scales.x.ticks,maxTicksLimit:10}},y:{...cb.scales.y,ticks:{...cb.scales.y.ticks,callback:v=>"$"+v}}}}});
   const ra=[{l:"Angel Jimenez",k:"AJ"},{l:"Vanessa Duran",k:"VD"},{l:"Luisa Tona",k:"LT"},{l:"Ivan Soto",k:"IS"},{l:"Fatima Soto",k:"FS"}];
   new Chart(document.getElementById("ch-rev-ag"),{type:"bar",data:{labels:D.revData.map(r=>r.m),datasets:ra.map(a=>({label:a.l,data:D.revData.map(d=>d[a.k]),backgroundColor:AC[a.l],borderRadius:2,barPercentage:.65}))},options:{...cb,plugins:{...cb.plugins,legend:lgd},scales:{...cb.scales,x:{...cb.scales.x,stacked:true},y:{...cb.scales.y,stacked:true,ticks:{...cb.scales.y.ticks,callback:v=>fk(v)}}}}});
-
-  // AOV
-  const aov=D.revData.map(r=>{const o={m:r.m};ra.forEach(a=>{const rev=r[a.k],ord=r[a.k+"o"];o[a.l]=ord?rev/ord:0;});return o;});
+  const aov=D.revData.map(r=>{const o={m:r.m};ra.forEach(a=>{const rev=r[a.k],ord=r[a.k+"o"];o[a.l]=ord>0?rev/ord:0;});return o;});
   new Chart(document.getElementById("ch-aov"),{type:"bar",data:{labels:aov.map(d=>d.m),datasets:ra.map(a=>({label:a.l,data:aov.map(d=>d[a.l]),backgroundColor:AC[a.l],borderRadius:3,barPercentage:.6}))},options:{...cb,plugins:{...cb.plugins,legend:lgd,tooltip:{...cb.plugins.tooltip,callbacks:{label:c=>" "+c.dataset.label+": "+fmt(c.parsed.y)}}},scales:{...cb.scales,y:{...cb.scales.y,ticks:{...cb.scales.y.ticks,callback:v=>fk(v)}}}}});
-
-  // Tiers
   const tL=["0% (5%)","25% (3%)","30% (2.5%)","35% (2%)","40% (1%)"],tK=["t0","t25","t30","t35","t40"],tC=["#2AACB8","#3B6CE7","#6C5CE7","#E8967A","#D4604A"];
-  new Chart(document.getElementById("ch-tier"),{type:"bar",data:{labels:D.agents.map(a=>a.name),datasets:tK.map((k,i)=>({label:tL[i],data:D.agents.map(a=>a.tiers[k]),backgroundColor:tC[i],barPercentage:.6}))},options:{indexAxis:"y",...cb,plugins:{...cb.plugins,legend:lgd},scales:{x:{stacked:true,grid:{color:"#EEF2F7"},ticks:{font:{family:"DM Sans",size:11},color:"#8A9BAE"}},y:{stacked:true,grid:{display:false},ticks:{font:{family:"DM Sans",size:11},color:"#3D5066"}}}}});
+  new Chart(document.getElementById("ch-tier"),{type:"bar",data:{labels:D.agents.map(a=>a.name),datasets:tK.map((k,i)=>({label:tL[i],data:D.agents.map(a=>a.tiers?.[k]||0),backgroundColor:tC[i],barPercentage:.6}))},options:{indexAxis:"y",...cb,plugins:{...cb.plugins,legend:lgd},scales:{x:{stacked:true,grid:{color:"#EEF2F7"},ticks:{font:{family:"DM Sans",size:11},color:"#8A9BAE"}},y:{stacked:true,grid:{display:false},ticks:{font:{family:"DM Sans",size:11},color:"#3D5066"}}}}});
+  const pm=[...D.agents].sort((a,b)=>(b.alc+b.kit)-(a.alc+a.kit));
+  document.getElementById("pm-box").innerHTML=pm.filter(p=>p.alc+p.kit>0).map(p=>{const t=p.alc+p.kit;return`<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div style="width:70px;font-size:12px;font-weight:500">${p.name.split(" ")[0]}</div><div style="flex:1;display:flex;height:18px;border-radius:4px;overflow:hidden;background:var(--bg)"><div style="width:${p.alc/t*100}%;background:var(--teal);display:flex;align-items:center;justify-content:center"><span style="font-size:9px;color:#fff;font-weight:700">${p.alc}</span></div>${p.kit?`<div style="min-width:22px;width:${Math.max(p.kit/t*100,4)}%;background:var(--coral);display:flex;align-items:center;justify-content:center"><span style="font-size:9px;color:#fff;font-weight:700">${p.kit}</span></div>`:""}</div><div style="width:30px;font-size:12px;font-weight:700;text-align:right">${t}</div></div>`;}).join("");
 
-  // Product mix
-  const pm=D.agents.sort((a,b)=>(b.alc+b.kit)-(a.alc+a.kit));
-  document.getElementById("pm-box").innerHTML=pm.map(p=>{const t=p.alc+p.kit;if(!t)return"";return`<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div style="width:70px;font-size:12px;font-weight:500">${p.name.split(" ")[0]}</div><div style="flex:1;display:flex;height:18px;border-radius:4px;overflow:hidden;background:var(--bg)"><div style="width:${p.alc/t*100}%;background:var(--teal);display:flex;align-items:center;justify-content:center"><span style="font-size:9px;color:#fff;font-weight:700">${p.alc}</span></div>${p.kit?`<div style="min-width:22px;width:${Math.max(p.kit/t*100,4)}%;background:var(--coral);display:flex;align-items:center;justify-content:center"><span style="font-size:9px;color:#fff;font-weight:700">${p.kit}</span></div>`:""}</div><div style="width:30px;font-size:12px;font-weight:700;text-align:right">${t}</div></div>`;}).join("");
-
-  // Sales table
-  function rST(f){const d=f&&f!=="All"?D.salesLog.filter(s=>s.ag===f):D.salesLog;
-    document.getElementById("sl-tbl").innerHTML=`<thead><tr><th>Tracking ID</th><th>Customer</th><th>Agent</th><th>Date</th><th>Revenue</th><th>Discount</th></tr></thead><tbody>${d.slice(0,50).map(s=>`<tr><td style="color:var(--teal);font-weight:600">${s.id}</td><td>${s.c}</td><td style="font-weight:500">${s.ag}</td><td style="color:var(--gray)">${s.d}</td><td style="font-weight:600">${fmt(s.r)}</td><td>${s.co?`<span class="tg" style="background:var(--teal-mist);color:var(--teal)">${s.co}</span>`:"—"}</td></tr>`).join("")}</tbody>`;}
+  // Agent code mapping for filter
+  const agMap={"AJimenez":"AJimenez","VDuran":"VDuran","LTona":"LTona","ISoto":["ISoto","Ivan Soto","Ivan"],"FSoto":"FSoto"};
+  function rST(f){
+    let d=D.salesLog;
+    if(f&&f!=="All"){d=d.filter(s=>{const ag=s.ag.trim();if(f==="ISoto")return ag==="ISoto"||ag==="Ivan Soto"||ag==="Ivan";return ag.includes(f);});}
+    document.getElementById("sl-tbl").innerHTML=`<thead><tr><th>Tracking ID</th><th>Customer</th><th>Agent</th><th>Date</th><th>Revenue</th><th>Discount</th></tr></thead><tbody>${d.slice(0,60).map(s=>`<tr><td style="color:var(--teal);font-weight:600">${s.id}</td><td>${s.c}</td><td style="font-weight:500">${s.ag}</td><td style="color:var(--gray)">${s.d}</td><td style="font-weight:600">${fmt(s.r)}</td><td>${s.co?`<span class="tg" style="background:var(--teal-mist);color:var(--teal)">${s.co}</span>`:"—"}</td></tr>`).join("")}</tbody>`;
+  }
   rST("All");document.getElementById("agent-filter").addEventListener("change",e=>rST(e.target.value));
 }
 
-// ═══════════════════════════════════════════════════════
-// KPI
-// ═══════════════════════════════════════════════════════
+// ═══ KPI ═══
 let ckf,ckd;
 function buildKPI(){window._k=1;
-  // Populate week selector from first agent's dates
   const firstAg=Object.values(D.kpi)[0];
-  if(firstAg){const ws=document.getElementById("kpi-wk");
-    firstAg.dates.forEach((d,i)=>{const o=document.createElement("option");o.value=i;o.textContent="Wk "+d;if(i===firstAg.dates.length-1)o.selected=true;ws.appendChild(o);});}
+  if(firstAg){const ws=document.getElementById("kpi-wk");firstAg.dates.forEach((d,i)=>{const o=document.createElement("option");o.value=i;o.textContent=d;if(i===firstAg.dates.length-1)o.selected=true;ws.appendChild(o);});}
+  // Dept week selector - same dates
+  if(firstAg){const ws2=document.getElementById("dept-wk-sel");firstAg.dates.forEach((d,i)=>{const o=document.createElement("option");o.value=i;o.textContent=d;if(i===firstAg.dates.length-1)o.selected=true;ws2.appendChild(o);});ws2.addEventListener("change",renderDept);}
   document.querySelectorAll(".ktb").forEach(t=>{t.addEventListener("click",()=>{
     document.querySelectorAll(".ktb").forEach(x=>x.classList.remove("active"));t.classList.add("active");
     const v=t.dataset.v;document.getElementById("kv-agent").style.display=v==="agent"?"block":"none";
@@ -438,40 +418,96 @@ function buildKPI(){window._k=1;
   document.getElementById("kpi-wk").addEventListener("change",renderAg);
   renderAg();
 }
-
 function renderAg(){
-  const ag=document.getElementById("kpi-ag").value;const wi=+document.getElementById("kpi-wk").value;
+  const ag=document.getElementById("kpi-ag").value,wi=+document.getElementById("kpi-wk").value;
   const d=D.kpi[ag];if(!d)return;
-  const km=["Assigned Conversations","Replies Sent","First Reply Time (hrs)","Handle Time (min)","SLA Breaches","Satisfaction %","Calls Answered","Missed Calls","Dialpad Time (hrs)","Days Worked","Time Usage %"];
+  const km=["Assigned Conversations","Messages Sent (excl. replies)","Replies Sent","First Reply Time (hrs)","Handle Time (min)","SLA Breaches","Satisfaction %","Calls Answered","Calls Placed","Missed Calls","Dialpad Time (hrs)","Days Worked","Time Usage","General Efficiency"];
   document.getElementById("kpi-cards").innerHTML=km.map(n=>{const m=d.kpis[n];if(!m)return"";
     const v=m.v[wi];const pv=wi>0?m.v[wi-1]:null;
-    const vs=v!==null?(n.includes("%")?(v*100).toFixed(0)+"%":Number(v).toFixed(n.includes("hrs")||n.includes("min")?1:0)):"—";
-    let st="good";if(m.t!==null){const lo=["First Reply Time (hrs)","SLA Breaches","Missed Calls","Handle Time (min)"];
+    // Format value
+    let vs;
+    if(n==="Satisfaction %")vs=v!==null&&v!==undefined?Math.round(v)+"%":"—";
+    else if(n==="Time Usage"||n==="General Efficiency")vs=v!==null&&v!==undefined?(typeof v==="number"?v.toFixed(1):v)+"%":"—";
+    else vs=v!==null&&v!==undefined?Number(v).toFixed(n.includes("hrs")||n.includes("min")?1:0):"—";
+    // Status
+    let st="good";if(m.t!==null&&v!==null&&v!==undefined){
+      const lo=["First Reply Time (hrs)","SLA Breaches","Missed Calls","Handle Time (min)"];
       if(lo.includes(n))st=v<=m.t?"good":v<=m.t*1.5?"warn":"bad";
-      else if(n.includes("%"))st=v>=m.t?"good":v>=m.t*.8?"warn":"bad";
-      else st=v>=m.t?"good":"warn";}
-    const ts=m.t!==null?(n.includes("%")?(m.t*100)+"%":m.t):"—";
-    const sp=m.v.map((x,j)=>{if(x===null||x===undefined)return"";const mx=Math.max(...m.v.filter(z=>z!==null&&!isNaN(z))),mn=Math.min(...m.v.filter(z=>z!==null&&!isNaN(z))),rn=mx-mn||1;const h=((x-mn)/rn)*32+4;return`<div style="width:5px;height:${h}px;background:${j===wi?'var(--text)':st==='good'?'var(--teal)':st==='warn'?'#D4860A':'var(--coral-dark)'};border-radius:2px;opacity:${j===wi?1:.25}"></div>`;}).join("");
-    return`<div class="km"><div class="kh"><div><span class="ks ${st}"></span><span class="kn">${n}</span></div><span class="kp ${m.p.toLowerCase()}">${m.p}</span></div><div class="kv">${vs}</div><div class="ktar">Target: ${ts}${pv!==null&&pv!==undefined?" · Prev: "+(n.includes("%")?(pv*100).toFixed(0)+"%":Number(pv).toFixed(1)):""}</div><div style="display:flex;align-items:flex-end;gap:2px;height:40px;margin-top:10px">${sp}</div></div>`;}).join("");
+      else st=v>=m.t?"good":v>=m.t*.8?"warn":"bad";}
+    const ts=m.t!==null?m.t+(n.includes("%")||n==="Satisfaction %"||n==="Time Usage"||n==="General Efficiency"?"%":""):"—";
+    return`<div class="km"><div class="kh"><div><span class="ks ${st}"></span><span class="kn">${n}</span></div><span class="kp ${m.p.toLowerCase()}">${m.p}</span></div><div class="kv-num">${vs}</div><div class="ktar">Target: ${ts}</div></div>`;}).join("");
 
-  const dates12=d.dates.slice(-12);const rs=d.kpis["Replies Sent"]?.v.slice(-12)||[];const frt=d.kpis["First Reply Time (hrs)"]?.v.slice(-12)||[];
-  if(ckf)ckf.destroy();ckf=new Chart(document.getElementById("ch-kf"),{type:"bar",data:{labels:dates12,datasets:[{label:"Replies Sent",data:rs,backgroundColor:"#2AACB8",borderRadius:4,barPercentage:.5,yAxisID:"y"},{label:"First Reply Time",data:frt,type:"line",borderColor:"#E8967A",borderWidth:2,pointRadius:3,tension:.3,yAxisID:"y1"}]},options:{...cb,plugins:{...cb.plugins,legend:lgd},scales:{x:cb.scales.x,y:{position:"left",grid:{color:"#EEF2F7"},ticks:{font:{family:"DM Sans",size:10},color:"#8A9BAE"}},y1:{position:"right",grid:{display:false},ticks:{font:{family:"DM Sans",size:10},color:"#E8967A",callback:v=>v+"h"}}}}});
+  // Front chart - Replies + Messages + First Reply Time
+  const dates12=d.dates.slice(-12);
+  const rs=d.kpis["Replies Sent"]?.v.slice(-12)||[];
+  const ms=d.kpis["Messages Sent (excl. replies)"]?.v.slice(-12)||[];
+  const frt=d.kpis["First Reply Time (hrs)"]?.v.slice(-12)||[];
+  if(ckf)ckf.destroy();
+  ckf=new Chart(document.getElementById("ch-kf"),{type:"bar",data:{labels:dates12,datasets:[
+    {label:"Replies Sent",data:rs,backgroundColor:"#2AACB8",borderRadius:4,barPercentage:.35,yAxisID:"y"},
+    {label:"Messages Sent",data:ms,backgroundColor:"#6C5CE7",borderRadius:4,barPercentage:.35,yAxisID:"y"},
+    {label:"First Reply Time",data:frt,type:"line",borderColor:"#E8967A",borderWidth:2,pointRadius:3,tension:.3,yAxisID:"y1"}
+  ]},options:{...cb,plugins:{...cb.plugins,legend:lgd},scales:{x:cb.scales.x,y:{position:"left",grid:{color:"#EEF2F7"},ticks:{font:{family:"DM Sans",size:10},color:"#8A9BAE"}},y1:{position:"right",grid:{display:false},ticks:{font:{family:"DM Sans",size:10},color:"#E8967A",callback:v=>v+"h"}}}}});
 
-  const ca=d.kpis["Calls Answered"]?.v.slice(-12)||[];const cp=d.kpis["Calls Placed"]?.v.slice(-12)||[];const cm=d.kpis["Missed Calls"]?.v.slice(-12)||[];
-  if(ckd)ckd.destroy();ckd=new Chart(document.getElementById("ch-kd"),{type:"bar",data:{labels:dates12,datasets:[{label:"Answered",data:ca,backgroundColor:"#2AACB8",borderRadius:4,barPercentage:.4},{label:"Placed",data:cp,backgroundColor:"#6C5CE7",borderRadius:4,barPercentage:.4},{label:"Missed",data:cm,backgroundColor:"#D4604A",borderRadius:4,barPercentage:.4}]},options:{...cb,plugins:{...cb.plugins,legend:lgd}}});
+  const ca=d.kpis["Calls Answered"]?.v.slice(-12)||[];
+  const cp=d.kpis["Calls Placed"]?.v.slice(-12)||[];
+  const cm=d.kpis["Missed Calls"]?.v.slice(-12)||[];
+  if(ckd)ckd.destroy();
+  ckd=new Chart(document.getElementById("ch-kd"),{type:"bar",data:{labels:dates12,datasets:[
+    {label:"Answered",data:ca,backgroundColor:"#2AACB8",borderRadius:4,barPercentage:.4},
+    {label:"Placed",data:cp,backgroundColor:"#6C5CE7",borderRadius:4,barPercentage:.4},
+    {label:"Missed",data:cm,backgroundColor:"#D4604A",borderRadius:4,barPercentage:.4}
+  ]},options:{...cb,plugins:{...cb.plugins,legend:lgd}}});
 
-  // Infraction summary
+  // Infraction summary - including Last 13 weeks
   const inf=d.inf||{};
-  document.getElementById("kpi-inf-sum").innerHTML=Object.entries(inf).map(([q,[o,a]])=>`<div style="display:flex;align-items:center;gap:16px;padding:8px 0;border-bottom:1px solid var(--border)"><div style="width:80px;font-size:12px;font-weight:600">${q}</div><div style="flex:1"><span class="inf-o">Op: ${o}</span> &nbsp; <span class="inf-a">Att: ${a}</span></div><div style="font-size:14px;font-weight:700;color:${(o+a)?'var(--coral-dark)':'var(--green)'}">${o+a} pts</div></div>`).join("");
+  const infHtml=Object.entries(inf).map(([q,[o,a]])=>{
+    const total=o+a;const isLast=q.includes("Last")||q.includes("13");
+    return`<div style="display:flex;align-items:center;gap:16px;padding:10px 16px;margin-bottom:6px;background:${isLast?'var(--teal-mist)':'var(--bg)'};border-radius:8px"><div style="width:100px;font-size:13px;font-weight:${isLast?700:600}">${q}</div><div style="flex:1;display:flex;gap:20px"><span style="font-size:12px"><span class="inf-o">Op:</span> ${o}</span><span style="font-size:12px"><span class="inf-a">Att:</span> ${a}</span></div><div style="font-size:15px;font-weight:700;color:${total>0?'var(--coral-dark)':'var(--green)'}"> ${total} pts</div></div>`;
+  }).join("");
+  document.getElementById("kpi-inf-sum").innerHTML=infHtml;
 }
 
 function renderDept(){
-  const w=D.weeklyDept;
-  document.getElementById("dept-sub").textContent="Week of "+w.week;
-  const cards=[{l:"PTO",v:w.pto,s:"days"},{l:"Infractions",v:w.inf,s:"this week"},{l:"Available Time",v:w.avail.toFixed(1)+"h",s:"team total"},{l:"Time Spent",v:w.spent.toFixed(1)+"h",s:"all platforms"},{l:"Utilization",v:w.pct,s:"target: 95%"}];
-  w.metrics.forEach(m=>{if(m.value&&m.kpi)cards.push({l:m.platform+" — "+m.kpi,v:m.value,s:m.target?"target: "+m.target:""});});
+  const wi=+document.getElementById("dept-wk-sel").value;
+  // Sum metrics across all agents for the selected week
+  const agNames=Object.keys(D.kpi);
+  // Get the week date label
+  const firstAg=Object.values(D.kpi)[0];
+  const weekLabel=firstAg?firstAg.dates[wi]:"";
+  document.getElementById("dept-sub").textContent="Week of "+weekLabel;
+
+  // Aggregate metrics
+  const agg={};const metricNames=Object.keys(firstAg?.kpis||{});
+  metricNames.forEach(mn=>{
+    let sum=0,count=0;
+    agNames.forEach(an=>{const v=D.kpi[an]?.kpis[mn]?.v[wi];if(v!==null&&v!==undefined&&!isNaN(v)){sum+=v;count++;}});
+    agg[mn]={sum,avg:count?sum/count:0,count};
+  });
+
+  // Build cards
+  const cards=[
+    {l:"Available Time",v:(agg["Hours/Week"]?.sum||0).toFixed(1)+"h",s:"team total"},
+    {l:"Time Usage (avg)",v:(agg["Time Usage"]?.avg||0).toFixed(1)+"%",s:"target: 95%"},
+    {l:"Replies Sent",v:Math.round(agg["Replies Sent"]?.sum||0),s:"Front — all agents"},
+    {l:"Messages Sent",v:Math.round(agg["Messages Sent (excl. replies)"]?.sum||0),s:"Front — excl. replies"},
+    {l:"Avg First Reply Time",v:(agg["First Reply Time (hrs)"]?.avg||0).toFixed(1)+" hrs",s:"target: 4 hrs"},
+    {l:"Avg Handle Time",v:(agg["Handle Time (min)"]?.avg||0).toFixed(1)+" min",s:"target: 4 min"},
+    {l:"Total SLA Breaches",v:Math.round(agg["SLA Breaches"]?.sum||0),s:"target: 2 per agent"},
+    {l:"Calls Answered",v:Math.round(agg["Calls Answered"]?.sum||0),s:"Dialpad — all agents"},
+    {l:"Calls Placed",v:Math.round(agg["Calls Placed"]?.sum||0),s:"Dialpad"},
+    {l:"Total Missed Calls",v:Math.round(agg["Missed Calls"]?.sum||0),s:"target: 0"},
+    {l:"Dialpad Time (total)",v:(agg["Dialpad Time (hrs)"]?.sum||0).toFixed(1)+" hrs",s:"all agents"},
+    {l:"General Efficiency (avg)",v:(agg["General Efficiency"]?.avg||0).toFixed(1)+"%",s:"target: 100%"},
+  ];
+
   document.getElementById("dept-cards").innerHTML=cards.map(c=>`<div class="dsc"><div class="dsl">${c.l}</div><div class="dsv">${c.v}</div><div class="dss">${c.s}</div></div>`).join("");
-  document.getElementById("dept-rat").innerHTML=`<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:8px">${w.ratings.map(r=>`<div style="background:var(--bg);border-radius:10px;padding:16px 24px;min-width:140px;text-align:center"><div style="font-size:10px;color:var(--gray);font-weight:600;text-transform:uppercase;letter-spacing:1px">${r.source}</div><div style="font-size:28px;font-weight:800;margin-top:6px">${r.rate}</div><div style="font-size:11px;color:${parseFloat(r.change)>0?'var(--green)':parseFloat(r.change)<0?'var(--coral-dark)':'var(--gray)'};margin-top:4px">${parseFloat(r.change)>0?"▲":parseFloat(r.change)<0?"▼":"—"} ${r.change}</div></div>`).join("")}</div>`;
+
+  // Ratings from weekly data
+  const w=D.weeklyDept;
+  if(w.ratings?.length){
+    document.getElementById("dept-rat").innerHTML=`<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:8px">${w.ratings.map(r=>`<div style="background:var(--bg);border-radius:10px;padding:16px 24px;min-width:140px;text-align:center"><div style="font-size:10px;color:var(--gray);font-weight:600;text-transform:uppercase;letter-spacing:1px">${r.source}</div><div style="font-size:28px;font-weight:800;margin-top:6px">${r.rate}</div></div>`).join("")}</div>`;
+  }
 }
 
 function buildInf(){window._inf=1;
@@ -482,58 +518,42 @@ function buildInf(){window._inf=1;
   new Chart(document.getElementById("ch-inf"),{type:"bar",data:{labels:so.map(s=>s[0]),datasets:[{label:"Attendance",data:so.map(s=>s[1].a),backgroundColor:"#E8967A",borderRadius:4},{label:"Operational",data:so.map(s=>s[1].o),backgroundColor:"#3B6CE7",borderRadius:4}]},options:{indexAxis:"y",...cb,plugins:{...cb.plugins,legend:lgd},scales:{x:{stacked:true,grid:{color:"#EEF2F7"},ticks:{font:{family:"DM Sans",size:11},color:"#8A9BAE"}},y:{stacked:true,grid:{display:false},ticks:{font:{family:"DM Sans",size:11},color:"#3D5066"}}}}});
 }
 
-// ═══════════════════════════════════════════════════════
-// SCHEDULE
-// ═══════════════════════════════════════════════════════
+// ═══ SCHEDULE ═══
 function buildSched(){window._sc=1;
   if(D.schedule.length>2){
     document.getElementById("sched-sub").textContent=D.schedule[0]?.[1]||"";
-    const dy=new Date().getDay();const tc=dy===0||dy===6?5:dy-1;
-    const days=D.schedule[1]||[];
+    const dy=new Date().getDay(),tc=dy===0||dy===6?5:dy-1,days=D.schedule[1]||[];
     let h="<thead><tr><th style='text-align:left'>Role</th>";
     for(let j=1;j<=6;j++)h+=`<th class="${j-1===tc?'ty':''}">${days[j]||""}</th>`;
     h+="</tr></thead><tbody>";
-    for(let i=2;i<=7;i++){const r=D.schedule[i];if(!r||!r[0])continue;
-      h+=`<tr><td><span class="rd" style="background:${r[0].includes("Chat")||r[0].includes("Live")?"#6C5CE7":r[0].includes("Hybrid")?"var(--coral)":"var(--teal)"}"></span>${r[0]}</td>`;
+    for(let i=2;i<=7;i++){const r=D.schedule[i];if(!r||(!r[0]&&!r[6]))continue;
+      const role=r[0]||"";h+=`<tr><td>${role?`<span class="rd" style="background:${role.includes("Chat")?"#6C5CE7":role.includes("Hybrid")?"var(--coral)":"var(--teal)"}"></span>${role}`:""}</td>`;
       for(let j=1;j<=6;j++)h+=`<td class="${j-1===tc?'ty':''}">${r[j]||""}</td>`;h+="</tr>";}
     h+="</tbody>";document.getElementById("sched-tbl").innerHTML=h;
   }
-  // Lunch
   document.getElementById("lunch-box").innerHTML=`<table class="st" style="margin-top:12px"><thead><tr><th style="text-align:left">Time (EST)</th><th>Mon–Thu</th><th>Friday</th></tr></thead><tbody>${[{t:"10:00 AM",m:"Ivan",f:"Ivan"},{t:"11:00 AM",m:"Angel",f:"Angel"},{t:"12:00 PM",m:"Vanessa",f:"Vanessa"},{t:"1:00 PM",m:"Fatima",f:"Fatima"},{t:"2:30 PM",m:"Ivan (break)",f:"—"},{t:"3:10 PM",m:"Angel (break)",f:"Ivan / Angel"},{t:"3:50 PM",m:"Vanessa (break)",f:"—"},{t:"4:30 PM",m:"Fatima (break)",f:"Fatima (break)"},{t:"5:00 PM",m:"Luisa (break)",f:"Luisa (break)"}].map(l=>`<tr><td style="font-weight:600;color:var(--teal)">${l.t}</td><td style="text-align:center">${l.m}</td><td style="text-align:center">${l.f}</td></tr>`).join("")}</tbody></table>`;
-  // Hours chart
   const an=Object.keys(D.kpi).filter(n=>D.kpi[n].kpis["Hours/Week"]);
   if(an.length){const dates=D.kpi[an[0]].dates.slice(-12);
     new Chart(document.getElementById("ch-hrs"),{type:"line",data:{labels:dates,datasets:an.map(a=>({label:a.split(" ")[0],data:D.kpi[a].kpis["Hours/Week"].v.slice(-12),borderColor:AC[a],borderWidth:2,pointRadius:2,tension:.3,fill:false})).concat([{label:"Target",data:Array(12).fill(38.35),borderColor:"#D4604A",borderWidth:1,borderDash:[5,5],pointRadius:0,fill:false}])},options:{...cb,plugins:{...cb.plugins,legend:lgd,tooltip:{...cb.plugins.tooltip,mode:"index",intersect:false}},scales:{...cb.scales,y:{...cb.scales.y,min:0,max:45,ticks:{...cb.scales.y.ticks,callback:v=>v+"h"}}}}});
   }
 }
 
-// ═══════════════════════════════════════════════════════
-// OPS
-// ═══════════════════════════════════════════════════════
+// ═══ OPS ═══
 function buildOps(){window._o=1;
-  // Count issues by dept
-  const deptC={};const catC={};let total=0;
+  const deptC={},catC={};let total=0;
   D.issues.forEach(is=>{deptC[is.dept]=(deptC[is.dept]||0)+1;catC[is.desc]=(catC[is.desc]||0)+1;total++;});
   const topCat=Object.entries(catC).sort((a,b)=>b[1]-a[1]).slice(0,10);
   const topDept=Object.entries(deptC).sort((a,b)=>b[1]-a[1]);
-
-  document.getElementById("ops-stats").innerHTML=`<div class="sc"><div class="sl">Total Issues</div><div class="sv">${total}</div><div class="ss">All time</div></div><div class="sc"><div class="sl">Top Issue</div><div class="sv" style="font-size:18px">${topCat[0]?.[0]||"—"}</div><div class="ss">${topCat[0]?.[1]||0} occurrences</div></div><div class="sc"><div class="sl">Top Department</div><div class="sv" style="font-size:18px">${topDept[0]?.[0]||"—"}</div><div class="ss">${topDept[0]?.[1]||0} issues</div></div>`;
-
+  document.getElementById("ops-stats").innerHTML=`<div class="sc"><div class="sl">Total Issues</div><div class="sv">${total}</div><div class="ss">All time</div></div><div class="sc"><div class="sl">Top Issue</div><div class="sv" style="font-size:18px">${topCat[0]?.[0]||"—"}</div><div class="ss">${topCat[0]?.[1]||0} occurrences</div></div><div class="sc"><div class="sl">Top Dept</div><div class="sv" style="font-size:18px">${topDept[0]?.[0]||"—"}</div><div class="ss">${topDept[0]?.[1]||0} issues</div></div>`;
   new Chart(document.getElementById("ch-dept"),{type:"doughnut",data:{labels:topDept.map(d=>d[0]),datasets:[{data:topDept.map(d=>d[1]),backgroundColor:["#2AACB8","#E8967A","#3B6CE7","#88DDE4","#6C5CE7"],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:"65%",plugins:{legend:{position:"bottom",labels:{font:{family:"DM Sans",size:12},padding:16,color:"#3D5066"}}}}});
-
-  const catColors=topCat.map((_,i)=>i<3?"#E8967A":i<6?"#2AACB8":"#88DDE4");
-  new Chart(document.getElementById("ch-cat"),{type:"bar",data:{labels:topCat.map(c=>c[0]),datasets:[{data:topCat.map(c=>c[1]),backgroundColor:catColors,borderRadius:4}]},options:{indexAxis:"y",...cb,scales:{x:{grid:{color:"#EEF2F7"},ticks:{font:{family:"DM Sans",size:10},color:"#8A9BAE"}},y:{grid:{display:false},ticks:{font:{family:"DM Sans",size:10},color:"#3D5066"}}}}});
-
+  new Chart(document.getElementById("ch-cat"),{type:"bar",data:{labels:topCat.map(c=>c[0]),datasets:[{data:topCat.map(c=>c[1]),backgroundColor:topCat.map((_,i)=>i<3?"#E8967A":i<6?"#2AACB8":"#88DDE4"),borderRadius:4}]},options:{indexAxis:"y",...cb,scales:{x:{grid:{color:"#EEF2F7"},ticks:{font:{family:"DM Sans",size:10},color:"#8A9BAE"}},y:{grid:{display:false},ticks:{font:{family:"DM Sans",size:10},color:"#3D5066"}}}}});
   const dc={OPS:"#E8967A",IT:"#3B6CE7",CS:"#2AACB8"},ic={High:"#D43B3B",Medium:"#D4860A",Low:"#2D8A2D"};
-  function rOI(){const dp=document.getElementById("ops-df").value;const im=document.getElementById("ops-if").value;
+  function rOI(){const dp=document.getElementById("ops-df").value,im=document.getElementById("ops-if").value;
     let d=D.issues.slice(-100);if(dp!=="All")d=d.filter(x=>x.dept===dp);if(im!=="All")d=d.filter(x=>x.impact===im);
-    document.getElementById("ops-tbl").innerHTML=`<thead><tr><th>Date</th><th>Day</th><th>Dept</th><th>Issue</th><th>Frequency</th><th>Impact</th><th>Mgmt</th></tr></thead><tbody>${d.slice().reverse().map(x=>`<tr><td style="color:var(--gray);white-space:nowrap">${x.date}</td><td>${x.day}</td><td><span class="tg" style="background:${dc[x.dept]||'#ccc'}20;color:${dc[x.dept]||'#666'}">${x.dept}</span></td><td style="font-weight:500">${x.desc}</td><td style="font-size:11px">${x.freq}</td><td><span class="tg" style="background:${ic[x.impact]||'#ccc'}18;color:${ic[x.impact]||'#666'}">${x.impact}</span></td><td style="font-size:11px;color:${x.mgmt==='Yes'?'var(--green)':x.mgmt==='No'?'var(--coral-dark)':'var(--gray)'};font-weight:600">${x.mgmt||"—"}</td></tr>`).join("")}</tbody>`;}
+    document.getElementById("ops-tbl").innerHTML=`<thead><tr><th>Date</th><th>Day</th><th>Dept</th><th>Issue</th><th>Freq</th><th>Impact</th><th>Mgmt</th></tr></thead><tbody>${d.slice().reverse().map(x=>`<tr><td style="color:var(--gray);white-space:nowrap">${x.date}</td><td>${x.day}</td><td><span class="tg" style="background:${dc[x.dept]||'#ccc'}20;color:${dc[x.dept]||'#666'}">${x.dept}</span></td><td style="font-weight:500">${x.desc}</td><td style="font-size:11px">${x.freq}</td><td><span class="tg" style="background:${ic[x.impact]||'#ccc'}18;color:${ic[x.impact]||'#666'}">${x.impact}</span></td><td style="font-size:11px;color:${x.mgmt==='Yes'?'var(--green)':x.mgmt==='No'?'var(--coral-dark)':'var(--gray)'};font-weight:600">${x.mgmt||"—"}</td></tr>`).join("")}</tbody>`;}
   rOI();document.getElementById("ops-df").addEventListener("change",rOI);document.getElementById("ops-if").addEventListener("change",rOI);
 }
 
-// ═══════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════
 loadAll();
 </script>
 </body>
