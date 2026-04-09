@@ -339,21 +339,30 @@ function renderHome(){
 
   renderLB("lb-home");
 
-  // PTO from agent KPI sheets (row 1, col 3 = Available PTO as integer days)
-  const ptoData=Object.entries(D.kpi).map(([n,k])=>({n:n.split(" ")[0],e:k.pto,c:AC[n]})).filter(p=>p.e>0||p.n);
-  document.getElementById("pto-box").innerHTML=ptoData.map(p=>`<div style="display:flex;align-items:center;gap:12px;margin-bottom:11px"><div style="width:80px;font-size:12px;font-weight:500">${p.n}</div><div style="flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden"><div style="height:100%;width:${Math.min((p.e/15*100),100)}%;background:${p.c};border-radius:4px"></div></div><div style="width:55px;font-size:11px;font-weight:700;text-align:right">${p.e} / 15</div></div>`).join("");
+  // PTO earned = 15 days * (months elapsed / 12). Available PTO from sheet is what's REMAINING.
+  const now=new Date();const monthsElapsed=now.getMonth()+(now.getDate()/30);// 0-indexed months
+  const earnedSoFar=Math.round((15*monthsElapsed/12)*100)/100;
+  const ptoData=Object.entries(D.kpi).map(([n,k])=>({n:n.split(" ")[0],e:Math.min(earnedSoFar,15),c:AC[n]}));
+  document.getElementById("pto-box").innerHTML=ptoData.map(p=>`<div style="display:flex;align-items:center;gap:12px;margin-bottom:11px"><div style="width:80px;font-size:12px;font-weight:500">${p.n}</div><div style="flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden"><div style="height:100%;width:${(p.e/15*100)}%;background:${p.c};border-radius:4px"></div></div><div style="width:55px;font-size:11px;font-weight:700;text-align:right">${p.e.toFixed(1)} / 15</div></div>`).join("");
 
   // Schedule
   if(D.schedule.length>2){
     document.getElementById("home-sched-label").textContent=D.schedule[0]?.[1]||"";
     const dy=new Date().getDay(),tc=dy===0||dy===6?5:dy-1,days=D.schedule[1]||[];
+    // Weekend person in charge = first person listed in weekend column (row 2, col 6)
+    const wkndLead=(D.schedule[2]&&D.schedule[2][6])?D.schedule[2][6].trim():"";
     let h="<thead><tr><th style='text-align:left'>Role</th>";
     for(let j=1;j<=6;j++)h+=`<th class="${j-1===tc?'ty':''}">${days[j]||""}</th>`;
     h+="</tr></thead><tbody>";
     for(let i=2;i<=7;i++){const r=D.schedule[i];if(!r||(!r[0]&&!r[6]))continue;
       const role=r[0]||"";
       h+=`<tr><td>${role?`<span class="rd" style="background:${role.includes("Chat")?"#6C5CE7":role.includes("Hybrid")?"var(--coral)":"var(--teal)"}"></span>${role}`:""}</td>`;
-      for(let j=1;j<=6;j++)h+=`<td class="${j-1===tc?'ty':''}">${r[j]||""}</td>`;h+="</tr>";}
+      for(let j=1;j<=6;j++){
+        const cell=(r[j]||"").trim();
+        const isWkndHighlight=j===6&&cell&&cell===wkndLead;
+        h+=`<td class="${j-1===tc?'ty':''}" ${isWkndHighlight?'style="background:var(--teal-mist);font-weight:700;color:var(--teal)"':''}>${cell}</td>`;
+      }
+      h+="</tr>";}
     h+="</tbody>";document.getElementById("home-sched-tbl").innerHTML=h;
   }
 
@@ -379,7 +388,12 @@ function buildSales(){window._s=1;renderLB("lb-sales");
   const lr=D.revData.length?D.revData[D.revData.length-1]:null;
   const tRev=lr?(lr.AJ+lr.LT+lr.IS+lr.VD+lr.FS):0;
   const tOrd=lr?(lr.AJo+lr.LTo+lr.ISo+lr.VDo+lr.FSo):0;
-  document.getElementById("sales-stats").innerHTML=`<div class="sc"><div class="sl">Total Commissions</div><div class="sv">${fmt(D.teamTotal||0)}</div><div class="ss">All agents</div></div><div class="sc"><div class="sl">Total Orders</div><div class="sv">${D.agents.reduce((s,a)=>s+a.orders,0)}</div><div class="ss">${D.agents.reduce((s,a)=>s+a.alc,0)} ALC + ${D.agents.reduce((s,a)=>s+a.kit,0)} KIT</div></div><div class="sc"><div class="sl">Latest Month</div><div class="sv">${fmt(tRev)}</div><div class="ss">${Math.round(tOrd)} orders</div></div>`;
+  // Commission AOV = total commissions revenue / total commission orders (587 orders from comm report)
+  const commOrders=D.agents.reduce((s,a)=>s+a.orders,0);
+  // Sales Contributor AOV = total revenue / total orders from sales log
+  const slTotalRev=D.salesLog.reduce((s,r)=>s+r.r,0);
+  const slTotalOrd=D.salesLog.length;
+  document.getElementById("sales-stats").innerHTML=`<div class="sc"><div class="sl">Total Commissions</div><div class="sv">${fmt(D.teamTotal||0)}</div><div class="ss">${commOrders} commissionable orders</div></div><div class="sc"><div class="sl">Commission AOV</div><div class="sv">${commOrders?fmt((D.teamTotal||0)/commOrders):"—"}</div><div class="ss">Avg commission per order</div></div><div class="sc"><div class="sl">Sales Contributor — Latest</div><div class="sv">${fmt(tRev)}</div><div class="ss">${lr?.m||""} — ${Math.round(tOrd)} orders</div></div><div class="sc"><div class="sl">Contributor AOV</div><div class="sv">${slTotalOrd?fmt(slTotalRev/slTotalOrd):"—"}</div><div class="ss">Avg revenue per assisted order</div></div>`;
   const mLbl=D.monthlyComm.map(d=>{const p=d.m.split("/");return p[0]+"/"+p[1].slice(-2);});
   const an=[["Angel Jimenez","a"],["Vanessa Duran","v"],["Luisa Tona","l"],["Ivan Soto","i"],["Khamal Tehfeh","k"],["Fatima Soto","f"]];
   new Chart(document.getElementById("ch-comm"),{type:"line",data:{labels:mLbl,datasets:an.map(([n,k])=>({label:n,data:D.monthlyComm.map(d=>d[k]),borderColor:AC[n],borderWidth:2,pointRadius:0,tension:.3,fill:false}))},options:{...cb,plugins:{...cb.plugins,legend:lgd,tooltip:{...cb.plugins.tooltip,mode:"index",intersect:false,callbacks:{label:c=>" "+c.dataset.label+": "+fmt(c.parsed.y)}}},scales:{...cb.scales,x:{...cb.scales.x,ticks:{...cb.scales.x.ticks,maxTicksLimit:10}},y:{...cb.scales.y,ticks:{...cb.scales.y.ticks,callback:v=>"$"+v}}}}});
@@ -392,14 +406,25 @@ function buildSales(){window._s=1;renderLB("lb-sales");
   const pm=[...D.agents].sort((a,b)=>(b.alc+b.kit)-(a.alc+a.kit));
   document.getElementById("pm-box").innerHTML=pm.filter(p=>p.alc+p.kit>0).map(p=>{const t=p.alc+p.kit;return`<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div style="width:70px;font-size:12px;font-weight:500">${p.name.split(" ")[0]}</div><div style="flex:1;display:flex;height:18px;border-radius:4px;overflow:hidden;background:var(--bg)"><div style="width:${p.alc/t*100}%;background:var(--teal);display:flex;align-items:center;justify-content:center"><span style="font-size:9px;color:#fff;font-weight:700">${p.alc}</span></div>${p.kit?`<div style="min-width:22px;width:${Math.max(p.kit/t*100,4)}%;background:var(--coral);display:flex;align-items:center;justify-content:center"><span style="font-size:9px;color:#fff;font-weight:700">${p.kit}</span></div>`:""}</div><div style="width:30px;font-size:12px;font-weight:700;text-align:right">${t}</div></div>`;}).join("");
 
-  // Agent code mapping for filter
-  const agMap={"AJimenez":"AJimenez","VDuran":"VDuran","LTona":"LTona","ISoto":["ISoto","Ivan Soto","Ivan"],"FSoto":"FSoto"};
-  function rST(f){
+  // Agent filter for sales log
+  const agentEl=document.getElementById("agent-filter");
+  function rST(){
+    const f=agentEl.value;
     let d=D.salesLog;
-    if(f&&f!=="All"){d=d.filter(s=>{const ag=s.ag.trim();if(f==="ISoto")return ag==="ISoto"||ag==="Ivan Soto"||ag==="Ivan";return ag.includes(f);});}
+    if(f&&f!=="All"){
+      d=d.filter(s=>{
+        const ag=(s.ag||"").trim();
+        if(f==="ISoto")return ag==="ISoto"||ag==="Ivan Soto"||ag==="Ivan";
+        if(f==="LTona")return ag==="LTona"||ag==="Luisa Tona";
+        if(f==="AJimenez")return ag==="AJimenez"||ag==="Angel Jimenez";
+        if(f==="VDuran")return ag==="VDuran"||ag==="Vanessa Duran";
+        if(f==="FSoto")return ag==="FSoto"||ag==="Fatima Soto";
+        return ag===f;
+      });
+    }
     document.getElementById("sl-tbl").innerHTML=`<thead><tr><th>Tracking ID</th><th>Customer</th><th>Agent</th><th>Date</th><th>Revenue</th><th>Discount</th></tr></thead><tbody>${d.slice(0,60).map(s=>`<tr><td style="color:var(--teal);font-weight:600">${s.id}</td><td>${s.c}</td><td style="font-weight:500">${s.ag}</td><td style="color:var(--gray)">${s.d}</td><td style="font-weight:600">${fmt(s.r)}</td><td>${s.co?`<span class="tg" style="background:var(--teal-mist);color:var(--teal)">${s.co}</span>`:"—"}</td></tr>`).join("")}</tbody>`;
   }
-  rST("All");document.getElementById("agent-filter").onchange=e=>rST(e.target.value);
+  rST();agentEl.addEventListener("change",rST);
 }
 
 // ═══ KPI ═══
@@ -530,12 +555,13 @@ function buildSched(){window._sc=1;
   if(D.schedule.length>2){
     document.getElementById("sched-sub").textContent=D.schedule[0]?.[1]||"";
     const dy=new Date().getDay(),tc=dy===0||dy===6?5:dy-1,days=D.schedule[1]||[];
+    const wkndLead=(D.schedule[2]&&D.schedule[2][6])?D.schedule[2][6].trim():"";
     let h="<thead><tr><th style='text-align:left'>Role</th>";
     for(let j=1;j<=6;j++)h+=`<th class="${j-1===tc?'ty':''}">${days[j]||""}</th>`;
     h+="</tr></thead><tbody>";
     for(let i=2;i<=7;i++){const r=D.schedule[i];if(!r||(!r[0]&&!r[6]))continue;
       const role=r[0]||"";h+=`<tr><td>${role?`<span class="rd" style="background:${role.includes("Chat")?"#6C5CE7":role.includes("Hybrid")?"var(--coral)":"var(--teal)"}"></span>${role}`:""}</td>`;
-      for(let j=1;j<=6;j++)h+=`<td class="${j-1===tc?'ty':''}">${r[j]||""}</td>`;h+="</tr>";}
+      for(let j=1;j<=6;j++){const cell=(r[j]||"").trim();const hl=j===6&&cell&&cell===wkndLead;h+=`<td class="${j-1===tc?'ty':''}" ${hl?'style="background:var(--teal-mist);font-weight:700;color:var(--teal)"':''}>${cell}</td>`;}h+="</tr>";}
     h+="</tbody>";document.getElementById("sched-tbl").innerHTML=h;
   }
   document.getElementById("lunch-box").innerHTML=`<table class="st" style="margin-top:12px"><thead><tr><th style="text-align:left">Time (EST)</th><th>Mon–Thu</th><th>Friday</th></tr></thead><tbody>${[{t:"10:00 AM",m:"Ivan",f:"Ivan"},{t:"11:00 AM",m:"Angel",f:"Angel"},{t:"12:00 PM",m:"Vanessa",f:"Vanessa"},{t:"1:00 PM",m:"Fatima",f:"Fatima"},{t:"2:30 PM",m:"Ivan (break)",f:"—"},{t:"3:10 PM",m:"Angel (break)",f:"Ivan / Angel"},{t:"3:50 PM",m:"Vanessa (break)",f:"—"},{t:"4:30 PM",m:"Fatima (break)",f:"Fatima (break)"},{t:"5:00 PM",m:"Luisa (break)",f:"Luisa (break)"}].map(l=>`<tr><td style="font-weight:600;color:var(--teal)">${l.t}</td><td style="text-align:center">${l.m}</td><td style="text-align:center">${l.f}</td></tr>`).join("")}</tbody></table>`;
