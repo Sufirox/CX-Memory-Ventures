@@ -28,27 +28,27 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .nav-btn:hover{color:#c8d6e0;background:rgba(255,255,255,.03)}.nav-btn.active{color:var(--teal);font-weight:600;background:rgba(42,172,184,.1);border-left-color:var(--teal)}
 .icon{font-size:17px;width:20px;text-align:center}
 .sidebar-footer{padding:18px 22px;border-top:1px solid rgba(255,255,255,.06);font-size:11px;color:#5A7A8A;line-height:1.6}
-.main{flex:1;margin-left:230px;padding:28px 32px;overflow-y:auto;max-height:100vh}
+.main{flex:1;margin-left:230px;padding:20px 24px;overflow-y:auto;max-height:100vh}
 .page{display:none}.page.active{display:block;animation:fu .35s ease}
-.page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:26px;flex-wrap:wrap;gap:12px}
-.page-header h1{font-size:24px;font-weight:800}.page-header p{font-size:13px;color:var(--gray);margin-top:3px}
+.page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+.page-header h1{font-size:20px;font-weight:800}.page-header p{font-size:12px;color:var(--gray);margin-top:2px}
 .sel{padding:9px 16px;border-radius:8px;border:1px solid #DDE3EB;font-size:13px;color:var(--slate);font-family:inherit;background:#fff;cursor:pointer}
-.stats-row{display:flex;gap:16px;margin-bottom:22px;flex-wrap:wrap}
-.sc{background:var(--card);border-radius:12px;padding:20px 24px;box-shadow:0 1px 4px rgba(0,0,0,.05);border-left:4px solid var(--teal);flex:1;min-width:170px}
+.stats-row{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.sc{background:var(--card);border-radius:10px;padding:14px 18px;box-shadow:0 1px 4px rgba(0,0,0,.05);border-left:4px solid var(--teal);flex:1;min-width:150px}
 .sc:nth-child(2){border-left-color:#45C4CF}.sc:nth-child(3){border-left-color:#0D5F68}.sc:nth-child(4){border-left-color:var(--coral)}
-.sl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--gray);margin-bottom:6px}
-.sv{font-size:28px;font-weight:800;line-height:1.1}.ss{font-size:11px;color:var(--gray);margin-top:4px}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:22px}
-.gs{display:grid;grid-template-columns:1fr 310px;gap:20px;margin-bottom:22px}
-.gl{display:grid;grid-template-columns:400px 1fr;gap:20px;margin-bottom:22px}
-.cd{background:var(--card);border-radius:12px;padding:24px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
-.ct{font-size:16px;font-weight:700;margin-bottom:3px}.csb{font-size:12px;color:var(--gray);margin-bottom:18px}
+.sl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--gray);margin-bottom:4px}
+.sv{font-size:22px;font-weight:800;line-height:1.1}.ss{font-size:10px;color:var(--gray);margin-top:3px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.gs{display:grid;grid-template-columns:1fr 280px;gap:14px;margin-bottom:16px}
+.gl{display:grid;grid-template-columns:360px 1fr;gap:14px;margin-bottom:16px}
+.cd{background:var(--card);border-radius:12px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.ct{font-size:14px;font-weight:700;margin-bottom:2px}.csb{font-size:11px;color:var(--gray);margin-bottom:14px}
 .cw{position:relative;width:100%}.cw canvas{width:100%!important}
-.lr{display:flex;align-items:center;gap:12px;margin-bottom:13px}
-.lrk{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.lr{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.lrk{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
 .lrk.g{background:var(--teal);color:#fff}.lrk.s{background:#45C4CF;color:#fff}.lrk.d{background:var(--border);color:var(--slate)}
-.ln{width:140px;font-size:13px;font-weight:500}.lb{flex:1;height:12px;background:var(--bg);border-radius:6px;overflow:hidden}
-.lf{height:100%;border-radius:6px;transition:width 1s cubic-bezier(.22,1,.36,1)}.la{width:85px;font-size:14px;font-weight:700;text-align:right}
+.ln{width:120px;font-size:12px;font-weight:500}.lb{flex:1;height:10px;background:var(--bg);border-radius:5px;overflow:hidden}
+.lf{height:100%;border-radius:5px;transition:width 1s cubic-bezier(.22,1,.36,1)}.la{width:75px;font-size:13px;font-weight:700;text-align:right}
 .li{opacity:.45}.lt{margin-top:14px;padding-top:14px;border-top:2px solid var(--border);display:flex;justify-content:space-between;align-items:center}
 .tw{overflow-x:auto;max-height:420px;overflow-y:auto}
 .tb{width:100%;border-collapse:collapse;font-size:12px}
@@ -65,18 +65,18 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .kt{display:flex;gap:0;margin-bottom:22px;border-bottom:2px solid var(--border)}
 .ktb{padding:10px 22px;font-size:13px;font-weight:600;color:var(--gray);border:none;background:0 0;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-2px}
 .ktb.active{color:var(--teal);border-bottom-color:var(--teal)}
-.kg{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:22px}
-.km{background:var(--card);border-radius:10px;padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
-.kh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
-.kn{font-size:12px;font-weight:600;color:var(--slate)}
-.kp{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:2px 7px;border-radius:3px}
+.kg{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:16px}
+.km{background:var(--card);border-radius:8px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.kh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.kn{font-size:11px;font-weight:600;color:var(--slate)}
+.kp{font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:2px 6px;border-radius:3px}
 .kp.front{background:#E8F0FE;color:#3B6CE7}.kp.dialpad{background:#FEF3E8;color:#D4860A}.kp.general{background:var(--teal-mist);color:var(--teal)}.kp.efficiency{background:#FEE8E8;color:#D43B3B}
-.kv-num{font-size:26px;font-weight:800;line-height:1}.ktar{font-size:11px;color:var(--gray);margin-top:4px}
+.kv-num{font-size:20px;font-weight:800;line-height:1}.ktar{font-size:10px;color:var(--gray);margin-top:3px}
 .ks{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
 .ks.good{background:#2D8A2D}.ks.warn{background:#D4860A}.ks.bad{background:#D43B3B}
-.dsc{background:var(--bg);border-radius:10px;padding:16px 20px}
-.dsl{font-size:10px;color:var(--gray);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
-.dsv{font-size:22px;font-weight:800;margin-top:4px}.dss{font-size:11px;color:var(--gray);margin-top:2px}
+.dsc{background:var(--bg);border-radius:8px;padding:12px 16px}
+.dsl{font-size:9px;color:var(--gray);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.dsv{font-size:18px;font-weight:800;margin-top:3px}.dss{font-size:10px;color:var(--gray);margin-top:1px}
 .inf-a{color:var(--coral-dark);font-weight:600}.inf-o{color:#3B6CE7;font-weight:600}
 @keyframes fu{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:1100px){.g2,.gs,.gl{grid-template-columns:1fr}}
@@ -110,7 +110,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 <div class="gs"><div class="cd"><div class="ct">Weekly Schedule</div><div class="csb" id="home-sched-label"></div><div style="overflow-x:auto"><table class="st" id="home-sched-tbl"></table></div></div>
 <div class="cd"><div class="ct">PTO Earned</div><div class="csb">Earned so far out of 15 annual days</div><div id="pto-box"></div></div></div>
 <div class="g2"><div class="cd"><div class="ct">Commission Leaderboard</div><div class="csb">All-time cumulative earnings</div><div id="lb-home"></div></div>
-<div class="cd"><div class="ct">Revenue by Month</div><div class="csb">Total team revenue</div><div class="cw"><canvas id="ch-rev-home" height="280"></canvas></div></div></div>
+<div class="cd"><div class="ct">Revenue by Month</div><div class="csb">Total team revenue</div><div class="cw"><canvas id="ch-rev-home" height="200"></canvas></div></div></div>
 </div>
 
 <div id="page-sales" class="page">
@@ -124,11 +124,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 <button id="date-clear" style="border:none;background:var(--teal-mist);color:var(--teal);border-radius:4px;padding:4px 8px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">Clear</button>
 </div></div></div>
 <div class="stats-row" id="sales-stats"></div>
-<div class="gl"><div class="cd"><div class="ct">Commission Leaderboard</div><div class="csb">All-time cumulative</div><div id="lb-sales"></div></div>
-<div class="cd"><div class="ct">Monthly Commission Trend</div><div class="csb" id="comm-sub">Full history</div><div class="cw"><canvas id="ch-comm" height="300"></canvas></div></div></div>
-<div class="cd" style="margin-bottom:22px"><div class="ct">Revenue by Agent (Sales Contributor)</div><div class="csb" id="rev-sub">Stacked by month</div><div class="cw"><canvas id="ch-rev-ag" height="300"></canvas></div></div>
-<div class="cd" style="margin-bottom:22px"><div class="ct">Average Order Value by Agent</div><div class="csb">Sales Contributor: Revenue ÷ Orders per month</div><div class="cw"><canvas id="ch-aov" height="280"></canvas></div></div>
-<div class="gs"><div class="cd"><div class="ct">Discount Tier Breakdown</div><div class="csb">Commissionable orders per bracket</div><div class="cw"><canvas id="ch-tier" height="280"></canvas></div></div>
+<div class="g2"><div class="cd"><div class="ct">Commission Leaderboard</div><div class="csb">All-time cumulative</div><div id="lb-sales"></div></div>
+<div class="cd"><div class="ct">Monthly Commission Trend</div><div class="csb" id="comm-sub">Full history</div><div class="cw"><canvas id="ch-comm" height="180"></canvas></div></div></div>
+<div class="g2"><div class="cd"><div class="ct">Revenue by Agent (Sales Contributor)</div><div class="csb" id="rev-sub">Stacked by month</div><div class="cw"><canvas id="ch-rev-ag" height="180"></canvas></div></div>
+<div class="cd"><div class="ct">Average Order Value by Agent</div><div class="csb">Sales Contributor: Revenue ÷ Orders per month</div><div class="cw"><canvas id="ch-aov" height="180"></canvas></div></div></div>
+<div class="g2"><div class="cd"><div class="ct">Discount Tier Breakdown</div><div class="csb">Commissionable orders per bracket</div><div class="cw"><canvas id="ch-tier" height="180"></canvas></div></div>
 <div class="cd"><div class="ct">Product Mix</div><div class="csb">ALC vs KIT</div><div id="pm-box"></div></div></div>
 <div class="cd"><div class="ct">Sales Log (Sales Contributor)</div><div class="csb" id="sl-sub">All orders</div><div class="tw"><table class="tb" id="sl-tbl"></table></div></div>
 </div>
@@ -140,28 +140,28 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 <select class="sel" id="kpi-wk"></select></div></div>
 <div class="kt"><button class="ktb active" data-v="agent">Agent View</button><button class="ktb" data-v="dept">Department</button><button class="ktb" data-v="inf">Infractions & PTO</button></div>
 <div id="kv-agent"><div class="kg" id="kpi-cards"></div>
-<div class="g2"><div class="cd"><div class="ct">Front Performance</div><div class="csb">Replies, messages & reply time</div><div class="cw"><canvas id="ch-kf" height="260"></canvas></div></div>
-<div class="cd"><div class="ct">Dialpad Activity</div><div class="csb">Calls answered, placed, missed</div><div class="cw"><canvas id="ch-kd" height="260"></canvas></div></div></div>
+<div class="g2"><div class="cd"><div class="ct">Front Performance</div><div class="csb">Replies, messages & reply time</div><div class="cw"><canvas id="ch-kf" height="190"></canvas></div></div>
+<div class="cd"><div class="ct">Dialpad Activity</div><div class="csb">Calls answered, placed, missed</div><div class="cw"><canvas id="ch-kd" height="190"></canvas></div></div></div>
 <div class="cd" style="margin-top:20px"><div class="ct">Infraction Summary</div><div class="csb">By quarter</div><div id="kpi-inf-sum"></div></div></div>
 <div id="kv-dept" style="display:none"><div class="cd" style="margin-bottom:22px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div><div class="ct">Department Weekly Summary</div><div class="csb" style="margin-bottom:0" id="dept-sub"></div></div><select class="sel" id="dept-wk-sel"></select></div><div class="kg" id="dept-cards"></div></div>
 <div class="cd"><div class="ct">Online Rating & Public Perception</div><div class="csb">External reviews</div><div id="dept-rat"></div></div></div>
 <div id="kv-inf" style="display:none"><div class="g2"><div class="cd"><div class="ct">Infraction Log</div><div class="csb">All records</div><div style="max-height:500px;overflow-y:auto"><table class="tb" id="inf-tbl"></table></div></div>
 <div class="cd"><div class="ct">PTO History</div><div class="csb">All entries</div><div style="max-height:500px;overflow-y:auto"><table class="tb" id="pto-tbl"></table></div></div></div>
-<div class="cd" style="margin-top:20px"><div class="ct">Infractions by Agent</div><div class="csb">Total accumulated</div><div class="cw"><canvas id="ch-inf" height="260"></canvas></div></div></div>
+<div class="cd" style="margin-top:20px"><div class="ct">Infractions by Agent</div><div class="csb">Total accumulated</div><div class="cw"><canvas id="ch-inf" height="190"></canvas></div></div></div>
 </div>
 
 <div id="page-schedule" class="page">
 <div class="page-header"><div><h1>Schedule & Attendance</h1><p>Rotations, breaks, hours</p></div></div>
 <div class="cd" style="margin-bottom:22px"><div class="ct">Current Week Schedule</div><div class="csb" id="sched-sub">Loading...</div><div style="overflow-x:auto"><table class="st" id="sched-tbl"></table></div></div>
 <div class="gs"><div class="cd"><div class="ct">Lunch & Break Schedule</div><div class="csb">Mon–Thu / Friday (EST)</div><div id="lunch-box"></div></div>
-<div class="cd"><div class="ct">Hours Worked — Last 12 Weeks</div><div class="csb">Target: 38.35 hrs/week</div><div class="cw"><canvas id="ch-hrs" height="260"></canvas></div></div></div>
+<div class="cd"><div class="ct">Hours Worked — Last 12 Weeks</div><div class="csb">Target: 38.35 hrs/week</div><div class="cw"><canvas id="ch-hrs" height="190"></canvas></div></div></div>
 </div>
 
 <div id="page-ops" class="page">
 <div class="page-header"><div><h1>Daily Operations</h1><p>Issues tracker</p></div></div>
 <div class="stats-row" id="ops-stats"></div>
-<div class="g2"><div class="cd"><div class="ct">Issues & Department in Charge of Reviewing</div><div class="csb">All-time</div><div class="cw"><canvas id="ch-dept" height="250"></canvas></div></div>
-<div class="cd"><div class="ct">Top Issue Categories</div><div class="csb">Most frequent</div><div class="cw"><canvas id="ch-cat" height="250"></canvas></div></div></div>
+<div class="g2"><div class="cd"><div class="ct">Issues & Department in Charge of Reviewing</div><div class="csb">All-time</div><div class="cw"><canvas id="ch-dept" height="190"></canvas></div></div>
+<div class="cd"><div class="ct">Top Issue Categories</div><div class="csb">Most frequent</div><div class="cw"><canvas id="ch-cat" height="190"></canvas></div></div></div>
 <div class="cd" style="margin-top:20px"><div class="ct">Recent Issues Log</div><div class="csb">Filterable</div>
 <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
 <select class="sel" id="ops-df"><option value="All">All Depts</option><option value="OPS">OPS</option><option value="IT">IT</option><option value="CS">CS</option></select>
