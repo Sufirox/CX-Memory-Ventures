@@ -79,6 +79,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .dsv{font-size:18px;font-weight:800;margin-top:3px}.dss{font-size:10px;color:var(--gray);margin-top:1px}
 .inf-a{color:var(--coral-dark);font-weight:600}.inf-o{color:#3B6CE7;font-weight:600}
 @keyframes fu{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.dr-btn{border:1px solid #DDE3EB;background:#fff;color:var(--slate);font-family:inherit;font-size:11px;font-weight:600;padding:5px 12px;border-radius:6px;cursor:pointer;transition:.15s}
+.dr-btn:hover{border-color:var(--teal);color:var(--teal)}.dr-btn.active{background:var(--teal);color:#fff;border-color:var(--teal)}
 @media(max-width:1100px){.g2,.gs,.gl{grid-template-columns:1fr}}
 @media(max-width:768px){.sidebar{width:60px}.sidebar span:not(.icon),.brand-bottom,.brand-sub,.sidebar-footer{display:none}.sidebar-brand{padding:20px 12px;text-align:center}.nav-btn{padding:12px 0;justify-content:center}.main{margin-left:60px;padding:20px 16px}.stats-row{flex-direction:column}}
 </style>
@@ -115,14 +117,22 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 
 <div id="page-sales" class="page">
 <div class="page-header"><div><h1>Sales & Commissions</h1><p>Commission tracking, revenue, sales performance</p></div>
-<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
 <select class="sel" id="agent-filter"><option value="All">All Agents</option><option value="AJimenez">Angel Jimenez</option><option value="VDuran">Vanessa Duran</option><option value="LTona">Luisa Tona</option><option value="ISoto">Ivan Soto</option><option value="FSoto">Fatima Soto</option></select>
-<div style="display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #DDE3EB;border-radius:8px;padding:4px 12px">
-<input type="date" id="date-from" class="sel" style="border:none;padding:6px 4px;font-size:12px">
-<span style="color:var(--gray);font-size:12px">→</span>
-<input type="date" id="date-to" class="sel" style="border:none;padding:6px 4px;font-size:12px">
-<button id="date-clear" style="border:none;background:var(--teal-mist);color:var(--teal);border-radius:4px;padding:4px 8px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">Clear</button>
-</div></div></div>
+</div></div>
+<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:16px">
+<span style="font-size:11px;color:var(--gray);font-weight:600">Period:</span>
+<button class="dr-btn active" data-range="all">All Time</button>
+<button class="dr-btn" data-range="3m">Last 3 Mo</button>
+<button class="dr-btn" data-range="6m">Last 6 Mo</button>
+<button class="dr-btn" data-range="1y">Last Year</button>
+<button class="dr-btn" data-range="custom">Custom</button>
+<div id="custom-dates" style="display:none;margin-left:4px;display:none;align-items:center;gap:4px">
+<input type="date" id="date-from" style="font-family:inherit;font-size:11px;padding:5px 8px;border:1px solid #DDE3EB;border-radius:6px;color:var(--slate)">
+<span style="color:var(--gray);font-size:11px">to</span>
+<input type="date" id="date-to" style="font-family:inherit;font-size:11px;padding:5px 8px;border:1px solid #DDE3EB;border-radius:6px;color:var(--slate)">
+</div>
+</div>
 <div class="stats-row" id="sales-stats"></div>
 <div class="g2"><div class="cd"><div class="ct">Commission Leaderboard</div><div class="csb">All-time cumulative</div><div id="lb-sales"></div></div>
 <div class="cd"><div class="ct">Monthly Commission Trend</div><div class="csb" id="comm-sub">Full history</div><div class="cw"><canvas id="ch-comm" height="180"></canvas></div></div></div>
@@ -399,18 +409,36 @@ function buildSales(){window._s=1;
   const agentEl=document.getElementById("agent-filter");
   const dateFrom=document.getElementById("date-from");
   const dateTo=document.getElementById("date-to");
-  const dateClear=document.getElementById("date-clear");
 
-  function agMatch(agCode, filter){
+  const agNameMap={"AJimenez":"Angel Jimenez","VDuran":"Vanessa Duran","LTona":"Luisa Tona","ISoto":"Ivan Soto","FSoto":"Fatima Soto"};
+  const agCommKey={"AJimenez":"a","VDuran":"v","LTona":"l","ISoto":"i","FSoto":"f"};
+  const agRevKey={"AJimenez":"AJ","VDuran":"VD","LTona":"LT","ISoto":"IS","FSoto":"FS"};
+
+  function agMatch(agCode,filter){
     if(!filter||filter==="All")return true;
     const ag=(agCode||"").trim();
     const map={"AJimenez":["AJimenez","Angel Jimenez"],"VDuran":["VDuran","Vanessa Duran"],"LTona":["LTona","Luisa Tona"],"ISoto":["ISoto","Ivan Soto","Ivan"],"FSoto":["FSoto","Fatima Soto"]};
     return(map[filter]||[]).includes(ag);
   }
 
-  // Parse date from MM-DD-YYYY or MM/DD/YYYY format
   function parseDate(s){if(!s)return null;const d=s.replace(/-/g,"/");const p=d.split("/");if(p.length!==3)return null;
     let y=+p[2],m=+p[0]-1,day=+p[1];if(y<100)y+=2000;return new Date(y,m,day);}
+
+  // Date range preset buttons
+  document.querySelectorAll(".dr-btn").forEach(btn=>{btn.addEventListener("click",()=>{
+    document.querySelectorAll(".dr-btn").forEach(b=>b.classList.remove("active"));btn.classList.add("active");
+    const r=btn.dataset.range;const now=new Date();const cd=document.getElementById("custom-dates");
+    if(r==="all"){dateFrom.value="";dateTo.value="";cd.style.display="none";}
+    else if(r==="custom"){cd.style.display="flex";}
+    else{cd.style.display="none";dateTo.value=now.toISOString().split("T")[0];
+      const from=new Date(now);
+      if(r==="3m")from.setMonth(from.getMonth()-3);
+      else if(r==="6m")from.setMonth(from.getMonth()-6);
+      else if(r==="1y")from.setFullYear(from.getFullYear()-1);
+      dateFrom.value=from.toISOString().split("T")[0];
+    }
+    refreshSales();
+  });});
 
   function refreshSales(){
     const f=agentEl.value;
@@ -430,25 +458,27 @@ function buildSales(){window._s=1;
     let mc=D.monthlyComm;
     if(df||dt){mc=mc.filter(m=>{const d=parseDate(m.m);if(!d)return true;if(df&&d<df)return false;if(dt&&d>dt)return false;return true;});}
 
-    // ── Stats cards ──
-    const commOrders=D.agents.reduce((s,a)=>s+a.orders,0);
-    const slTotalRev=sl.reduce((s,r)=>s+r.r,0);
-    const slCount=sl.length;
+    // ── Stats: Total Commissions filtered by agent ──
+    let agentComm,agentCommOrders;
+    if(f==="All"){agentComm=D.teamTotal||0;agentCommOrders=D.agents.reduce((s,a)=>s+a.orders,0);}
+    else{const ag=D.agents.find(a=>agMatch(a.name,f));agentComm=ag?ag.total:0;agentCommOrders=ag?ag.orders:0;}
+    // If date filtered, sum from monthly commission data
+    if(df||dt){const ck=f==="All"?["a","l","i","k","v","f"]:[agCommKey[f]||"a"];
+      agentComm=0;mc.forEach(m=>{ck.forEach(k=>{agentComm+=m[k]||0;});});}
 
-    // Contributor AOV from revenue data
+    const slTotalRev=sl.reduce((s,r)=>s+r.r,0);const slCount=sl.length;
+    const agKs=f==="All"?["AJ","LT","IS","VD","FS"]:[agRevKey[f]||"AJ"];
     let contribRev=0,contribOrd=0;
-    const agKeys=f==="All"?["AJ","LT","IS","VD","FS"]:f==="AJimenez"?["AJ"]:f==="LTona"?["LT"]:f==="ISoto"?["IS"]:f==="VDuran"?["VD"]:f==="FSoto"?["FS"]:["AJ","LT","IS","VD","FS"];
-    rd.forEach(r=>{agKeys.forEach(k=>{contribRev+=r[k]||0;contribOrd+=r[k+"o"]||0;});});
+    rd.forEach(r=>{agKs.forEach(k=>{contribRev+=r[k]||0;contribOrd+=r[k+"o"]||0;});});
     const contribAOV=contribOrd>0?contribRev/contribOrd:0;
-
-    // Commission AOV (from sales log orders — avg revenue per order)
     const slAOV=slCount>0?slTotalRev/slCount:0;
+    const agLabel=f==="All"?"All agents":agNameMap[f]||f;
 
     document.getElementById("sales-stats").innerHTML=`
-      <div class="sc"><div class="sl">Total Commissions</div><div class="sv">${fmt(D.teamTotal||0)}</div><div class="ss">${commOrders} commissionable orders</div></div>
-      <div class="sc"><div class="sl">Contributor AOV</div><div class="sv">${fmt(contribAOV)}</div><div class="ss">${Math.round(contribOrd)} orders · Revenue ÷ Orders</div></div>
+      <div class="sc"><div class="sl">Total Commissions</div><div class="sv">${fmt(agentComm)}</div><div class="ss">${agLabel} · ${Math.round(agentCommOrders)} orders</div></div>
+      <div class="sc"><div class="sl">Contributor AOV</div><div class="sv">${fmt(contribAOV)}</div><div class="ss">${Math.round(contribOrd)} orders · Rev ÷ Orders</div></div>
       <div class="sc"><div class="sl">Sales Log AOV</div><div class="sv">${fmt(slAOV)}</div><div class="ss">${slCount} tracked orders</div></div>
-      <div class="sc"><div class="sl">Sales Contributor Revenue</div><div class="sv">${fmt(contribRev)}</div><div class="ss">${rd.length} months shown</div></div>`;
+      <div class="sc"><div class="sl">Contributor Revenue</div><div class="sv">${fmt(contribRev)}</div><div class="ss">${rd.length} months · ${agLabel}</div></div>`;
 
     // ── Leaderboard ──
     renderLB("lb-sales");
@@ -457,45 +487,38 @@ function buildSales(){window._s=1;
     if(chComm)chComm.destroy();
     const mLbl=mc.map(d=>{const p=d.m.split("/");return p[0]+"/"+p[1].slice(-2);});
     const an=[["Angel Jimenez","a"],["Vanessa Duran","v"],["Luisa Tona","l"],["Ivan Soto","i"],["Khamal Tehfeh","k"],["Fatima Soto","f"]];
-    const filteredAn=f==="All"?an:an.filter(([n])=>agMatch(n,f)||agMatch(n.split(" ").map((w,i)=>i===0?w[0]:w).join(""),f));
-    const commDS=f==="All"?an:an; // Always show all agents for context
-    chComm=new Chart(document.getElementById("ch-comm"),{type:"line",data:{labels:mLbl,datasets:commDS.map(([n,k])=>({label:n,data:mc.map(d=>d[k]),borderColor:AC[n],borderWidth:2,pointRadius:0,tension:.3,fill:false}))},options:{...cb,plugins:{...cb.plugins,legend:lgd,tooltip:{...cb.plugins.tooltip,mode:"index",intersect:false,callbacks:{label:c=>" "+c.dataset.label+": "+fmt(c.parsed.y)}}},scales:{...cb.scales,x:{...cb.scales.x,ticks:{...cb.scales.x.ticks,maxTicksLimit:10}},y:{...cb.scales.y,ticks:{...cb.scales.y.ticks,callback:v=>"$"+v}}}}});
-    document.getElementById("comm-sub").textContent=mc.length+" months"+(df||dt?" (filtered)":"");
+    chComm=new Chart(document.getElementById("ch-comm"),{type:"line",data:{labels:mLbl,datasets:an.map(([n,k])=>({label:n,data:mc.map(d=>d[k]),borderColor:AC[n],borderWidth:f!=="All"&&agNameMap[f]===n?3:1.5,pointRadius:f!=="All"&&agNameMap[f]===n?3:0,tension:.3,fill:false,borderDash:f!=="All"&&agNameMap[f]!==n?[3,3]:[]}))},options:{...cb,plugins:{...cb.plugins,legend:lgd,tooltip:{...cb.plugins.tooltip,mode:"index",intersect:false,callbacks:{label:c=>" "+c.dataset.label+": "+fmt(c.parsed.y)}}},scales:{...cb.scales,x:{...cb.scales.x,ticks:{...cb.scales.x.ticks,maxTicksLimit:10}},y:{...cb.scales.y,ticks:{...cb.scales.y.ticks,callback:v=>"$"+v}}}}});
 
     // ── Revenue by Agent ──
     if(chRevAg)chRevAg.destroy();
     const ra=[{l:"Angel Jimenez",k:"AJ"},{l:"Vanessa Duran",k:"VD"},{l:"Luisa Tona",k:"LT"},{l:"Ivan Soto",k:"IS"},{l:"Fatima Soto",k:"FS"}];
-    const filteredRA=f==="All"?ra:ra.filter(a=>{const map={"AJ":"AJimenez","VD":"VDuran","LT":"LTona","IS":"ISoto","FS":"FSoto"};return f===map[a.k];});
-    const showRA=f==="All"?ra:filteredRA;
+    const showRA=f==="All"?ra:ra.filter(a=>f===({AJ:"AJimenez",VD:"VDuran",LT:"LTona",IS:"ISoto",FS:"FSoto"})[a.k]);
     chRevAg=new Chart(document.getElementById("ch-rev-ag"),{type:"bar",data:{labels:rd.map(r=>r.m),datasets:showRA.map(a=>({label:a.l,data:rd.map(d=>d[a.k]),backgroundColor:AC[a.l],borderRadius:2,barPercentage:.65}))},options:{...cb,plugins:{...cb.plugins,legend:lgd},scales:{...cb.scales,x:{...cb.scales.x,stacked:f==="All"},y:{...cb.scales.y,stacked:f==="All",ticks:{...cb.scales.y.ticks,callback:v=>fk(v)}}}}});
-    document.getElementById("rev-sub").textContent="Sales Contributor"+(df||dt?" — filtered date range":"");
 
-    // ── AOV by Agent per month ──
+    // ── AOV ──
     if(chAov)chAov.destroy();
     const aov=rd.map(r=>{const o={m:r.m};showRA.forEach(a=>{const rev=r[a.k],ord=r[a.k+"o"];o[a.l]=ord>0?rev/ord:0;});return o;});
     chAov=new Chart(document.getElementById("ch-aov"),{type:"bar",data:{labels:aov.map(d=>d.m),datasets:showRA.map(a=>({label:a.l,data:aov.map(d=>d[a.l]),backgroundColor:AC[a.l],borderRadius:3,barPercentage:.6}))},options:{...cb,plugins:{...cb.plugins,legend:lgd,tooltip:{...cb.plugins.tooltip,callbacks:{label:c=>" "+c.dataset.label+": "+fmt(c.parsed.y)}}},scales:{...cb.scales,y:{...cb.scales.y,ticks:{...cb.scales.y.ticks,callback:v=>fk(v)}}}}});
 
     // ── Tiers ──
     if(chTier)chTier.destroy();
-    const tL=["0% (5%)","25% (3%)","30% (2.5%)","35% (2%)","40% (1%)"],tK=["t0","t25","t30","t35","t40"],tC=["#2AACB8","#3B6CE7","#6C5CE7","#E8967A","#D4604A"];
-    const tierAgents=f==="All"?D.agents:D.agents.filter(a=>agMatch(a.name,f));
-    chTier=new Chart(document.getElementById("ch-tier"),{type:"bar",data:{labels:tierAgents.map(a=>a.name),datasets:tK.map((k,i)=>({label:tL[i],data:tierAgents.map(a=>a.tiers?.[k]||0),backgroundColor:tC[i],barPercentage:.6}))},options:{indexAxis:"y",...cb,plugins:{...cb.plugins,legend:lgd},scales:{x:{stacked:true,grid:{color:"#EEF2F7"},ticks:{font:{family:"DM Sans",size:11},color:"#8A9BAE"}},y:{stacked:true,grid:{display:false},ticks:{font:{family:"DM Sans",size:11},color:"#3D5066"}}}}});
+    const tL=["0%","25%","30%","35%","40%"],tK=["t0","t25","t30","t35","t40"],tC=["#2AACB8","#3B6CE7","#6C5CE7","#E8967A","#D4604A"];
+    const tierAg=f==="All"?D.agents:D.agents.filter(a=>agMatch(a.name,f));
+    chTier=new Chart(document.getElementById("ch-tier"),{type:"bar",data:{labels:tierAg.map(a=>a.name),datasets:tK.map((k,i)=>({label:tL[i],data:tierAg.map(a=>a.tiers?.[k]||0),backgroundColor:tC[i],barPercentage:.6}))},options:{indexAxis:"y",...cb,plugins:{...cb.plugins,legend:lgd},scales:{x:{stacked:true,grid:{color:"#EEF2F7"},ticks:{font:{family:"DM Sans",size:11},color:"#8A9BAE"}},y:{stacked:true,grid:{display:false},ticks:{font:{family:"DM Sans",size:11},color:"#3D5066"}}}}});
 
     // ── Product mix ──
     const pm=(f==="All"?[...D.agents]:D.agents.filter(a=>agMatch(a.name,f))).sort((a,b)=>(b.alc+b.kit)-(a.alc+a.kit));
-    document.getElementById("pm-box").innerHTML=pm.filter(p=>p.alc+p.kit>0).map(p=>{const t=p.alc+p.kit;return`<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div style="width:70px;font-size:12px;font-weight:500">${p.name.split(" ")[0]}</div><div style="flex:1;display:flex;height:18px;border-radius:4px;overflow:hidden;background:var(--bg)"><div style="width:${p.alc/t*100}%;background:var(--teal);display:flex;align-items:center;justify-content:center"><span style="font-size:9px;color:#fff;font-weight:700">${p.alc}</span></div>${p.kit?`<div style="min-width:22px;width:${Math.max(p.kit/t*100,4)}%;background:var(--coral);display:flex;align-items:center;justify-content:center"><span style="font-size:9px;color:#fff;font-weight:700">${p.kit}</span></div>`:""}</div><div style="width:30px;font-size:12px;font-weight:700;text-align:right">${t}</div></div>`;}).join("");
+    document.getElementById("pm-box").innerHTML=pm.filter(p=>p.alc+p.kit>0).map(p=>{const t=p.alc+p.kit;return`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="width:60px;font-size:11px;font-weight:500">${p.name.split(" ")[0]}</div><div style="flex:1;display:flex;height:16px;border-radius:4px;overflow:hidden;background:var(--bg)"><div style="width:${p.alc/t*100}%;background:var(--teal);display:flex;align-items:center;justify-content:center"><span style="font-size:8px;color:#fff;font-weight:700">${p.alc}</span></div>${p.kit?`<div style="min-width:20px;width:${Math.max(p.kit/t*100,4)}%;background:var(--coral);display:flex;align-items:center;justify-content:center"><span style="font-size:8px;color:#fff;font-weight:700">${p.kit}</span></div>`:""}</div><div style="width:28px;font-size:11px;font-weight:700;text-align:right">${t}</div></div>`;}).join("");
 
-    // ── Sales log table ──
-    document.getElementById("sl-sub").textContent=sl.length+" orders"+(f!=="All"?" · "+f:"")+(df||dt?" · filtered":"");
-    document.getElementById("sl-tbl").innerHTML=`<thead><tr><th>Tracking ID</th><th>Customer</th><th>Agent</th><th>Date</th><th>Revenue</th><th>Discount</th></tr></thead><tbody>${sl.slice(0,80).map(s=>`<tr><td style="color:var(--teal);font-weight:600">${s.id}</td><td>${s.c}</td><td style="font-weight:500">${s.ag}</td><td style="color:var(--gray)">${s.d}</td><td style="font-weight:600">${fmt(s.r)}</td><td>${s.co?`<span class="tg" style="background:var(--teal-mist);color:var(--teal)">${s.co}</span>`:"—"}</td></tr>`).join("")}</tbody>`;
+    // ── Sales log ──
+    document.getElementById("sl-sub").textContent=sl.length+" orders"+(f!=="All"?" · "+agLabel:"")+(df||dt?" · filtered":"");
+    document.getElementById("sl-tbl").innerHTML=`<thead><tr><th>ID</th><th>Customer</th><th>Agent</th><th>Date</th><th>Revenue</th><th>Code</th></tr></thead><tbody>${sl.slice(0,80).map(s=>`<tr><td style="color:var(--teal);font-weight:600;font-size:11px">${s.id}</td><td>${s.c}</td><td style="font-weight:500">${s.ag}</td><td style="color:var(--gray)">${s.d}</td><td style="font-weight:600">${fmt(s.r)}</td><td>${s.co?`<span class="tg" style="background:var(--teal-mist);color:var(--teal)">${s.co}</span>`:"—"}</td></tr>`).join("")}</tbody>`;
   }
 
-  // Set default date range (show all)
   refreshSales();
   agentEl.addEventListener("change",refreshSales);
   dateFrom.addEventListener("change",refreshSales);
   dateTo.addEventListener("change",refreshSales);
-  dateClear.addEventListener("click",()=>{dateFrom.value="";dateTo.value="";refreshSales();});
 }
 
 // ═══ KPI ═══
