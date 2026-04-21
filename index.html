@@ -215,10 +215,10 @@ async function fetchCSV(url,name){
   const bar=document.getElementById("load-fill");
   if(el)el.textContent="Loading "+name+"...";
 
-  async function tryFetch(u){const r=await fetch(u,{redirect:'follow'});if(!r.ok)throw new Error('HTTP '+r.status);const t=await r.text();if(t.includes('<!DOCTYPE'))throw new Error('HTML response');return parseCSV(t);}
+  async function tryFetch(u){const r=await fetch(u,{redirect:'follow',cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const t=await r.text();if(t.includes('<!DOCTYPE'))throw new Error('HTML response');return parseCSV(t);}
 
   try{const p=await tryFetch(url);console.log("✅ "+name+": "+p.length+" rows");return p;}catch(e){}
-  try{const proxy="https://corsproxy.io/?"+encodeURIComponent(url);const p=await tryFetch(proxy);console.log("✅ "+name+" (proxy): "+p.length+" rows");return p;}catch(e2){console.error("❌ "+name+": failed");return [];}
+  try{const ts=Date.now();const proxy="https://corsproxy.io/?"+encodeURIComponent(url+(url.includes("?")?"\x26":"?")+"_t="+ts);const p=await tryFetch(proxy);console.log("✅ "+name+" (proxy): "+p.length+" rows");return p;}catch(e2){console.error("❌ "+name+": failed");return [];}
 }
 
 const D={agents:[],monthlyComm:[],revData:[],salesLog:[],weeklyDept:{},weeklyRaw:[],kpi:{},infractions:[],ptoLog:[],issues:[],schedule:[]};
@@ -289,6 +289,9 @@ async function loadAll(){
 
   for(const[name,rows]of Object.entries(kpiSheets)){
     if(!rows||rows.length<10)continue;
+    // Verify the data matches the expected agent
+    const sheetAgent=(rows[1]&&rows[1][1])?rows[1][1].trim():"";
+    if(sheetAgent&&sheetAgent!==name){console.warn("⚠️ KPI mismatch: expected "+name+" but sheet says "+sheetAgent);}
     const dates=[];const hdr=rows[4]||[];
     for(let j=4;j<hdr.length;j++){if(hdr[j])dates.push(hdr[j]);}
     const kpis={};
