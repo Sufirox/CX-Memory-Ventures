@@ -86,7 +86,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 
 /* ═══ REFUNDS MODULE ═══ */
 .rf-range{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.rf-range input[type=date]{font-family:inherit;font-size:12px;padding:7px 10px;border:1px solid #DDE3EB;border-radius:8px;color:var(--slate);background:#fff}
+.rf-range input[type=date]{font-family:inherit;font-size:12px;padding:7px 10px;border:1px solid #DDE3EB;border-radius:8px;color:var(--slate);background:#fff;cursor:pointer;min-width:140px}
+.rf-range input[type=date]::-webkit-calendar-picker-indicator{cursor:pointer;opacity:.6;position:absolute;right:8px;width:16px;height:16px}
+.rf-range input[type=date]::-webkit-calendar-picker-indicator:hover{opacity:1}
 .rf-range label{font-size:11px;color:var(--gray);font-weight:600}
 .rf-preset{display:flex;gap:4px;margin-left:4px}
 .rf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:18px}
@@ -238,7 +240,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
   </div>
 </div>
 <div class="rf-kpis" id="rf-totals"></div>
-<div class="cd" style="margin-bottom:16px"><div class="ct">Refund Trend — All Connected Brands</div><div class="csb" id="rf-trend-sub">Daily refund totals in selected range</div><div class="cw"><canvas id="rf-trend" height="180"></canvas></div></div>
+<div class="cd" style="margin-bottom:16px"><div class="ct">Refund Trend — All Connected Brands</div><div class="csb" id="rf-trend-sub">Daily refund totals in selected range</div><div class="cw" style="height:180px"><canvas id="rf-trend"></canvas></div></div>
 <div class="ct" style="font-size:15px;margin:18px 0 10px">Brands</div>
 <div class="rf-grid" id="rf-cards"></div>
 </div>
@@ -1054,6 +1056,11 @@ async function buildRefunds(){
     btn.addEventListener("click",()=>{rfApplyPreset(btn.dataset.rfdr,dFromEl,dToEl);rfRenderDetail();});
   });
   document.getElementById("rf-back").addEventListener("click",rfCloseDetail);
+
+  // Make entire date input clickable (not just the tiny calendar icon)
+  [fromEl,toEl,dFromEl,dToEl].forEach(el=>{
+    el.addEventListener("click",e=>{if(typeof el.showPicker==="function"){try{el.showPicker();}catch(err){}}});
+  });
 
   rfRenderMain();
 }
