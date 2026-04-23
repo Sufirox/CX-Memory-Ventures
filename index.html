@@ -83,6 +83,48 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .dr-btn:hover{border-color:var(--teal);color:var(--teal)}.dr-btn.active{background:var(--teal);color:#fff;border-color:var(--teal)}
 @media(max-width:1100px){.g2,.gs,.gl{grid-template-columns:1fr}}
 @media(max-width:768px){.sidebar{width:60px}.sidebar span:not(.icon),.brand-bottom,.brand-sub,.sidebar-footer{display:none}.sidebar-brand{padding:20px 12px;text-align:center}.nav-btn{padding:12px 0;justify-content:center}.main{margin-left:60px;padding:20px 16px}.stats-row{flex-direction:column}}
+
+/* ═══ REFUNDS MODULE ═══ */
+.rf-range{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rf-range input[type=date]{font-family:inherit;font-size:12px;padding:7px 10px;border:1px solid #DDE3EB;border-radius:8px;color:var(--slate);background:#fff}
+.rf-range label{font-size:11px;color:var(--gray);font-weight:600}
+.rf-preset{display:flex;gap:4px;margin-left:4px}
+.rf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:18px}
+.rf-card{background:var(--card);border-radius:12px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.05);cursor:pointer;transition:transform .15s,box-shadow .15s;border-top:3px solid var(--teal);position:relative;overflow:hidden}
+.rf-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.rf-card.rf-off{opacity:.55;cursor:not-allowed;border-top-color:var(--gray)}
+.rf-card.rf-off:hover{transform:none;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.rf-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.rf-bn{font-size:14px;font-weight:700;color:var(--text)}
+.rf-bc{font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+.rf-badge{font-size:9px;font-weight:700;padding:3px 8px;border-radius:10px;text-transform:uppercase;letter-spacing:.5px}
+.rf-badge.live{background:#E6F7F4;color:#0D7A6B}
+.rf-badge.wait{background:#FFF4E6;color:#B8721A}
+.rf-amt{font-size:26px;font-weight:800;color:var(--coral-dark);line-height:1.1;margin:6px 0 2px}
+.rf-amt.wait{color:var(--gray);font-size:18px;font-style:italic;font-weight:600}
+.rf-cnt{font-size:11px;color:var(--gray);margin-bottom:10px}
+.rf-spark{width:100%;height:40px;margin-top:8px}
+.rf-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.rf-kpi{background:var(--card);border-radius:10px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,.05);border-left:4px solid var(--coral)}
+.rf-kpi:nth-child(2){border-left-color:var(--teal)}
+.rf-kpi:nth-child(3){border-left-color:#6C5CE7}
+.rf-kpi:nth-child(4){border-left-color:var(--coral-dark)}
+.rf-kl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--gray);margin-bottom:4px}
+.rf-kv{font-size:22px;font-weight:800;line-height:1.1}
+.rf-ks{font-size:10px;color:var(--gray);margin-top:3px}
+.rf-back{display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:var(--teal);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:4px 0;margin-bottom:8px}
+.rf-back:hover{color:var(--navy)}
+.rf-sub{display:none}
+.rf-sub.active{display:block;animation:fu .35s ease}
+.rf-reasons{display:flex;flex-direction:column;gap:8px;max-height:320px;overflow-y:auto}
+.rf-rr{display:flex;align-items:center;gap:10px}
+.rf-rn{flex:1;font-size:12px;font-weight:500;color:var(--slate);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rf-rb{width:110px;height:8px;background:var(--bg);border-radius:4px;overflow:hidden}
+.rf-rbf{height:100%;background:var(--coral);border-radius:4px;transition:width .6s cubic-bezier(.22,1,.36,1)}
+.rf-rv{width:80px;text-align:right;font-size:12px;font-weight:700;color:var(--coral-dark)}
+.rf-rc{width:35px;text-align:right;font-size:11px;color:var(--gray)}
+@media(max-width:1100px){.rf-kpis{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.rf-kpis{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -101,6 +143,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 <button class="nav-btn" data-page="kpi"><span class="icon">◇</span> <span>Agent KPIs</span></button>
 <button class="nav-btn" data-page="schedule"><span class="icon">◆</span> <span>Schedule & Attendance</span></button>
 <button class="nav-btn" data-page="ops"><span class="icon">○</span> <span>Daily Operations</span></button>
+<button class="nav-btn" data-page="refunds"><span class="icon">⟲</span> <span>General Refunds</span></button>
 </nav>
 <div class="sidebar-footer"><span id="sf-ver">v1.0</span></div>
 </aside>
@@ -179,6 +222,51 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 <div class="tw" style="max-height:450px"><table class="tb" id="ops-tbl"></table></div></div>
 </div>
 
+<div id="page-refunds" class="page">
+<div id="rf-main" class="rf-sub active">
+<div class="page-header">
+  <div><h1>General Refunds</h1><p>Refund overview across all brands</p></div>
+  <div class="rf-range">
+    <label>From</label><input type="date" id="rf-from">
+    <label>To</label><input type="date" id="rf-to">
+    <div class="rf-preset">
+      <button class="dr-btn" data-rfr="mtd">This Month</button>
+      <button class="dr-btn" data-rfr="30d">Last 30d</button>
+      <button class="dr-btn" data-rfr="ytd">YTD</button>
+      <button class="dr-btn" data-rfr="all">All</button>
+    </div>
+  </div>
+</div>
+<div class="rf-kpis" id="rf-totals"></div>
+<div class="cd" style="margin-bottom:16px"><div class="ct">Refund Trend — All Connected Brands</div><div class="csb" id="rf-trend-sub">Daily refund totals in selected range</div><div class="cw"><canvas id="rf-trend" height="180"></canvas></div></div>
+<div class="ct" style="font-size:15px;margin:18px 0 10px">Brands</div>
+<div class="rf-grid" id="rf-cards"></div>
+</div>
+
+<div id="rf-detail" class="rf-sub">
+<button class="rf-back" id="rf-back">← Back to all brands</button>
+<div class="page-header">
+  <div><h1 id="rf-d-title">Brand</h1><p id="rf-d-sub">Refund detail</p></div>
+  <div class="rf-range">
+    <label>From</label><input type="date" id="rf-d-from">
+    <label>To</label><input type="date" id="rf-d-to">
+    <div class="rf-preset">
+      <button class="dr-btn" data-rfdr="mtd">This Month</button>
+      <button class="dr-btn" data-rfdr="30d">Last 30d</button>
+      <button class="dr-btn" data-rfdr="ytd">YTD</button>
+      <button class="dr-btn" data-rfdr="all">All</button>
+    </div>
+  </div>
+</div>
+<div class="rf-kpis" id="rf-d-totals"></div>
+<div class="g2">
+  <div class="cd"><div class="ct">Refund Trend</div><div class="csb">Daily refund totals in selected range</div><div class="cw"><canvas id="rf-d-trend" height="200"></canvas></div></div>
+  <div class="cd"><div class="ct">Refund Reasons</div><div class="csb" id="rf-d-reasons-sub">Normalized groupings</div><div class="rf-reasons" id="rf-d-reasons"></div></div>
+</div>
+<div class="cd" style="margin-top:14px"><div class="ct">Refund Log</div><div class="csb" id="rf-d-log-sub">All refunds in selected range</div><div class="tw" style="max-height:500px"><table class="tb" id="rf-d-tbl"></table></div></div>
+</div>
+</div>
+
 </div>
 <script>
 const VER="v1.1 — Apr 2026";
@@ -195,6 +283,12 @@ const URLS={
   kpiVanessa:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1407071428&single=true&output=csv",
   schedule:"https://docs.google.com/spreadsheets/d/e/2PACX-1vQINTKfEREAnt10bxY_UG9I5GbSANCx6Doq-BGG23MzD1wR2IDfrRc84UEIZlhkYcLuov70Ug2_Pf1x/pub?output=csv",
   issues:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTWF963vZC_H_A9nrbVL8Flpuwp5Te3aeOo1TxaLAs0pRU-E5GgqSOgW4MO9vGCkML4A4Q_XT37hePv/pub?gid=89929469&single=true&output=csv",
+  refScanCafe:"https://docs.google.com/spreadsheets/d/e/2PACX-1vQwLb81pzWhS71hVYhmYoYRF60vDYZ3pU7wddBdY9gC_qcMNQVxjIkRq4wtafAubcgRRyq1FYMPCKrR/pub?gid=1482789841&single=true&output=csv",
+  refScanDigital:"https://docs.google.com/spreadsheets/d/e/2PACX-1vQwLb81pzWhS71hVYhmYoYRF60vDYZ3pU7wddBdY9gC_qcMNQVxjIkRq4wtafAubcgRRyq1FYMPCKrR/pub?gid=354568337&single=true&output=csv",
+  refCrema:"https://docs.google.com/spreadsheets/d/e/2PACX-1vQwLb81pzWhS71hVYhmYoYRF60vDYZ3pU7wddBdY9gC_qcMNQVxjIkRq4wtafAubcgRRyq1FYMPCKrR/pub?gid=213185750&single=true&output=csv",
+  refAmznCrema:"https://docs.google.com/spreadsheets/d/e/2PACX-1vQwLb81pzWhS71hVYhmYoYRF60vDYZ3pU7wddBdY9gC_qcMNQVxjIkRq4wtafAubcgRRyq1FYMPCKrR/pub?gid=108285671&single=true&output=csv",
+  refAmznSupplyKick:"https://docs.google.com/spreadsheets/d/e/2PACX-1vQwLb81pzWhS71hVYhmYoYRF60vDYZ3pU7wddBdY9gC_qcMNQVxjIkRq4wtafAubcgRRyq1FYMPCKrR/pub?gid=358662783&single=true&output=csv",
+  refAmznMV:"https://docs.google.com/spreadsheets/d/e/2PACX-1vQwLb81pzWhS71hVYhmYoYRF60vDYZ3pU7wddBdY9gC_qcMNQVxjIkRq4wtafAubcgRRyq1FYMPCKrR/pub?gid=417767780&single=true&output=csv",
 };
 const AC={"Angel Jimenez":"#2AACB8","Vanessa Duran":"#E8967A","Luisa Tona":"#3B6CE7","Ivan Soto":"#6C5CE7","Khamal Tehfeh":"#999","Fatima Soto":"#2D8A2D"};
 const INACTIVE=["Khamal Tehfeh","Vanessa Duran"];
@@ -401,6 +495,7 @@ document.querySelectorAll(".nav-btn[data-page]").forEach(b=>{b.addEventListener(
   if(b.dataset.page==="kpi"&&!window._k)buildKPI();
   if(b.dataset.page==="schedule"&&!window._sc)buildSched();
   if(b.dataset.page==="ops"&&!window._o)buildOps();
+  if(b.dataset.page==="refunds"&&!window._rf)buildRefunds();
 })});
 
 // ═══ SALES ═══
@@ -679,6 +774,288 @@ function buildOps(){window._o=1;
     let d=D.issues.slice(-100);if(dp!=="All")d=d.filter(x=>x.dept===dp);if(im!=="All")d=d.filter(x=>x.impact===im);
     document.getElementById("ops-tbl").innerHTML=`<thead><tr><th>Date</th><th>Day</th><th>Dept</th><th>Issue</th><th>Freq</th><th>Impact</th><th>Mgmt</th></tr></thead><tbody>${d.slice().reverse().map(x=>`<tr><td style="color:var(--gray);white-space:nowrap">${x.date}</td><td>${x.day}</td><td><span class="tg" style="background:${dc[x.dept]||'#ccc'}20;color:${dc[x.dept]||'#666'}">${x.dept}</span></td><td style="font-weight:500">${x.desc}</td><td style="font-size:11px">${x.freq}</td><td><span class="tg" style="background:${ic[x.impact]||'#ccc'}18;color:${ic[x.impact]||'#666'}">${x.impact}</span></td><td style="font-size:11px;color:${x.mgmt==='Yes'?'var(--green)':x.mgmt==='No'?'var(--coral-dark)':'var(--gray)'};font-weight:600">${x.mgmt||"—"}</td></tr>`).join("")}</tbody>`;}
   rOI();document.getElementById("ops-df").addEventListener("change",rOI);document.getElementById("ops-if").addEventListener("change",rOI);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  GENERAL REFUNDS MODULE
+// ═══════════════════════════════════════════════════════════════
+const RF_BRANDS=[
+  {id:"scancafe",name:"ScanCafe",cat:"Memory Digitization",color:"#2AACB8",live:true,urlKey:"refScanCafe",parser:"pScanCafe"},
+  {id:"scandigital",name:"ScanDigital",cat:"Memory Digitization",color:"#45C4CF",live:true,urlKey:"refScanDigital",parser:"pScanDigital"},
+  {id:"crema",name:"Crema Coffee Products",cat:"Coffee Accessories",color:"#D4604A",live:false,urlKey:"refCrema",parser:null},
+  {id:"amzn_crema",name:"Amazon Crema",cat:"Amazon",color:"#E8967A",live:false,urlKey:"refAmznCrema",parser:null},
+  {id:"amzn_sk",name:"Amazon SupplyKick",cat:"Amazon",color:"#6C5CE7",live:false,urlKey:"refAmznSupplyKick",parser:null},
+  {id:"amzn_mv",name:"Amazon Memory Ventures",cat:"Amazon",color:"#3B6CE7",live:false,urlKey:"refAmznMV",parser:null}
+];
+const RF={data:{},loaded:false,loading:false,charts:{}};
+
+// Date parser: handles "21-04-2026" (DD-MM-YYYY) and "04/15/2026 10:38:10 AM" (MM/DD/YYYY)
+function rfDate(s,fmt){
+  if(!s)return null;
+  const t=String(s).trim();if(!t)return null;
+  if(fmt==="dmy"){const m=t.match(/^(\d{1,2})-(\d{1,2})-(\d{4})/);if(!m)return null;const d=new Date(+m[3],+m[2]-1,+m[1]);return isNaN(d)?null:d;}
+  if(fmt==="mdy"){const m=t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(!m)return null;const d=new Date(+m[3],+m[1]-1,+m[2]);return isNaN(d)?null:d;}
+  const d=new Date(t);return isNaN(d)?null:d;
+}
+function rfISO(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function rfToday(){const d=new Date();d.setHours(0,0,0,0);return d;}
+
+// Normalize a reason/comment: lowercase, trim, collapse whitespace, light merging
+function rfNormReason(s){
+  if(!s)return "(no reason given)";
+  let t=String(s).toLowerCase().trim().replace(/\s+/g," ").replace(/[.;]+$/,"");
+  if(!t)return "(no reason given)";
+  // Light merging of near-duplicates
+  const merges=[
+    [/could ?not process media|media (we )?could ?not process|unprocessable media/,"could not process media"],
+    [/subscribed by accident|unaware.*subscription|did not know.*subscri|not aware.*subscri|not aware he chose|not aware she chose|accidental subscription|didn'?t mean to subscri/,"accidental subscription"],
+    [/shipping .*balance|shipping refund|^shipping$/,"shipping adjustment"],
+    [/over ?pay|overcharge/,"overpayment"],
+    [/duplicate (order|charge)|duplicated order/,"duplicate charge"],
+    [/cancell?ed order|order cancell?ation/,"order cancelled"],
+    [/damaged|broken|defect/,"damaged/defective"],
+    [/un+a?p+lied discount|unapplied discount/,"unapplied discount"],
+  ];
+  for(const[re,rep]of merges){if(re.test(t))return rep;}
+  return t;
+}
+
+// ═══ PARSERS ═══ return array of {date:Date, amount:Number (positive), reason:String (normalized), rawReason:String, raw:Object}
+function pScanCafe(rows){
+  // Headers: Customer Email, Customer Name, Refund Type, Details, Refund Amount, Comments, Refund Date
+  const out=[];
+  for(let i=1;i<rows.length;i++){const r=rows[i];if(!r||!r[0])continue;
+    const d=rfDate(r[6],"dmy");if(!d)continue;
+    const amt=Math.abs(pn(r[4]));if(!amt)continue;
+    const rawR=(r[5]||"").trim();
+    out.push({date:d,amount:amt,reason:rfNormReason(rawR),rawReason:rawR,
+      raw:{email:r[0]||"",customer:r[1]||"",type:r[2]||"",details:r[3]||""}});
+  }
+  return out;
+}
+function pScanDigital(rows){
+  // Headers: Transaction #, Location, Date, Refund Reason, Method, Name, Brand, Last 4, Amount, Auth Code, Status
+  const out=[];
+  for(let i=1;i<rows.length;i++){const r=rows[i];if(!r||!r[0])continue;
+    const d=rfDate(r[2],"mdy");if(!d)continue;
+    const amt=Math.abs(pn(r[8]));if(!amt)continue;
+    const rawR=(r[3]||"").trim();
+    out.push({date:d,amount:amt,reason:rfNormReason(rawR),rawReason:rawR,
+      raw:{txn:r[0]||"",customer:r[5]||"",method:r[4]||"",card:r[6]+" ****"+(r[7]||""),status:r[10]||""}});
+  }
+  return out;
+}
+const RF_PARSERS={pScanCafe,pScanDigital};
+
+async function rfLoad(){
+  if(RF.loaded||RF.loading)return;
+  RF.loading=true;
+  const jobs=RF_BRANDS.filter(b=>b.live).map(async b=>{
+    const rows=await fetchCSV(URLS[b.urlKey],"Refunds:"+b.name);
+    RF.data[b.id]=RF_PARSERS[b.parser]?RF_PARSERS[b.parser](rows):[];
+  });
+  await Promise.all(jobs);
+  RF.loaded=true;RF.loading=false;
+}
+
+function rfFilter(list,from,to){return list.filter(x=>x.date>=from&&x.date<=to);}
+
+function rfSetDefaultDates(fromEl,toEl){
+  const t=rfToday();const first=new Date(t.getFullYear(),t.getMonth(),1);
+  fromEl.value=rfISO(first);toEl.value=rfISO(t);
+}
+function rfReadRange(fromEl,toEl){
+  const f=fromEl.value?new Date(fromEl.value+"T00:00:00"):new Date(2000,0,1);
+  const t=toEl.value?new Date(toEl.value+"T23:59:59"):new Date(2099,11,31);
+  return{from:f,to:t};
+}
+function rfApplyPreset(preset,fromEl,toEl){
+  const t=rfToday();let f;
+  if(preset==="mtd")f=new Date(t.getFullYear(),t.getMonth(),1);
+  else if(preset==="30d"){f=new Date(t);f.setDate(f.getDate()-30);}
+  else if(preset==="ytd")f=new Date(t.getFullYear(),0,1);
+  else{f=new Date(2000,0,1);toEl.value=rfISO(t);fromEl.value=rfISO(f);return;}
+  fromEl.value=rfISO(f);toEl.value=rfISO(t);
+}
+
+// Destroy a chart safely before re-rendering
+function rfKill(id){if(RF.charts[id]){RF.charts[id].destroy();delete RF.charts[id];}}
+
+// ═══ MAIN VIEW ═══
+function rfRenderMain(){
+  const fromEl=document.getElementById("rf-from"),toEl=document.getElementById("rf-to");
+  const{from,to}=rfReadRange(fromEl,toEl);
+
+  // Aggregate per-brand totals and daily trend series
+  const brandTotals={};let grandTotal=0,grandCount=0;
+  const connectedBrands=RF_BRANDS.filter(b=>b.live);
+  const allRefunds=[];
+  for(const b of connectedBrands){
+    const filtered=rfFilter(RF.data[b.id]||[],from,to);
+    const total=filtered.reduce((s,x)=>s+x.amount,0);
+    brandTotals[b.id]={total,count:filtered.length,list:filtered};
+    grandTotal+=total;grandCount+=filtered.length;
+    allRefunds.push(...filtered);
+  }
+  const avg=grandCount?grandTotal/grandCount:0;
+
+  // KPIs
+  document.getElementById("rf-totals").innerHTML=`
+    <div class="rf-kpi"><div class="rf-kl">Total Refunded</div><div class="rf-kv" style="color:var(--coral-dark)">${fmt(grandTotal)}</div><div class="rf-ks">Selected range</div></div>
+    <div class="rf-kpi"><div class="rf-kl">Refund Count</div><div class="rf-kv">${grandCount}</div><div class="rf-ks">Across connected brands</div></div>
+    <div class="rf-kpi"><div class="rf-kl">Avg. Refund</div><div class="rf-kv">${fmt(avg)}</div><div class="rf-ks">Per transaction</div></div>
+    <div class="rf-kpi"><div class="rf-kl">Brands Connected</div><div class="rf-kv">${connectedBrands.length} / ${RF_BRANDS.length}</div><div class="rf-ks">${RF_BRANDS.length-connectedBrands.length} awaiting data</div></div>`;
+
+  // Trend chart — daily totals across all connected brands
+  rfKill("trendMain");
+  const days={};
+  for(const r of allRefunds){const k=rfISO(r.date);days[k]=(days[k]||0)+r.amount;}
+  const sortedDays=Object.keys(days).sort();
+  const labels=sortedDays.map(k=>{const d=new Date(k+"T00:00:00");return (d.getMonth()+1)+"/"+d.getDate();});
+  const values=sortedDays.map(k=>days[k]);
+  document.getElementById("rf-trend-sub").textContent=`Daily refund totals — ${rfISO(from)} to ${rfISO(to)}`;
+  RF.charts.trendMain=new Chart(document.getElementById("rf-trend"),{type:"line",data:{labels,datasets:[{data:values,borderColor:"#D4604A",backgroundColor:"rgba(212,96,74,.12)",fill:true,tension:.3,pointRadius:3,pointBackgroundColor:"#D4604A",borderWidth:2}]},options:{...cb,plugins:{...cb.plugins,tooltip:{...cb.plugins.tooltip,callbacks:{label:c=>fmt(c.parsed.y)}}},scales:{...cb.scales,y:{...cb.scales.y,ticks:{...cb.scales.y.ticks,callback:v=>fk(v)}}}}});
+
+  // Brand cards grid
+  const cards=RF_BRANDS.map(b=>{
+    if(!b.live){
+      return `<div class="rf-card rf-off" data-brand="${b.id}">
+        <div class="rf-hdr"><div><div class="rf-bn">${b.name}</div><div class="rf-bc">${b.cat}</div></div><span class="rf-badge wait">Awaiting Data</span></div>
+        <div class="rf-amt wait">Not connected</div>
+        <div class="rf-cnt">CSV not yet available</div>
+      </div>`;
+    }
+    const bt=brandTotals[b.id];
+    // Mini sparkline data: last 14 days (or within range) as SVG
+    const sparkDays=[];const sparkVals=[];
+    const endDate=to;const startDate=new Date(endDate);startDate.setDate(startDate.getDate()-13);
+    for(let d=new Date(Math.max(startDate,from));d<=endDate;d.setDate(d.getDate()+1)){
+      const k=rfISO(d);sparkDays.push(k);
+      sparkVals.push(bt.list.filter(r=>rfISO(r.date)===k).reduce((s,x)=>s+x.amount,0));
+    }
+    const mx=Math.max(...sparkVals,1);
+    const w=240,h=40;
+    const pts=sparkVals.map((v,i)=>{const x=(i/Math.max(sparkVals.length-1,1))*w;const y=h-(v/mx)*(h-4)-2;return x+","+y;}).join(" ");
+    const spark=sparkVals.length>1?`<svg class="rf-spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polyline points="${pts}" fill="none" stroke="${b.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>`:'<div class="rf-cnt" style="margin-top:10px">No refunds in range</div>';
+    return `<div class="rf-card" data-brand="${b.id}" style="border-top-color:${b.color}">
+      <div class="rf-hdr"><div><div class="rf-bn">${b.name}</div><div class="rf-bc">${b.cat}</div></div><span class="rf-badge live">Live</span></div>
+      <div class="rf-amt">${fmt(bt.total)}</div>
+      <div class="rf-cnt">${bt.count} refund${bt.count===1?'':'s'} in range</div>
+      ${spark}
+    </div>`;
+  }).join("");
+  document.getElementById("rf-cards").innerHTML=cards;
+
+  // Wire card clicks (only live)
+  document.querySelectorAll("#rf-cards .rf-card:not(.rf-off)").forEach(el=>{
+    el.onclick=()=>rfOpenDetail(el.dataset.brand);
+  });
+}
+
+// ═══ DETAIL VIEW ═══
+function rfOpenDetail(brandId){
+  const b=RF_BRANDS.find(x=>x.id===brandId);if(!b||!b.live)return;
+  document.getElementById("rf-main").classList.remove("active");
+  document.getElementById("rf-detail").classList.add("active");
+  document.getElementById("rf-d-title").textContent=b.name;
+  document.getElementById("rf-d-sub").textContent=`${b.cat} — detailed refund analysis`;
+  // Sync date range from main view
+  document.getElementById("rf-d-from").value=document.getElementById("rf-from").value;
+  document.getElementById("rf-d-to").value=document.getElementById("rf-to").value;
+  RF.currentBrand=brandId;
+  rfRenderDetail();
+  document.querySelector(".main").scrollTo({top:0,behavior:"smooth"});
+}
+
+function rfRenderDetail(){
+  const b=RF_BRANDS.find(x=>x.id===RF.currentBrand);if(!b)return;
+  const fromEl=document.getElementById("rf-d-from"),toEl=document.getElementById("rf-d-to");
+  const{from,to}=rfReadRange(fromEl,toEl);
+  const list=rfFilter(RF.data[b.id]||[],from,to);
+  const total=list.reduce((s,x)=>s+x.amount,0);
+  const avg=list.length?total/list.length:0;
+  const reasons={};for(const r of list){reasons[r.reason]=(reasons[r.reason]||{count:0,amt:0});reasons[r.reason].count++;reasons[r.reason].amt+=r.amount;}
+  const reasonsSorted=Object.entries(reasons).sort((a,b)=>b[1].amt-a[1].amt);
+  const topReason=reasonsSorted[0]?reasonsSorted[0][0]:"—";
+
+  // KPIs
+  document.getElementById("rf-d-totals").innerHTML=`
+    <div class="rf-kpi"><div class="rf-kl">Total Refunded</div><div class="rf-kv" style="color:var(--coral-dark)">${fmt(total)}</div><div class="rf-ks">Selected range</div></div>
+    <div class="rf-kpi"><div class="rf-kl">Refund Count</div><div class="rf-kv">${list.length}</div><div class="rf-ks">Transactions</div></div>
+    <div class="rf-kpi"><div class="rf-kl">Avg. Refund</div><div class="rf-kv">${fmt(avg)}</div><div class="rf-ks">Per transaction</div></div>
+    <div class="rf-kpi"><div class="rf-kl">Top Reason</div><div class="rf-kv" style="font-size:14px;line-height:1.3;padding-top:4px">${topReason}</div><div class="rf-ks">${reasonsSorted[0]?reasonsSorted[0][1].count+' cases':'—'}</div></div>`;
+
+  // Trend chart
+  rfKill("trendDetail");
+  const days={};for(const r of list){const k=rfISO(r.date);days[k]=(days[k]||0)+r.amount;}
+  const sortedDays=Object.keys(days).sort();
+  const labels=sortedDays.map(k=>{const d=new Date(k+"T00:00:00");return (d.getMonth()+1)+"/"+d.getDate();});
+  const values=sortedDays.map(k=>days[k]);
+  RF.charts.trendDetail=new Chart(document.getElementById("rf-d-trend"),{type:"line",data:{labels,datasets:[{data:values,borderColor:b.color,backgroundColor:b.color+"22",fill:true,tension:.3,pointRadius:3,pointBackgroundColor:b.color,borderWidth:2}]},options:{...cb,plugins:{...cb.plugins,tooltip:{...cb.plugins.tooltip,callbacks:{label:c=>fmt(c.parsed.y)}}},scales:{...cb.scales,y:{...cb.scales.y,ticks:{...cb.scales.y.ticks,callback:v=>fk(v)}}}}});
+
+  // Reasons breakdown
+  const mxR=reasonsSorted[0]?reasonsSorted[0][1].amt:1;
+  document.getElementById("rf-d-reasons-sub").textContent=`${reasonsSorted.length} unique reason${reasonsSorted.length===1?'':'s'} — normalized groupings`;
+  document.getElementById("rf-d-reasons").innerHTML=reasonsSorted.length?reasonsSorted.map(([name,d])=>`
+    <div class="rf-rr" title="${name}">
+      <div class="rf-rn">${name}</div>
+      <div class="rf-rb"><div class="rf-rbf" style="width:${(d.amt/mxR*100).toFixed(1)}%;background:${b.color}"></div></div>
+      <div class="rf-rv">${fmt(d.amt)}</div>
+      <div class="rf-rc">${d.count}×</div>
+    </div>`).join(""):'<div style="color:var(--gray);font-size:12px;padding:12px 0">No refunds in selected range</div>';
+
+  // Refund log table — columns depend on brand
+  const isSC=b.id==="scancafe";
+  const head=isSC
+    ?`<thead><tr><th>Date</th><th>Customer</th><th>Email</th><th>Type</th><th>Details</th><th>Amount</th><th>Raw Comment</th></tr></thead>`
+    :`<thead><tr><th>Date</th><th>Txn #</th><th>Customer</th><th>Method</th><th>Status</th><th>Amount</th><th>Raw Reason</th></tr></thead>`;
+  const rowsHtml=list.slice().sort((a,b)=>b.date-a.date).map(r=>{
+    const dateCell=`<td style="color:var(--gray);white-space:nowrap">${rfISO(r.date)}</td>`;
+    const amtCell=`<td style="font-weight:700;color:var(--coral-dark);white-space:nowrap">${fmt(r.amount)}</td>`;
+    const rawCell=`<td style="font-size:11px;color:var(--slate);max-width:260px">${(r.rawReason||"").replace(/</g,"&lt;")||'<span style="color:var(--gray)">—</span>'}</td>`;
+    if(isSC){
+      return `<tr>${dateCell}<td>${r.raw.customer||""}</td><td style="font-size:11px;color:var(--gray)">${r.raw.email||""}</td><td>${r.raw.type||""}</td><td style="font-size:11px">${(r.raw.details||"").replace(/</g,"&lt;")}</td>${amtCell}${rawCell}</tr>`;
+    }
+    return `<tr>${dateCell}<td style="font-size:11px;font-family:monospace">${r.raw.txn||""}</td><td>${r.raw.customer||""}</td><td style="font-size:11px">${r.raw.method||""}</td><td style="font-size:11px">${r.raw.status||""}</td>${amtCell}${rawCell}</tr>`;
+  }).join("");
+  document.getElementById("rf-d-log-sub").textContent=`${list.length} refund${list.length===1?'':'s'} in selected range`;
+  document.getElementById("rf-d-tbl").innerHTML=head+`<tbody>${rowsHtml||'<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:30px">No refunds in selected range</td></tr>'}</tbody>`;
+}
+
+function rfCloseDetail(){
+  document.getElementById("rf-detail").classList.remove("active");
+  document.getElementById("rf-main").classList.add("active");
+  RF.currentBrand=null;
+  // Re-render main in case date was changed in detail
+  rfRenderMain();
+}
+
+async function buildRefunds(){
+  window._rf=1;
+  const fromEl=document.getElementById("rf-from"),toEl=document.getElementById("rf-to");
+  const dFromEl=document.getElementById("rf-d-from"),dToEl=document.getElementById("rf-d-to");
+  rfSetDefaultDates(fromEl,toEl);
+
+  // Show a simple loading state in the cards area while we fetch
+  document.getElementById("rf-cards").innerHTML='<div style="grid-column:1/-1;padding:30px;text-align:center;color:var(--gray);font-size:13px">Loading refund data…</div>';
+  document.getElementById("rf-totals").innerHTML='';
+
+  await rfLoad();
+
+  // Wire events
+  fromEl.addEventListener("change",rfRenderMain);
+  toEl.addEventListener("change",rfRenderMain);
+  dFromEl.addEventListener("change",rfRenderDetail);
+  dToEl.addEventListener("change",rfRenderDetail);
+  document.querySelectorAll("#rf-main [data-rfr]").forEach(btn=>{
+    btn.addEventListener("click",()=>{rfApplyPreset(btn.dataset.rfr,fromEl,toEl);rfRenderMain();});
+  });
+  document.querySelectorAll("#rf-detail [data-rfdr]").forEach(btn=>{
+    btn.addEventListener("click",()=>{rfApplyPreset(btn.dataset.rfdr,dFromEl,dToEl);rfRenderDetail();});
+  });
+  document.getElementById("rf-back").addEventListener("click",rfCloseDetail);
+
+  rfRenderMain();
 }
 
 loadAll();
