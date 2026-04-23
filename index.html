@@ -266,6 +266,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
   <div class="cd"><div class="ct">Refund Reasons</div><div class="csb" id="rf-d-reasons-sub">Normalized groupings</div><div class="rf-reasons" id="rf-d-reasons"></div></div>
 </div>
 <div class="cd" style="margin-top:14px"><div class="ct">Refund Log</div><div class="csb" id="rf-d-log-sub">All refunds in selected range</div><div class="tw" style="max-height:500px"><table class="tb" id="rf-d-tbl"></table></div></div>
+<div id="rf-d-returns" style="display:none;margin-top:22px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div style="height:3px;flex:1;background:linear-gradient(90deg,#E8967A,transparent);border-radius:2px"></div><div style="font-size:15px;font-weight:800;color:var(--coral-dark);letter-spacing:.5px">RETURNS</div><div style="height:3px;flex:1;background:linear-gradient(90deg,transparent,#E8967A);border-radius:2px"></div></div>
+  <div class="rf-kpis" id="rf-d-ret-totals"></div>
+  <div class="g2">
+    <div class="cd"><div class="ct">Returns Trend (Inventory Value)</div><div class="csb">Daily return inventory value in selected range</div><div class="cw"><canvas id="rf-d-ret-trend" height="200"></canvas></div></div>
+    <div class="cd"><div class="ct">Top SKUs Returned</div><div class="csb" id="rf-d-ret-sku-sub">By inventory value</div><div class="rf-reasons" id="rf-d-ret-skus"></div></div>
+  </div>
+  <div class="cd" style="margin-top:14px"><div class="ct">Returns Log</div><div class="csb" id="rf-d-ret-log-sub">All returns in selected range</div><div class="tw" style="max-height:500px"><table class="tb" id="rf-d-ret-tbl"></table></div></div>
+</div>
 </div>
 </div>
 
@@ -784,10 +793,10 @@ function buildOps(){window._o=1;
 const RF_BRANDS=[
   {id:"scancafe",name:"ScanCafe",cat:"Memory Digitization",color:"#2AACB8",live:true,urlKey:"refScanCafe",parser:"pScanCafe"},
   {id:"scandigital",name:"ScanDigital",cat:"Memory Digitization",color:"#45C4CF",live:true,urlKey:"refScanDigital",parser:"pScanDigital"},
-  {id:"crema",name:"Crema Coffee Products",cat:"Coffee Accessories",color:"#D4604A",live:false,urlKey:"refCrema",parser:null},
-  {id:"amzn_crema",name:"Amazon Crema",cat:"Amazon",color:"#E8967A",live:false,urlKey:"refAmznCrema",parser:null},
-  {id:"amzn_sk",name:"Amazon SupplyKick",cat:"Amazon",color:"#6C5CE7",live:false,urlKey:"refAmznSupplyKick",parser:null},
-  {id:"amzn_mv",name:"Amazon Memory Ventures",cat:"Amazon",color:"#3B6CE7",live:false,urlKey:"refAmznMV",parser:null}
+  {id:"crema",name:"Crema Coffee Products",cat:"Coffee Accessories",color:"#D4604A",live:true,urlKey:"refCrema",parser:"pCrema",compound:true},
+  {id:"amzn_crema",name:"Amazon Crema",cat:"Amazon",color:"#E8967A",live:true,urlKey:"refAmznCrema",parser:"pAmazon"},
+  {id:"amzn_sk",name:"Amazon SupplyKick",cat:"Amazon",color:"#6C5CE7",live:true,urlKey:"refAmznSupplyKick",parser:"pAmazon"},
+  {id:"amzn_mv",name:"Amazon Memory Ventures",cat:"Amazon",color:"#3B6CE7",live:true,urlKey:"refAmznMV",parser:"pAmazon"}
 ];
 const RF={data:{},loaded:false,loading:false,charts:{}};
 
@@ -797,6 +806,7 @@ function rfDate(s,fmt){
   const t=String(s).trim();if(!t)return null;
   if(fmt==="dmy"){const m=t.match(/^(\d{1,2})-(\d{1,2})-(\d{4})/);if(!m)return null;const d=new Date(+m[3],+m[2]-1,+m[1]);return isNaN(d)?null:d;}
   if(fmt==="mdy"){const m=t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(!m)return null;const d=new Date(+m[3],+m[1]-1,+m[2]);return isNaN(d)?null:d;}
+  if(fmt==="ymd"){const m=t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);if(!m)return null;const d=new Date(+m[1],+m[2]-1,+m[3]);return isNaN(d)?null:d;}
   const d=new Date(t);return isNaN(d)?null:d;
 }
 function rfISO(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
@@ -847,7 +857,56 @@ function pScanDigital(rows){
   }
   return out;
 }
-const RF_PARSERS={pScanCafe,pScanDigital};
+function pAmazon(rows){
+  // Headers: Date, Transaction Status, Transaction type, Order ID, Product Details,
+  //          Total product charges, Total promotional rebates, Amazon fees, Other, Total (USD)
+  // Amount is negative in col 9 (Total USD). We take absolute value.
+  // No refund reason column — Amazon does not expose it. Use Product Details as context.
+  const out=[];
+  for(let i=1;i<rows.length;i++){const r=rows[i];if(!r||!r[0])continue;
+    const d=rfDate(r[0],"mdy");if(!d)continue;
+    const type=(r[2]||"").trim().toLowerCase();
+    if(type!=="refund")continue; // filter defensively in case non-refund rows appear
+    const amt=Math.abs(pn(r[9]));if(!amt)continue;
+    const product=(r[4]||"").trim();
+    out.push({date:d,amount:amt,reason:"(amazon — no reason provided)",rawReason:"",
+      raw:{order:r[3]||"",product,status:r[1]||"",charges:pn(r[5]),rebates:pn(r[6]),fees:pn(r[7]),other:pn(r[8])}});
+  }
+  return out;
+}
+function pCrema(rows){
+  // Two side-by-side datasets. Row 0: section headers. Row 1: column headers.
+  // Cols 0-2: REFUNDS (Day | Order ID | Refunded payments)
+  // Cols 5-7: RETURNS (SKU | Returns worth | Orders/units)
+  // Each row may carry refund data, return data, both, or neither.
+  const refunds=[],returns=[];
+  for(let i=2;i<rows.length;i++){const r=rows[i];if(!r)continue;
+    const d=rfDate(r[0],"ymd");if(!d)continue;
+    // Refund side
+    const rpRaw=(r[2]||"").trim();
+    if(rpRaw&&rpRaw!=="$0.00"){
+      const amt=Math.abs(pn(rpRaw));
+      if(amt){
+        refunds.push({date:d,amount:amt,reason:"(shopify — no reason provided)",rawReason:"",
+          raw:{order:r[1]||""}});
+      }
+    }
+    // Returns side
+    const sku=(r[5]||"").trim();
+    const rwRaw=(r[6]||"").trim();
+    const unitsRaw=(r[7]||"").trim();
+    if(rwRaw&&rwRaw!=="$0.00"){
+      const worth=Math.abs(pn(rwRaw));
+      const units=Math.round(pn(unitsRaw));
+      if(worth){
+        returns.push({date:d,amount:worth,units,sku:sku||"(no SKU)",raw:{}});
+      }
+    }
+  }
+  // Compound return
+  return {refunds,returns};
+}
+const RF_PARSERS={pScanCafe,pScanDigital,pAmazon,pCrema};
 
 async function rfLoad(){
   if(RF.loaded||RF.loading)return;
@@ -861,6 +920,21 @@ async function rfLoad(){
 }
 
 function rfFilter(list,from,to){return list.filter(x=>x.date>=from&&x.date<=to);}
+
+// Compound brands (e.g. Crema) store {refunds, returns}. Non-compound store a flat array.
+function rfGetRefunds(brandId){
+  const b=RF_BRANDS.find(x=>x.id===brandId);
+  const d=RF.data[brandId];
+  if(!d)return [];
+  if(b&&b.compound)return d.refunds||[];
+  return d;
+}
+function rfGetReturns(brandId){
+  const b=RF_BRANDS.find(x=>x.id===brandId);
+  const d=RF.data[brandId];
+  if(!d||!b||!b.compound)return [];
+  return d.returns||[];
+}
 
 function rfSetDefaultDates(fromEl,toEl){
   const t=rfToday();const first=new Date(t.getFullYear(),t.getMonth(),1);
@@ -893,7 +967,7 @@ function rfRenderMain(){
   const connectedBrands=RF_BRANDS.filter(b=>b.live);
   const allRefunds=[];
   for(const b of connectedBrands){
-    const filtered=rfFilter(RF.data[b.id]||[],from,to);
+    const filtered=rfFilter(rfGetRefunds(b.id),from,to);
     const total=filtered.reduce((s,x)=>s+x.amount,0);
     brandTotals[b.id]={total,count:filtered.length,list:filtered};
     grandTotal+=total;grandCount+=filtered.length;
@@ -973,19 +1047,39 @@ function rfRenderDetail(){
   const b=RF_BRANDS.find(x=>x.id===RF.currentBrand);if(!b)return;
   const fromEl=document.getElementById("rf-d-from"),toEl=document.getElementById("rf-d-to");
   const{from,to}=rfReadRange(fromEl,toEl);
-  const list=rfFilter(RF.data[b.id]||[],from,to);
+  const list=rfFilter(rfGetRefunds(b.id),from,to);
   const total=list.reduce((s,x)=>s+x.amount,0);
   const avg=list.length?total/list.length:0;
-  const reasons={};for(const r of list){reasons[r.reason]=(reasons[r.reason]||{count:0,amt:0});reasons[r.reason].count++;reasons[r.reason].amt+=r.amount;}
-  const reasonsSorted=Object.entries(reasons).sort((a,b)=>b[1].amt-a[1].amt);
-  const topReason=reasonsSorted[0]?reasonsSorted[0][0]:"—";
+  const isAmzn=b.id.startsWith("amzn_");
 
-  // KPIs
+  // For Amazon: group by Product (no reasons available from Amazon). For others: by normalized reason.
+  let breakdown;
+  if(isAmzn){
+    const prods={};
+    for(const r of list){
+      const key=(r.raw.product||"(unknown product)").trim()||"(unknown product)";
+      if(!prods[key])prods[key]={count:0,amt:0};
+      prods[key].count++;prods[key].amt+=r.amount;
+    }
+    breakdown=Object.entries(prods).sort((a,b)=>b[1].amt-a[1].amt);
+  }else{
+    const reasons={};
+    for(const r of list){
+      if(!reasons[r.reason])reasons[r.reason]={count:0,amt:0};
+      reasons[r.reason].count++;reasons[r.reason].amt+=r.amount;
+    }
+    breakdown=Object.entries(reasons).sort((a,b)=>b[1].amt-a[1].amt);
+  }
+  const topLabel=breakdown[0]?breakdown[0][0]:"—";
+  const topLabelShort=topLabel.length>50?topLabel.slice(0,47)+"…":topLabel;
+
+  // KPIs — for Amazon, "Top Reason" becomes "Top Product"
+  const topKpiLabel=isAmzn?"Top Product (by $)":"Top Reason";
   document.getElementById("rf-d-totals").innerHTML=`
     <div class="rf-kpi"><div class="rf-kl">Total Refunded</div><div class="rf-kv" style="color:var(--coral-dark)">${fmt(total)}</div><div class="rf-ks">Selected range</div></div>
     <div class="rf-kpi"><div class="rf-kl">Refund Count</div><div class="rf-kv">${list.length}</div><div class="rf-ks">Transactions</div></div>
     <div class="rf-kpi"><div class="rf-kl">Avg. Refund</div><div class="rf-kv">${fmt(avg)}</div><div class="rf-ks">Per transaction</div></div>
-    <div class="rf-kpi"><div class="rf-kl">Top Reason</div><div class="rf-kv" style="font-size:14px;line-height:1.3;padding-top:4px">${topReason}</div><div class="rf-ks">${reasonsSorted[0]?reasonsSorted[0][1].count+' cases':'—'}</div></div>`;
+    <div class="rf-kpi"><div class="rf-kl">${topKpiLabel}</div><div class="rf-kv" style="font-size:13px;line-height:1.3;padding-top:4px" title="${topLabel.replace(/"/g,'&quot;')}">${topLabelShort}</div><div class="rf-ks">${breakdown[0]?breakdown[0][1].count+(isAmzn?' refund'+(breakdown[0][1].count===1?'':'s'):' cases'):'—'}</div></div>`;
 
   // Trend chart
   rfKill("trendDetail");
@@ -995,26 +1089,40 @@ function rfRenderDetail(){
   const values=sortedDays.map(k=>days[k]);
   RF.charts.trendDetail=new Chart(document.getElementById("rf-d-trend"),{type:"line",data:{labels,datasets:[{data:values,borderColor:b.color,backgroundColor:b.color+"22",fill:true,tension:.3,pointRadius:3,pointBackgroundColor:b.color,borderWidth:2}]},options:{...cb,plugins:{...cb.plugins,tooltip:{...cb.plugins.tooltip,callbacks:{label:c=>fmt(c.parsed.y)}}},scales:{...cb.scales,y:{...cb.scales.y,ticks:{...cb.scales.y.ticks,callback:v=>fk(v)}}}}});
 
-  // Reasons breakdown
-  const mxR=reasonsSorted[0]?reasonsSorted[0][1].amt:1;
-  document.getElementById("rf-d-reasons-sub").textContent=`${reasonsSorted.length} unique reason${reasonsSorted.length===1?'':'s'} — normalized groupings`;
-  document.getElementById("rf-d-reasons").innerHTML=reasonsSorted.length?reasonsSorted.map(([name,d])=>`
-    <div class="rf-rr" title="${name}">
-      <div class="rf-rn">${name}</div>
+  // Breakdown panel (reasons OR top products)
+  const mxR=breakdown[0]?breakdown[0][1].amt:1;
+  const panelTitle=document.querySelector("#rf-detail .g2 .cd:nth-child(2) .ct");
+  if(panelTitle)panelTitle.textContent=isAmzn?"Top Products by Refund $":"Refund Reasons";
+  document.getElementById("rf-d-reasons-sub").textContent=isAmzn
+    ?`${breakdown.length} distinct product${breakdown.length===1?'':'s'} refunded — Amazon does not expose refund reasons`
+    :`${breakdown.length} unique reason${breakdown.length===1?'':'s'} — normalized groupings`;
+  document.getElementById("rf-d-reasons").innerHTML=breakdown.length?breakdown.slice(0,50).map(([name,d])=>{
+    const shown=name.length>60?name.slice(0,57)+"…":name;
+    return `<div class="rf-rr" title="${name.replace(/"/g,'&quot;')}">
+      <div class="rf-rn">${shown}</div>
       <div class="rf-rb"><div class="rf-rbf" style="width:${(d.amt/mxR*100).toFixed(1)}%;background:${b.color}"></div></div>
       <div class="rf-rv">${fmt(d.amt)}</div>
       <div class="rf-rc">${d.count}×</div>
-    </div>`).join(""):'<div style="color:var(--gray);font-size:12px;padding:12px 0">No refunds in selected range</div>';
+    </div>`;
+  }).join(""):'<div style="color:var(--gray);font-size:12px;padding:12px 0">No refunds in selected range</div>';
 
   // Refund log table — columns depend on brand
   const isSC=b.id==="scancafe";
-  const head=isSC
-    ?`<thead><tr><th>Date</th><th>Customer</th><th>Email</th><th>Type</th><th>Details</th><th>Amount</th><th>Raw Comment</th></tr></thead>`
-    :`<thead><tr><th>Date</th><th>Txn #</th><th>Customer</th><th>Method</th><th>Status</th><th>Amount</th><th>Raw Reason</th></tr></thead>`;
+  let head;
+  if(isAmzn){
+    head=`<thead><tr><th>Date</th><th>Order ID</th><th>Product</th><th>Status</th><th>Fees</th><th>Amount</th></tr></thead>`;
+  }else if(isSC){
+    head=`<thead><tr><th>Date</th><th>Customer</th><th>Email</th><th>Type</th><th>Details</th><th>Amount</th><th>Raw Comment</th></tr></thead>`;
+  }else{
+    head=`<thead><tr><th>Date</th><th>Txn #</th><th>Customer</th><th>Method</th><th>Status</th><th>Amount</th><th>Raw Reason</th></tr></thead>`;
+  }
   const rowsHtml=list.slice().sort((a,b)=>b.date-a.date).map(r=>{
     const dateCell=`<td style="color:var(--gray);white-space:nowrap">${rfISO(r.date)}</td>`;
     const amtCell=`<td style="font-weight:700;color:var(--coral-dark);white-space:nowrap">${fmt(r.amount)}</td>`;
     const rawCell=`<td style="font-size:11px;color:var(--slate);max-width:260px">${(r.rawReason||"").replace(/</g,"&lt;")||'<span style="color:var(--gray)">—</span>'}</td>`;
+    if(isAmzn){
+      return `<tr>${dateCell}<td style="font-size:11px;font-family:monospace">${r.raw.order||""}</td><td style="font-size:11px;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(r.raw.product||'').replace(/"/g,'&quot;')}">${(r.raw.product||"").replace(/</g,"&lt;")}</td><td style="font-size:11px">${r.raw.status||""}</td><td style="font-size:11px;color:var(--gray)">${fmt(r.raw.fees||0)}</td>${amtCell}</tr>`;
+    }
     if(isSC){
       return `<tr>${dateCell}<td>${r.raw.customer||""}</td><td style="font-size:11px;color:var(--gray)">${r.raw.email||""}</td><td>${r.raw.type||""}</td><td style="font-size:11px">${(r.raw.details||"").replace(/</g,"&lt;")}</td>${amtCell}${rawCell}</tr>`;
     }
@@ -1022,6 +1130,64 @@ function rfRenderDetail(){
   }).join("");
   document.getElementById("rf-d-log-sub").textContent=`${list.length} refund${list.length===1?'':'s'} in selected range`;
   document.getElementById("rf-d-tbl").innerHTML=head+`<tbody>${rowsHtml||'<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:30px">No refunds in selected range</td></tr>'}</tbody>`;
+
+  // ═══ RETURNS SECTION (compound brands only, e.g. Crema Shopify) ═══
+  const retSection=document.getElementById("rf-d-returns");
+  rfKill("retTrend");
+  if(b.compound){
+    retSection.style.display="block";
+    const returns=rfFilter(rfGetReturns(b.id),from,to);
+    const retValue=returns.reduce((s,x)=>s+x.amount,0);
+    const retUnits=returns.reduce((s,x)=>s+(x.units||0),0);
+    const retLines=returns.length;
+    const uniqueSkus=new Set(returns.map(x=>x.sku)).size;
+
+    document.getElementById("rf-d-ret-totals").innerHTML=`
+      <div class="rf-kpi"><div class="rf-kl">Return Inventory Value</div><div class="rf-kv" style="color:var(--coral-dark)">${fmt(retValue)}</div><div class="rf-ks">Selected range</div></div>
+      <div class="rf-kpi"><div class="rf-kl">Units Returned</div><div class="rf-kv">${retUnits}</div><div class="rf-ks">Total SKU count</div></div>
+      <div class="rf-kpi"><div class="rf-kl">Return Line Items</div><div class="rf-kv">${retLines}</div><div class="rf-ks">SKU-day rows</div></div>
+      <div class="rf-kpi"><div class="rf-kl">Unique SKUs</div><div class="rf-kv">${uniqueSkus}</div><div class="rf-ks">Distinct products returned</div></div>`;
+
+    // Trend: daily return value
+    const retDays={};for(const r of returns){const k=rfISO(r.date);retDays[k]=(retDays[k]||0)+r.amount;}
+    const retSorted=Object.keys(retDays).sort();
+    const retLabels=retSorted.map(k=>{const d=new Date(k+"T00:00:00");return (d.getMonth()+1)+"/"+d.getDate();});
+    const retValues=retSorted.map(k=>retDays[k]);
+    RF.charts.retTrend=new Chart(document.getElementById("rf-d-ret-trend"),{type:"line",data:{labels:retLabels,datasets:[{data:retValues,borderColor:"#E8967A",backgroundColor:"rgba(232,150,122,.18)",fill:true,tension:.3,pointRadius:3,pointBackgroundColor:"#E8967A",borderWidth:2}]},options:{...cb,plugins:{...cb.plugins,tooltip:{...cb.plugins.tooltip,callbacks:{label:c=>fmt(c.parsed.y)}}},scales:{...cb.scales,y:{...cb.scales.y,ticks:{...cb.scales.y.ticks,callback:v=>fk(v)}}}}});
+
+    // Top SKUs aggregation
+    const skuAgg={};
+    for(const r of returns){
+      if(!skuAgg[r.sku])skuAgg[r.sku]={amt:0,units:0,lines:0};
+      skuAgg[r.sku].amt+=r.amount;
+      skuAgg[r.sku].units+=(r.units||0);
+      skuAgg[r.sku].lines++;
+    }
+    const skuSorted=Object.entries(skuAgg).sort((a,b)=>b[1].amt-a[1].amt);
+    const mxS=skuSorted[0]?skuSorted[0][1].amt:1;
+    document.getElementById("rf-d-ret-sku-sub").textContent=`${skuSorted.length} SKU${skuSorted.length===1?'':'s'} — sorted by $ value returned`;
+    document.getElementById("rf-d-ret-skus").innerHTML=skuSorted.length?skuSorted.slice(0,50).map(([sku,d])=>`
+      <div class="rf-rr" title="${sku}">
+        <div class="rf-rn" style="font-family:monospace;font-size:11px">${sku}</div>
+        <div class="rf-rb"><div class="rf-rbf" style="width:${(d.amt/mxS*100).toFixed(1)}%;background:#E8967A"></div></div>
+        <div class="rf-rv">${fmt(d.amt)}</div>
+        <div class="rf-rc">${d.units}u</div>
+      </div>`).join(""):'<div style="color:var(--gray);font-size:12px;padding:12px 0">No returns in selected range</div>';
+
+    // Returns log table — SKU-level rows sorted by date desc
+    const retHead=`<thead><tr><th>Date</th><th>SKU</th><th>Units</th><th>Inventory Value</th></tr></thead>`;
+    const retRowsHtml=returns.slice().sort((a,b)=>b.date-a.date).map(r=>`
+      <tr>
+        <td style="color:var(--gray);white-space:nowrap">${rfISO(r.date)}</td>
+        <td style="font-family:monospace;font-size:11px">${r.sku}</td>
+        <td>${r.units||0}</td>
+        <td style="font-weight:700;color:var(--coral-dark);white-space:nowrap">${fmt(r.amount)}</td>
+      </tr>`).join("");
+    document.getElementById("rf-d-ret-log-sub").textContent=`${retLines} return line${retLines===1?'':'s'} in selected range`;
+    document.getElementById("rf-d-ret-tbl").innerHTML=retHead+`<tbody>${retRowsHtml||'<tr><td colspan="4" style="text-align:center;color:var(--gray);padding:30px">No returns in selected range</td></tr>'}</tbody>`;
+  }else{
+    retSection.style.display="none";
+  }
 }
 
 function rfCloseDetail(){
