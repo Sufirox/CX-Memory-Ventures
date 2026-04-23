@@ -107,10 +107,22 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .rf-cnt{font-size:11px;color:var(--gray);margin-bottom:10px}
 .rf-spark{width:100%;height:40px;margin-top:8px}
 .rf-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+/* Compound KPI layout: split into two halves (refunds | returns), each 2x2 */
+.rf-kpis.rf-split{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.rf-kpis.rf-split .rf-half{display:grid;grid-template-columns:1fr 1fr;gap:10px;position:relative;padding-top:22px}
+.rf-kpis.rf-split .rf-half::before{content:attr(data-label);position:absolute;top:0;left:2px;font-size:10px;font-weight:800;letter-spacing:1.5px;color:var(--coral-dark)}
+.rf-kpis.rf-split .rf-half.rf-half-ret::before{color:#B8721A}
 .rf-kpi{background:var(--card);border-radius:10px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,.05);border-left:4px solid var(--coral)}
 .rf-kpi:nth-child(2){border-left-color:var(--teal)}
 .rf-kpi:nth-child(3){border-left-color:#6C5CE7}
 .rf-kpi:nth-child(4){border-left-color:var(--coral-dark)}
+/* Compound layout: 8 KPIs in 2 rows. First 4 are refund (coral-teal-purple-coral-dark), next 4 are return (tan gradient) */
+.rf-compound .rf-kpis{grid-template-columns:repeat(4,1fr)}
+.rf-kpi.rfk-ref{border-left-color:var(--coral)}
+.rf-kpi.rfk-ref:nth-of-type(2){border-left-color:#E8967A}
+.rf-kpi.rfk-ret{border-left-color:#E8967A;background:linear-gradient(to right,rgba(232,150,122,.05),var(--card) 40%)}
+.rf-compound .rf-kpi.rfk-ref{border-left-color:var(--coral-dark)}
+.rf-compound .rf-kpi.rfk-ret{border-left-color:#E8967A}
 .rf-kl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--gray);margin-bottom:4px}
 .rf-kv{font-size:22px;font-weight:800;line-height:1.1}
 .rf-ks{font-size:10px;color:var(--gray);margin-top:3px}
@@ -125,8 +137,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .rf-rbf{height:100%;background:var(--coral);border-radius:4px;transition:width .6s cubic-bezier(.22,1,.36,1)}
 .rf-rv{width:80px;text-align:right;font-size:12px;font-weight:700;color:var(--coral-dark)}
 .rf-rc{width:35px;text-align:right;font-size:11px;color:var(--gray)}
-@media(max-width:1100px){.rf-kpis{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:600px){.rf-kpis{grid-template-columns:1fr}}
+@media(max-width:1100px){.rf-kpis{grid-template-columns:repeat(2,1fr)} .rf-kpis.rf-split{grid-template-columns:1fr}}
+@media(max-width:600px){.rf-kpis{grid-template-columns:1fr} .rf-kpis.rf-split .rf-half{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -261,19 +273,49 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
   </div>
 </div>
 <div class="rf-kpis" id="rf-d-totals"></div>
+
+<!-- Row 1: Refunds Trend | (Top SKUs Returned for compound | Refund Reasons for single) -->
 <div class="g2">
-  <div class="cd"><div class="ct">Refund Trend</div><div class="csb">Daily refund totals in selected range</div><div class="cw"><canvas id="rf-d-trend" height="200"></canvas></div></div>
-  <div class="cd"><div class="ct">Refund Reasons</div><div class="csb" id="rf-d-reasons-sub">Normalized groupings</div><div class="rf-reasons" id="rf-d-reasons"></div></div>
-</div>
-<div class="cd" style="margin-top:14px"><div class="ct">Refund Log</div><div class="csb" id="rf-d-log-sub">All refunds in selected range</div><div class="tw" style="max-height:500px"><table class="tb" id="rf-d-tbl"></table></div></div>
-<div id="rf-d-returns" style="display:none;margin-top:22px">
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div style="height:3px;flex:1;background:linear-gradient(90deg,#E8967A,transparent);border-radius:2px"></div><div style="font-size:15px;font-weight:800;color:var(--coral-dark);letter-spacing:.5px">RETURNS</div><div style="height:3px;flex:1;background:linear-gradient(90deg,transparent,#E8967A);border-radius:2px"></div></div>
-  <div class="rf-kpis" id="rf-d-ret-totals"></div>
-  <div class="g2">
-    <div class="cd"><div class="ct">Returns Trend (Inventory Value)</div><div class="csb">Daily return inventory value in selected range</div><div class="cw"><canvas id="rf-d-ret-trend" height="200"></canvas></div></div>
-    <div class="cd"><div class="ct">Top SKUs Returned</div><div class="csb" id="rf-d-ret-sku-sub">By inventory value</div><div class="rf-reasons" id="rf-d-ret-skus"></div></div>
+  <div class="cd">
+    <div class="ct rf-compound-only" style="display:none;color:var(--coral-dark)">REFUNDS</div>
+    <div class="ct" style="font-size:13px;font-weight:600">Refund Trend</div>
+    <div class="csb">Daily refund totals in selected range</div>
+    <div class="cw"><canvas id="rf-d-trend" height="200"></canvas></div>
   </div>
-  <div class="cd" style="margin-top:14px"><div class="ct">Returns Log</div><div class="csb" id="rf-d-ret-log-sub">All returns in selected range</div><div class="tw" style="max-height:500px"><table class="tb" id="rf-d-ret-tbl"></table></div></div>
+  <div class="cd">
+    <div class="ct rf-compound-only" style="display:none;color:#E8967A">RETURNS</div>
+    <div class="ct" id="rf-d-panel-title" style="font-size:13px;font-weight:600">Refund Reasons</div>
+    <div class="csb" id="rf-d-reasons-sub">Normalized groupings</div>
+    <div class="rf-reasons" id="rf-d-reasons"></div>
+  </div>
+</div>
+
+<!-- Row 2: Compound only — Refund Value Distribution | Returns Trend -->
+<div class="g2 rf-compound-only" style="display:none">
+  <div class="cd">
+    <div class="ct" style="font-size:13px;font-weight:600">Refund Value Distribution</div>
+    <div class="csb">How refund amounts are distributed by bucket</div>
+    <div class="cw"><canvas id="rf-d-dist" height="200"></canvas></div>
+  </div>
+  <div class="cd">
+    <div class="ct" style="font-size:13px;font-weight:600">Returns Trend (Inventory Value)</div>
+    <div class="csb">Daily return inventory value in selected range</div>
+    <div class="cw"><canvas id="rf-d-ret-trend" height="200"></canvas></div>
+  </div>
+</div>
+
+<!-- Row 3: Logs — refund log always, returns log compound-only, side by side when both present -->
+<div class="g2">
+  <div class="cd">
+    <div class="ct" style="font-size:13px;font-weight:600">Refund Log</div>
+    <div class="csb" id="rf-d-log-sub">All refunds in selected range</div>
+    <div class="tw" style="max-height:500px"><table class="tb" id="rf-d-tbl"></table></div>
+  </div>
+  <div class="cd rf-compound-only" style="display:none">
+    <div class="ct" style="font-size:13px;font-weight:600">Returns Log</div>
+    <div class="csb" id="rf-d-ret-log-sub">All returns in selected range</div>
+    <div class="tw" style="max-height:500px"><table class="tb" id="rf-d-ret-tbl"></table></div>
+  </div>
 </div>
 </div>
 </div>
@@ -1051,7 +1093,111 @@ function rfRenderDetail(){
   const total=list.reduce((s,x)=>s+x.amount,0);
   const avg=list.length?total/list.length:0;
   const isAmzn=b.id.startsWith("amzn_");
+  const isCompound=!!b.compound;
 
+  // Toggle compound layout class on the detail page container
+  document.getElementById("rf-detail").classList.toggle("rf-compound",isCompound);
+  // Toggle visibility of single-brand vs compound blocks
+  document.querySelectorAll("#rf-detail .rf-single-only").forEach(el=>el.style.display=isCompound?"none":"");
+  document.querySelectorAll("#rf-detail .rf-compound-only").forEach(el=>el.style.display=isCompound?"":"none");
+
+  if(isCompound){
+    // ═══ COMPOUND LAYOUT (Crema Shopify) ═══
+    const returns=rfFilter(rfGetReturns(b.id),from,to);
+    const retValue=returns.reduce((s,x)=>s+x.amount,0);
+    const retUnits=returns.reduce((s,x)=>s+(x.units||0),0);
+    const retLines=returns.length;
+    const uniqueSkus=new Set(returns.map(x=>x.sku)).size;
+
+    // Side-by-side layout: LEFT half = refunds (2x2), RIGHT half = returns (2x2)
+    const totalsEl=document.getElementById("rf-d-totals");
+    totalsEl.classList.add("rf-split");
+    totalsEl.innerHTML=`
+      <div class="rf-half rf-half-ref" data-label="REFUNDS">
+        <div class="rf-kpi rfk-ref"><div class="rf-kl">Total Refunded</div><div class="rf-kv" style="color:var(--coral-dark)">${fmt(total)}</div><div class="rf-ks">Selected range</div></div>
+        <div class="rf-kpi rfk-ref"><div class="rf-kl">Refund Count</div><div class="rf-kv">${list.length}</div><div class="rf-ks">Transactions</div></div>
+        <div class="rf-kpi rfk-ref"><div class="rf-kl">Avg. Refund</div><div class="rf-kv">${fmt(avg)}</div><div class="rf-ks">Per transaction</div></div>
+        <div class="rf-kpi rfk-ref"><div class="rf-kl">Biggest Refund</div><div class="rf-kv">${fmt(list.length?Math.max(...list.map(x=>x.amount)):0)}</div><div class="rf-ks">Single transaction</div></div>
+      </div>
+      <div class="rf-half rf-half-ret" data-label="RETURNS">
+        <div class="rf-kpi rfk-ret"><div class="rf-kl">Return Inventory Value</div><div class="rf-kv" style="color:var(--coral-dark)">${fmt(retValue)}</div><div class="rf-ks">Selected range</div></div>
+        <div class="rf-kpi rfk-ret"><div class="rf-kl">Units Returned</div><div class="rf-kv">${retUnits}</div><div class="rf-ks">Total SKU count</div></div>
+        <div class="rf-kpi rfk-ret"><div class="rf-kl">Return Line Items</div><div class="rf-kv">${retLines}</div><div class="rf-ks">SKU-day rows</div></div>
+        <div class="rf-kpi rfk-ret"><div class="rf-kl">Unique SKUs</div><div class="rf-kv">${uniqueSkus}</div><div class="rf-ks">Distinct products</div></div>
+      </div>`;
+
+    // Row 1: Refunds Trend | Top SKUs Returned
+    rfKill("trendDetail");rfKill("retTrend");
+    const refDays={};for(const r of list){const k=rfISO(r.date);refDays[k]=(refDays[k]||0)+r.amount;}
+    const refSorted=Object.keys(refDays).sort();
+    const refLabels=refSorted.map(k=>{const d=new Date(k+"T00:00:00");return (d.getMonth()+1)+"/"+d.getDate();});
+    const refValues=refSorted.map(k=>refDays[k]);
+    RF.charts.trendDetail=new Chart(document.getElementById("rf-d-trend"),{type:"line",data:{labels:refLabels,datasets:[{data:refValues,borderColor:b.color,backgroundColor:b.color+"22",fill:true,tension:.3,pointRadius:3,pointBackgroundColor:b.color,borderWidth:2}]},options:{...cb,plugins:{...cb.plugins,tooltip:{...cb.plugins.tooltip,callbacks:{label:c=>fmt(c.parsed.y)}}},scales:{...cb.scales,y:{...cb.scales.y,ticks:{...cb.scales.y.ticks,callback:v=>fk(v)}}}}});
+
+    // Top SKUs on the right
+    const skuAgg={};
+    for(const r of returns){
+      if(!skuAgg[r.sku])skuAgg[r.sku]={amt:0,units:0,lines:0};
+      skuAgg[r.sku].amt+=r.amount;skuAgg[r.sku].units+=(r.units||0);skuAgg[r.sku].lines++;
+    }
+    const skuSorted=Object.entries(skuAgg).sort((a,b)=>b[1].amt-a[1].amt);
+    const mxS=skuSorted[0]?skuSorted[0][1].amt:1;
+    // Repurpose the reasons panel (moved into the compound layout) to hold Top SKUs
+    const panelTitle1=document.getElementById("rf-d-panel-title");
+    if(panelTitle1)panelTitle1.textContent="Top SKUs Returned";
+    document.getElementById("rf-d-reasons-sub").textContent=`${skuSorted.length} SKU${skuSorted.length===1?'':'s'} — by inventory value`;
+    document.getElementById("rf-d-reasons").innerHTML=skuSorted.length?skuSorted.slice(0,50).map(([sku,d])=>`
+      <div class="rf-rr" title="${sku}">
+        <div class="rf-rn" style="font-family:monospace;font-size:11px">${sku}</div>
+        <div class="rf-rb"><div class="rf-rbf" style="width:${(d.amt/mxS*100).toFixed(1)}%;background:#E8967A"></div></div>
+        <div class="rf-rv">${fmt(d.amt)}</div>
+        <div class="rf-rc">${d.units}u</div>
+      </div>`).join(""):'<div style="color:var(--gray);font-size:12px;padding:12px 0">No returns in selected range</div>';
+
+    // Row 2: Refund Value Distribution | Returns Trend
+    const buckets=[
+      {label:"$0–25",min:0,max:25},
+      {label:"$25–50",min:25,max:50},
+      {label:"$50–100",min:50,max:100},
+      {label:"$100–250",min:100,max:250},
+      {label:"$250–500",min:250,max:500},
+      {label:"$500+",min:500,max:Infinity},
+    ];
+    const bucketCounts=buckets.map(bk=>list.filter(r=>r.amount>=bk.min&&r.amount<bk.max).length);
+    rfKill("refDist");
+    RF.charts.refDist=new Chart(document.getElementById("rf-d-dist"),{type:"bar",data:{labels:buckets.map(b=>b.label),datasets:[{data:bucketCounts,backgroundColor:b.color,borderRadius:6,barPercentage:.7}]},options:{...cb,plugins:{...cb.plugins,tooltip:{...cb.plugins.tooltip,callbacks:{label:c=>c.parsed.y+" refund"+(c.parsed.y===1?'':'s')}}},scales:{...cb.scales,y:{...cb.scales.y,beginAtZero:true,ticks:{...cb.scales.y.ticks,stepSize:1,precision:0}}}}});
+
+    const retDays={};for(const r of returns){const k=rfISO(r.date);retDays[k]=(retDays[k]||0)+r.amount;}
+    const retSortedK=Object.keys(retDays).sort();
+    const retLabels=retSortedK.map(k=>{const d=new Date(k+"T00:00:00");return (d.getMonth()+1)+"/"+d.getDate();});
+    const retValues=retSortedK.map(k=>retDays[k]);
+    RF.charts.retTrend=new Chart(document.getElementById("rf-d-ret-trend"),{type:"line",data:{labels:retLabels,datasets:[{data:retValues,borderColor:"#E8967A",backgroundColor:"rgba(232,150,122,.18)",fill:true,tension:.3,pointRadius:3,pointBackgroundColor:"#E8967A",borderWidth:2}]},options:{...cb,plugins:{...cb.plugins,tooltip:{...cb.plugins.tooltip,callbacks:{label:c=>fmt(c.parsed.y)}}},scales:{...cb.scales,y:{...cb.scales.y,ticks:{...cb.scales.y.ticks,callback:v=>fk(v)}}}}});
+
+    // Row 3: Refund Log | Returns Log
+    const refHead=`<thead><tr><th>Date</th><th>Order ID</th><th>Amount</th></tr></thead>`;
+    const refRowsHtml=list.slice().sort((a,b)=>b.date-a.date).map(r=>`
+      <tr>
+        <td style="color:var(--gray);white-space:nowrap">${rfISO(r.date)}</td>
+        <td style="font-family:monospace;font-size:11px">${r.raw.order||""}</td>
+        <td style="font-weight:700;color:var(--coral-dark);white-space:nowrap">${fmt(r.amount)}</td>
+      </tr>`).join("");
+    document.getElementById("rf-d-log-sub").textContent=`${list.length} refund${list.length===1?'':'s'} in selected range`;
+    document.getElementById("rf-d-tbl").innerHTML=refHead+`<tbody>${refRowsHtml||'<tr><td colspan="3" style="text-align:center;color:var(--gray);padding:30px">No refunds in selected range</td></tr>'}</tbody>`;
+
+    const retHead=`<thead><tr><th>Date</th><th>SKU</th><th>Units</th><th>Inventory Value</th></tr></thead>`;
+    const retRowsHtml=returns.slice().sort((a,b)=>b.date-a.date).map(r=>`
+      <tr>
+        <td style="color:var(--gray);white-space:nowrap">${rfISO(r.date)}</td>
+        <td style="font-family:monospace;font-size:11px">${r.sku}</td>
+        <td>${r.units||0}</td>
+        <td style="font-weight:700;color:var(--coral-dark);white-space:nowrap">${fmt(r.amount)}</td>
+      </tr>`).join("");
+    document.getElementById("rf-d-ret-log-sub").textContent=`${retLines} return line${retLines===1?'':'s'} in selected range`;
+    document.getElementById("rf-d-ret-tbl").innerHTML=retHead+`<tbody>${retRowsHtml||'<tr><td colspan="4" style="text-align:center;color:var(--gray);padding:30px">No returns in selected range</td></tr>'}</tbody>`;
+    return; // Don't fall through to single-brand rendering
+  }
+
+  // ═══ SINGLE-BRAND LAYOUT (existing behavior for non-compound brands) ═══
   // For Amazon: group by Product (no reasons available from Amazon). For others: by normalized reason.
   let breakdown;
   if(isAmzn){
@@ -1075,7 +1221,9 @@ function rfRenderDetail(){
 
   // KPIs — for Amazon, "Top Reason" becomes "Top Product"
   const topKpiLabel=isAmzn?"Top Product (by $)":"Top Reason";
-  document.getElementById("rf-d-totals").innerHTML=`
+  const totalsElS=document.getElementById("rf-d-totals");
+  totalsElS.classList.remove("rf-split");
+  totalsElS.innerHTML=`
     <div class="rf-kpi"><div class="rf-kl">Total Refunded</div><div class="rf-kv" style="color:var(--coral-dark)">${fmt(total)}</div><div class="rf-ks">Selected range</div></div>
     <div class="rf-kpi"><div class="rf-kl">Refund Count</div><div class="rf-kv">${list.length}</div><div class="rf-ks">Transactions</div></div>
     <div class="rf-kpi"><div class="rf-kl">Avg. Refund</div><div class="rf-kv">${fmt(avg)}</div><div class="rf-ks">Per transaction</div></div>
@@ -1091,7 +1239,7 @@ function rfRenderDetail(){
 
   // Breakdown panel (reasons OR top products)
   const mxR=breakdown[0]?breakdown[0][1].amt:1;
-  const panelTitle=document.querySelector("#rf-detail .g2 .cd:nth-child(2) .ct");
+  const panelTitle=document.getElementById("rf-d-panel-title");
   if(panelTitle)panelTitle.textContent=isAmzn?"Top Products by Refund $":"Refund Reasons";
   document.getElementById("rf-d-reasons-sub").textContent=isAmzn
     ?`${breakdown.length} distinct product${breakdown.length===1?'':'s'} refunded — Amazon does not expose refund reasons`
@@ -1130,64 +1278,6 @@ function rfRenderDetail(){
   }).join("");
   document.getElementById("rf-d-log-sub").textContent=`${list.length} refund${list.length===1?'':'s'} in selected range`;
   document.getElementById("rf-d-tbl").innerHTML=head+`<tbody>${rowsHtml||'<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:30px">No refunds in selected range</td></tr>'}</tbody>`;
-
-  // ═══ RETURNS SECTION (compound brands only, e.g. Crema Shopify) ═══
-  const retSection=document.getElementById("rf-d-returns");
-  rfKill("retTrend");
-  if(b.compound){
-    retSection.style.display="block";
-    const returns=rfFilter(rfGetReturns(b.id),from,to);
-    const retValue=returns.reduce((s,x)=>s+x.amount,0);
-    const retUnits=returns.reduce((s,x)=>s+(x.units||0),0);
-    const retLines=returns.length;
-    const uniqueSkus=new Set(returns.map(x=>x.sku)).size;
-
-    document.getElementById("rf-d-ret-totals").innerHTML=`
-      <div class="rf-kpi"><div class="rf-kl">Return Inventory Value</div><div class="rf-kv" style="color:var(--coral-dark)">${fmt(retValue)}</div><div class="rf-ks">Selected range</div></div>
-      <div class="rf-kpi"><div class="rf-kl">Units Returned</div><div class="rf-kv">${retUnits}</div><div class="rf-ks">Total SKU count</div></div>
-      <div class="rf-kpi"><div class="rf-kl">Return Line Items</div><div class="rf-kv">${retLines}</div><div class="rf-ks">SKU-day rows</div></div>
-      <div class="rf-kpi"><div class="rf-kl">Unique SKUs</div><div class="rf-kv">${uniqueSkus}</div><div class="rf-ks">Distinct products returned</div></div>`;
-
-    // Trend: daily return value
-    const retDays={};for(const r of returns){const k=rfISO(r.date);retDays[k]=(retDays[k]||0)+r.amount;}
-    const retSorted=Object.keys(retDays).sort();
-    const retLabels=retSorted.map(k=>{const d=new Date(k+"T00:00:00");return (d.getMonth()+1)+"/"+d.getDate();});
-    const retValues=retSorted.map(k=>retDays[k]);
-    RF.charts.retTrend=new Chart(document.getElementById("rf-d-ret-trend"),{type:"line",data:{labels:retLabels,datasets:[{data:retValues,borderColor:"#E8967A",backgroundColor:"rgba(232,150,122,.18)",fill:true,tension:.3,pointRadius:3,pointBackgroundColor:"#E8967A",borderWidth:2}]},options:{...cb,plugins:{...cb.plugins,tooltip:{...cb.plugins.tooltip,callbacks:{label:c=>fmt(c.parsed.y)}}},scales:{...cb.scales,y:{...cb.scales.y,ticks:{...cb.scales.y.ticks,callback:v=>fk(v)}}}}});
-
-    // Top SKUs aggregation
-    const skuAgg={};
-    for(const r of returns){
-      if(!skuAgg[r.sku])skuAgg[r.sku]={amt:0,units:0,lines:0};
-      skuAgg[r.sku].amt+=r.amount;
-      skuAgg[r.sku].units+=(r.units||0);
-      skuAgg[r.sku].lines++;
-    }
-    const skuSorted=Object.entries(skuAgg).sort((a,b)=>b[1].amt-a[1].amt);
-    const mxS=skuSorted[0]?skuSorted[0][1].amt:1;
-    document.getElementById("rf-d-ret-sku-sub").textContent=`${skuSorted.length} SKU${skuSorted.length===1?'':'s'} — sorted by $ value returned`;
-    document.getElementById("rf-d-ret-skus").innerHTML=skuSorted.length?skuSorted.slice(0,50).map(([sku,d])=>`
-      <div class="rf-rr" title="${sku}">
-        <div class="rf-rn" style="font-family:monospace;font-size:11px">${sku}</div>
-        <div class="rf-rb"><div class="rf-rbf" style="width:${(d.amt/mxS*100).toFixed(1)}%;background:#E8967A"></div></div>
-        <div class="rf-rv">${fmt(d.amt)}</div>
-        <div class="rf-rc">${d.units}u</div>
-      </div>`).join(""):'<div style="color:var(--gray);font-size:12px;padding:12px 0">No returns in selected range</div>';
-
-    // Returns log table — SKU-level rows sorted by date desc
-    const retHead=`<thead><tr><th>Date</th><th>SKU</th><th>Units</th><th>Inventory Value</th></tr></thead>`;
-    const retRowsHtml=returns.slice().sort((a,b)=>b.date-a.date).map(r=>`
-      <tr>
-        <td style="color:var(--gray);white-space:nowrap">${rfISO(r.date)}</td>
-        <td style="font-family:monospace;font-size:11px">${r.sku}</td>
-        <td>${r.units||0}</td>
-        <td style="font-weight:700;color:var(--coral-dark);white-space:nowrap">${fmt(r.amount)}</td>
-      </tr>`).join("");
-    document.getElementById("rf-d-ret-log-sub").textContent=`${retLines} return line${retLines===1?'':'s'} in selected range`;
-    document.getElementById("rf-d-ret-tbl").innerHTML=retHead+`<tbody>${retRowsHtml||'<tr><td colspan="4" style="text-align:center;color:var(--gray);padding:30px">No returns in selected range</td></tr>'}</tbody>`;
-  }else{
-    retSection.style.display="none";
-  }
 }
 
 function rfCloseDetail(){
