@@ -911,7 +911,9 @@ function pAmazon(rows){
     const type=(r[2]||"").trim().toLowerCase();
     if(type!=="refund")continue; // filter defensively in case non-refund rows appear
     const amt=Math.abs(pn(r[9]));if(!amt)continue;
-    const product=(r[4]||"").trim();
+    let product=(r[4]||"").trim();
+    // Strip "CREMA Coffee Products " prefix (case-insensitive) so the actual item name shows
+    product=product.replace(/^crema\s+coffee\s+products\s*/i,"").trim();
     out.push({date:d,amount:amt,reason:"(amazon — no reason provided)",rawReason:"",
       raw:{order:r[3]||"",product,status:r[1]||"",charges:pn(r[5]),rebates:pn(r[6]),fees:pn(r[7]),other:pn(r[8])}});
   }
