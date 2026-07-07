@@ -790,10 +790,27 @@ function renderDept(){
       {l:"Brand Reviews",v:br!=null?Math.round(br):"—",s:"Amazon"},
     ];
   }else{
-    // Historical — aggregate from per-agent KPI sheets
+    // Historical — aggregate from per-agent KPI sheets, adjusted for PTO from General Data
+    const BASE_HRS=148.4, HRS_PER_DAY=7.42;
+    // Parse weekLabel (MM/DD/YYYY) as week start; span = [weekStart, weekStart+7)
+    const parseD=(s)=>{const m=String(s).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(!m)return null;return new Date(+m[3],+m[1]-1,+m[2]);};
+    const wkStart=parseD(weekLabel);
+    const wkEnd=wkStart?new Date(wkStart.getFullYear(),wkStart.getMonth(),wkStart.getDate()+7):null;
+    const inWk=(dateStr)=>{if(!wkStart)return false;const d=parseD(dateStr);return d&&d>=wkStart&&d<wkEnd;};
+    const ptoDays=(D.ptoLog||[]).filter(r=>inWk(r.date)&&r.agent!=="Holiday").length;
+    const holidayDays=(D.ptoLog||[]).filter(r=>inWk(r.date)&&r.agent==="Holiday").length;
+    const ptoHrs=ptoDays*HRS_PER_DAY;
+    const holidayHrs=holidayDays*HRS_PER_DAY*4; // holiday affects all 4 agents
+    const availHrs=BASE_HRS-ptoHrs-holidayHrs;
+    const spentHrs=agg["Hours/Week"]?.sum||0;
+    const usedPct=availHrs>0?(spentHrs/availHrs*100):0;
+    const infWk=(D.infractions||[]).filter(r=>inWk(r.date));
+    const infPts=infWk.reduce((s,r)=>s+(r.val||0),0);
     cards=[
-      {l:"Available Time",v:(agg["Hours/Week"]?.sum||0).toFixed(1)+"h",s:"team total"},
-      {l:"Time Usage (avg)",v:(agg["Time Usage"]?.avg||0).toFixed(1)+"%",s:"target: 95%"},
+      {l:"Available Time",v:availHrs.toFixed(2)+"h",s:`base 148.4h − ${ptoDays} PTO${holidayDays?` − ${holidayDays} holiday`:""}`},
+      {l:"Time Spent",v:spentHrs.toFixed(2)+"h",s:"team total"},
+      {l:"Used Time",v:usedPct.toFixed(2)+"%",s:"target: 95%"},
+      {l:"Infraction Points",v:infPts.toFixed(1),s:`${infWk.length} event${infWk.length===1?"":"s"}`},
       {l:"Replies Sent",v:Math.round(agg["Replies Sent"]?.sum||0),s:"Front — all agents"},
       {l:"Messages Sent",v:Math.round(agg["Messages Sent (excl. replies)"]?.sum||0),s:"Front — excl. replies"},
       {l:"Avg First Reply Time",v:(agg["First Reply Time (hrs)"]?.avg||0).toFixed(1)+" hrs",s:"target: 4 hrs"},
@@ -802,8 +819,6 @@ function renderDept(){
       {l:"Calls Answered",v:Math.round(agg["Calls Answered"]?.sum||0),s:"Dialpad — all agents"},
       {l:"Calls Placed",v:Math.round(agg["Calls Placed"]?.sum||0),s:"Dialpad"},
       {l:"Total Missed Calls",v:Math.round(agg["Missed Calls"]?.sum||0),s:"target: 0"},
-      {l:"Dialpad Time (total)",v:(agg["Dialpad Time (hrs)"]?.sum||0).toFixed(1)+" hrs",s:"all agents"},
-      {l:"General Efficiency (avg)",v:(agg["General Efficiency"]?.avg||0).toFixed(1)+"%",s:"target: 100%"},
     ];
   }
 
