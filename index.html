@@ -744,14 +744,14 @@ function renderAg(){
 
 function renderDept(){
   const wi=+document.getElementById("dept-wk-sel").value;
-  // Sum metrics across all agents for the selected week
   const agNames=Object.keys(D.kpi);
-  // Get the week date label
   const firstAg=Object.values(D.kpi)[0];
   const weekLabel=firstAg?firstAg.dates[wi]:"";
-  document.getElementById("dept-sub").textContent="Week of "+weekLabel;
+  const isLatest=firstAg?wi===firstAg.dates.length-1:false;
+  const w=D.weeklyDept||{};
+  document.getElementById("dept-sub").textContent="Week of "+weekLabel+(isLatest?" (live from CE Weekly Report)":" (historical — aggregated from agent data)");
 
-  // Aggregate metrics
+  // Aggregate metrics from agent KPIs (used for historical weeks)
   const agg={};const metricNames=Object.keys(firstAg?.kpis||{});
   metricNames.forEach(mn=>{
     let sum=0,count=0;
@@ -759,26 +759,57 @@ function renderDept(){
     agg[mn]={sum,avg:count?sum/count:0,count};
   });
 
-  // Build cards
-  const cards=[
-    {l:"Available Time",v:(agg["Hours/Week"]?.sum||0).toFixed(1)+"h",s:"team total"},
-    {l:"Time Usage (avg)",v:(agg["Time Usage"]?.avg||0).toFixed(1)+"%",s:"target: 95%"},
-    {l:"Replies Sent",v:Math.round(agg["Replies Sent"]?.sum||0),s:"Front — all agents"},
-    {l:"Messages Sent",v:Math.round(agg["Messages Sent (excl. replies)"]?.sum||0),s:"Front — excl. replies"},
-    {l:"Avg First Reply Time",v:(agg["First Reply Time (hrs)"]?.avg||0).toFixed(1)+" hrs",s:"target: 4 hrs"},
-    {l:"Avg Handle Time",v:(agg["Handle Time (min)"]?.avg||0).toFixed(1)+" min",s:"target: 4 min"},
-    {l:"Total SLA Breaches",v:Math.round(agg["SLA Breaches"]?.sum||0),s:"target: 2 per agent"},
-    {l:"Calls Answered",v:Math.round(agg["Calls Answered"]?.sum||0),s:"Dialpad — all agents"},
-    {l:"Calls Placed",v:Math.round(agg["Calls Placed"]?.sum||0),s:"Dialpad"},
-    {l:"Total Missed Calls",v:Math.round(agg["Missed Calls"]?.sum||0),s:"target: 0"},
-    {l:"Dialpad Time (total)",v:(agg["Dialpad Time (hrs)"]?.sum||0).toFixed(1)+" hrs",s:"all agents"},
-    {l:"General Efficiency (avg)",v:(agg["General Efficiency"]?.avg||0).toFixed(1)+"%",s:"target: 100%"},
-  ];
+  // Helper: pick from CSV metrics by KPI name (col B)
+  const csvGet=(kpiName)=>{const m=(w.metrics||[]).find(x=>(x.kpi||"").toLowerCase().trim()===kpiName.toLowerCase());return m?m.done:null;};
+  const num=(v)=>{if(v==null||v==="")return null;const n=parseFloat(String(v).replace(/[^0-9.\-]/g,""));return isNaN(n)?null:n;};
+
+  let cards;
+  if(isLatest && w.avail){
+    // Pull from CSV snapshot
+    const repl=num(csvGet("Replies sent"));
+    const msg=num(csvGet("Messages sent (excluding replies)"));
+    const rt=num(csvGet("Reply time (avg)"));
+    const frt=num(csvGet("First reply time (avg)"));
+    const ht=num(csvGet("Handle time (avg)"));
+    const ca=num(csvGet("Calls Answered"));
+    const cp=num(csvGet("Calls Placed"));
+    const mtg=num(csvGet("Meeting"));
+    const br=num(csvGet("Brand Reviews"));
+    cards=[
+      {l:"Available Time",v:(w.avail||0).toFixed(2)+"h",s:"team total"},
+      {l:"Time Spent",v:(w.spent||0).toFixed(2)+"h",s:"team total"},
+      {l:"Used Time",v:w.pct||"—",s:"target: 95%"},
+      {l:"Replies Sent",v:repl!=null?Math.round(repl):"—",s:"Front"},
+      {l:"Messages Sent",v:msg!=null?Math.round(msg):"—",s:"Front — excl. replies"},
+      {l:"Reply Time (avg)",v:rt!=null?rt.toFixed(2)+" hrs":"—",s:"target: 4 hrs"},
+      {l:"First Reply Time (avg)",v:frt!=null?frt.toFixed(2)+" hrs":"—",s:"target: 4 hrs"},
+      {l:"Handle Time (avg)",v:ht!=null?ht.toFixed(2)+" min":"—",s:"target: 5 min"},
+      {l:"Calls Answered",v:ca!=null?Math.round(ca):"—",s:"Dialpad"},
+      {l:"Calls Placed",v:cp!=null?Math.round(cp):"—",s:"Dialpad"},
+      {l:"Meetings",v:mtg!=null?mtg.toFixed(2)+" hrs":"—",s:"General"},
+      {l:"Brand Reviews",v:br!=null?Math.round(br):"—",s:"Amazon"},
+    ];
+  }else{
+    // Historical — aggregate from per-agent KPI sheets
+    cards=[
+      {l:"Available Time",v:(agg["Hours/Week"]?.sum||0).toFixed(1)+"h",s:"team total"},
+      {l:"Time Usage (avg)",v:(agg["Time Usage"]?.avg||0).toFixed(1)+"%",s:"target: 95%"},
+      {l:"Replies Sent",v:Math.round(agg["Replies Sent"]?.sum||0),s:"Front — all agents"},
+      {l:"Messages Sent",v:Math.round(agg["Messages Sent (excl. replies)"]?.sum||0),s:"Front — excl. replies"},
+      {l:"Avg First Reply Time",v:(agg["First Reply Time (hrs)"]?.avg||0).toFixed(1)+" hrs",s:"target: 4 hrs"},
+      {l:"Avg Handle Time",v:(agg["Handle Time (min)"]?.avg||0).toFixed(1)+" min",s:"target: 4 min"},
+      {l:"Total SLA Breaches",v:Math.round(agg["SLA Breaches"]?.sum||0),s:"target: 2 per agent"},
+      {l:"Calls Answered",v:Math.round(agg["Calls Answered"]?.sum||0),s:"Dialpad — all agents"},
+      {l:"Calls Placed",v:Math.round(agg["Calls Placed"]?.sum||0),s:"Dialpad"},
+      {l:"Total Missed Calls",v:Math.round(agg["Missed Calls"]?.sum||0),s:"target: 0"},
+      {l:"Dialpad Time (total)",v:(agg["Dialpad Time (hrs)"]?.sum||0).toFixed(1)+" hrs",s:"all agents"},
+      {l:"General Efficiency (avg)",v:(agg["General Efficiency"]?.avg||0).toFixed(1)+"%",s:"target: 100%"},
+    ];
+  }
 
   document.getElementById("dept-cards").innerHTML=cards.map(c=>`<div class="dsc"><div class="dsl">${c.l}</div><div class="dsv">${c.v}</div><div class="dss">${c.s}</div></div>`).join("");
 
   // Ratings from weekly data
-  const w=D.weeklyDept;
   if(w.ratings?.length){
     document.getElementById("dept-rat").innerHTML=`<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:8px">${w.ratings.map(r=>`<div style="background:var(--bg);border-radius:10px;padding:16px 24px;min-width:140px;text-align:center"><div style="font-size:10px;color:var(--gray);font-weight:600;text-transform:uppercase;letter-spacing:1px">${r.source}</div><div style="font-size:28px;font-weight:800;margin-top:6px">${r.rate}</div></div>`).join("")}</div>`;
   }
