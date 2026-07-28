@@ -327,6 +327,8 @@ const URLS={
   salesOverview:"https://docs.google.com/spreadsheets/d/e/2PACX-1vSMwoSny4boAvjEA1o3fbUB_1ccMyr0TOhtw3JJoXVJ1KpvlaNOfXEe6bQMvbOi-s1w75bOifS2Uvkt/pub?gid=599922517&single=true&output=csv",
   salesLog:"https://docs.google.com/spreadsheets/d/e/2PACX-1vSMwoSny4boAvjEA1o3fbUB_1ccMyr0TOhtw3JJoXVJ1KpvlaNOfXEe6bQMvbOi-s1w75bOifS2Uvkt/pub?gid=589829049&single=true&output=csv",
   commOverview:"https://docs.google.com/spreadsheets/d/e/2PACX-1vQb9MSXK7p3vQOGwYgWmfM_LOE8k7xMAiN-QajJ87771bAfGZXPjfg_wzdRKBEGhZJ_zoU-uOYwv17m/pub?gid=1346274881&single=true&output=csv",
+  frontData:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=208889552&single=true&output=csv",
+  dialpadData:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=888035573&single=true&output=csv",
   weekly:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1909086011&single=true&output=csv",
   generalData:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1380055448&single=true&output=csv",
   kpiAngel:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1537411239&single=true&output=csv",
@@ -378,18 +380,18 @@ async function fetchCSV(url,name){
   try{const ts=Date.now();const proxy="https://corsproxy.io/?"+encodeURIComponent(url+(url.includes("?")?"\x26":"?")+"_t="+ts);const p=await tryFetch(proxy);console.log("✅ "+name+" (proxy): "+p.length+" rows");return p;}catch(e2){console.error("❌ "+name+": failed");return [];}
 }
 
-const D={agents:[],monthlyComm:[],revData:[],salesLog:[],weeklyDept:{},weeklyRaw:[],kpi:{},infractions:[],ptoLog:[],issues:[],schedule:[]};
+const D={agents:[],monthlyComm:[],revData:[],salesLog:[],weeklyDept:{},weeklyRaw:[],kpi:{},infractions:[],ptoLog:[],issues:[],schedule:[],front:{},frontAgent:{},dialpadAgent:{}};
 
 async function loadAll(){
-  const names=["commOverview","salesOverview","salesLog","weekly","generalData","kpiAngel","kpiIvan","kpiFatima","kpiLuisa","kpiVanessa","schedule","issues"];
-  const urls=[URLS.commOverview,URLS.salesOverview,URLS.salesLog,URLS.weekly,URLS.generalData,URLS.kpiAngel,URLS.kpiIvan,URLS.kpiFatima,URLS.kpiLuisa,URLS.kpiVanessa,URLS.schedule,URLS.issues];
+  const names=["commOverview","salesOverview","salesLog","weekly","generalData","kpiAngel","kpiIvan","kpiFatima","kpiLuisa","kpiVanessa","schedule","issues","frontData","dialpadData"];
+  const urls=[URLS.commOverview,URLS.salesOverview,URLS.salesLog,URLS.weekly,URLS.generalData,URLS.kpiAngel,URLS.kpiIvan,URLS.kpiFatima,URLS.kpiLuisa,URLS.kpiVanessa,URLS.schedule,URLS.issues,URLS.frontData,URLS.dialpadData];
   const bar=document.getElementById("load-fill");
   const results=[];
   for(let i=0;i<urls.length;i++){
     results.push(await fetchCSV(urls[i],names[i]));
     if(bar)bar.style.width=((i+1)/urls.length*100)+"%";
   }
-  const [commOv,salesOv,salesLg,weekly,genData,kA,kI,kF,kL,kV,sched,issues]=results;
+  const [commOv,salesOv,salesLg,weekly,genData,kA,kI,kF,kL,kV,sched,issues,frontData,dialpadData]=results;
 
   // ═══ PARSE COMMISSION OVERVIEW ═══
   // Rows 2-7 = agents, row 8 = totals. Col 0=name, 1=total, 2-6=tiers, 7=ALC, 8=KIT, 9=orders
@@ -474,6 +476,33 @@ async function loadAll(){
   for(let i=2;i<genData.length;i++){const r=genData[i];
     if(r&&r[0]&&r[1]&&r[0].includes("/"))D.infractions.push({date:r[0],agent:r[1],type:r[2]||"",val:pn(r[3]),comment:r[4]||"",ticket:r[5]||""});
     if(r&&r[7]&&r[8]&&r[7].includes("/"))D.ptoLog.push({date:r[7],agent:r[8],comment:r[9]||""});
+  }
+
+  // ═══ PARSE FRONT DATA (per-agent per-week; aggregate satisfaction per week) ═══
+  // Cols: 0=Week, 1=Teammate, 5=Replies sent, 6=Messages sent (excl. replies), 18=Sat%, 19=Sat avg (0-5)
+  D.front={};D.frontAgent={};
+  for(let i=1;i<frontData.length;i++){const r=frontData[i];
+    if(!r||!r[0]||!r[0].includes("/"))continue;
+    const wk=r[0].trim(); const agent=(r[1]||"").trim();
+    const satPct=parseFloat(r[18]);const satAvg=parseFloat(r[19]);
+    if(!D.front[wk])D.front[wk]={pctSum:0,pctN:0,avgSum:0,avgN:0};
+    if(!isNaN(satPct)){D.front[wk].pctSum+=satPct;D.front[wk].pctN++;}
+    if(!isNaN(satAvg)){D.front[wk].avgSum+=satAvg;D.front[wk].avgN++;}
+    if(agent){
+      if(!D.frontAgent[agent])D.frontAgent[agent]={};
+      D.frontAgent[agent][wk]={replies:pn(r[5]),msgs:pn(r[6])};
+    }
+  }
+
+  // ═══ PARSE DIALPAD DATA (per-agent per-week) ═══
+  // Cols: 0=Week, 2=name, 19=Calls Placed, 20=Calls Answered
+  D.dialpadAgent={};
+  for(let i=1;i<dialpadData.length;i++){const r=dialpadData[i];
+    if(!r||!r[0]||!r[0].includes("/"))continue;
+    const wk=r[0].trim(); const agent=(r[2]||"").trim();
+    if(!agent)continue;
+    if(!D.dialpadAgent[agent])D.dialpadAgent[agent]={};
+    D.dialpadAgent[agent][wk]={placed:pn(r[19]),answered:pn(r[20])};
   }
 
   // ═══ SCHEDULE ═══
@@ -690,11 +719,28 @@ function buildKPI(){window._k=1;
 function renderAg(){
   const ag=document.getElementById("kpi-ag").value,wi=+document.getElementById("kpi-wk").value;
   const d=D.kpi[ag];if(!d)return;
-  const km=["Assigned Conversations","Total Messages","Messages Sent (excl. replies)","Replies Sent","First Reply Time (hrs)","Handle Time (min)","SLA Breaches","Satisfaction %","Calls Answered","Calls Placed","Missed Calls","Dialpad Time (hrs)","Days Worked","Time Usage","General Efficiency"];
+  const km=["Assigned Conversations","Total Messages","Messages Sent (excl. replies)","Replies Sent","First Reply Time (hrs)","Handle Time (min)","SLA Breaches","Satisfaction %","Calls Answered","Calls Placed","Missed Calls","Dialpad Time (hrs)","Days Worked","Time Usage","General Efficiency","Interactions / Day"];
   // Compute Total Messages = Replies + Messages excl replies
   if(d.kpis["Replies Sent"]&&d.kpis["Messages Sent (excl. replies)"]){
     const rv=d.kpis["Replies Sent"].v,mv=d.kpis["Messages Sent (excl. replies)"].v;
     d.kpis["Total Messages"]={v:rv.map((r,i)=>(r||0)+(mv[i]||0)),t:null,p:"Front"};
+  }
+  // Compute Interactions/Day per week: (replies+msgs+answered+placed) ÷ (5 − pto days for this agent that week)
+  {
+    const parseD3=(s)=>{const m=String(s).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(!m)return null;return new Date(+m[3],+m[1]-1,+m[2]);};
+    const vArr=d.dates.map(wk=>{
+      const wkStart=parseD3(wk);if(!wkStart)return null;
+      const wkEnd=new Date(wkStart.getFullYear(),wkStart.getMonth(),wkStart.getDate()+7);
+      const inWk=(ds)=>{const x=parseD3(ds);return x&&x>=wkStart&&x<wkEnd;};
+      const f=D.frontAgent?.[ag]?.[wk]||{replies:0,msgs:0};
+      const dp=D.dialpadAgent?.[ag]?.[wk]||{placed:0,answered:0};
+      const total=(f.replies||0)+(f.msgs||0)+(dp.answered||0)+(dp.placed||0);
+      const ptoDays=(D.ptoLog||[]).filter(x=>inWk(x.date)&&x.agent===ag).length;
+      const holDays=(D.ptoLog||[]).filter(x=>inWk(x.date)&&x.agent==="Holiday").length;
+      const workDays=5-ptoDays-holDays;
+      return workDays>0?total/workDays:null;
+    });
+    d.kpis["Interactions / Day"]={v:vArr,t:null,p:"General"};
   }
   document.getElementById("kpi-cards").innerHTML=km.map(n=>{const m=d.kpis[n];if(!m)return"";
     const v=m.v[wi];const pv=wi>0?m.v[wi-1]:null;
@@ -702,6 +748,7 @@ function renderAg(){
     let vs;
     if(n==="Satisfaction %")vs=v!==null&&v!==undefined?Math.round(v)+"%":"—";
     else if(n==="Time Usage"||n==="General Efficiency")vs=v!==null&&v!==undefined?(typeof v==="number"?v.toFixed(1):v)+"%":"—";
+    else if(n==="Interactions / Day")vs=v!==null&&v!==undefined?Number(v).toFixed(1):"—";
     else vs=v!==null&&v!==undefined?Number(v).toFixed(n.includes("hrs")||n.includes("min")?1:0):"—";
     // Status
     let st="good";if(m.t!==null&&v!==null&&v!==undefined){
@@ -763,6 +810,31 @@ function renderDept(){
   const csvGet=(kpiName)=>{const m=(w.metrics||[]).find(x=>(x.kpi||"").toLowerCase().trim()===kpiName.toLowerCase());return m?m.done:null;};
   const num=(v)=>{if(v==null||v==="")return null;const n=parseFloat(String(v).replace(/[^0-9.\-]/g,""));return isNaN(n)?null:n;};
 
+  // Satisfaction score for this week (from Front data)
+  const sat=D.front?.[weekLabel];
+  const satAvg=sat&&sat.avgN?(sat.avgSum/sat.avgN):null;
+  const satPct=sat&&sat.pctN?(sat.pctSum/sat.pctN*100):null;
+  const satCard={l:"Satisfaction",v:satAvg!=null?satAvg.toFixed(2)+" / 5":"—",s:satPct!=null?satPct.toFixed(1)+"% positive":"no responses"};
+
+  // Interactions/day (team): sum Front replies+msgs + Dialpad answered+placed across all agents for this week
+  // ÷ (5 × active agents − total team PTO days for this week)
+  const parseD2=(s)=>{const m=String(s).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(!m)return null;return new Date(+m[3],+m[1]-1,+m[2]);};
+  const wkStart2=parseD2(weekLabel);
+  const wkEnd2=wkStart2?new Date(wkStart2.getFullYear(),wkStart2.getMonth(),wkStart2.getDate()+7):null;
+  const inWk2=(dateStr)=>{if(!wkStart2)return false;const d=parseD2(dateStr);return d&&d>=wkStart2&&d<wkEnd2;};
+  const ACTIVE_AGENTS=["Angel Jimenez","Ivan Soto","Fatima Soto","Luisa Tona"];
+  let teamRepl=0,teamMsg=0,teamAns=0,teamPlc=0;
+  ACTIVE_AGENTS.forEach(a=>{
+    const f=D.frontAgent?.[a]?.[weekLabel];if(f){teamRepl+=f.replies||0;teamMsg+=f.msgs||0;}
+    const d=D.dialpadAgent?.[a]?.[weekLabel];if(d){teamAns+=d.answered||0;teamPlc+=d.placed||0;}
+  });
+  const teamPtoDays=(D.ptoLog||[]).filter(x=>inWk2(x.date)&&x.agent!=="Holiday"&&ACTIVE_AGENTS.includes(x.agent)).length;
+  const teamHolDays=(D.ptoLog||[]).filter(x=>inWk2(x.date)&&x.agent==="Holiday").length;
+  const teamWorkDays=(5*ACTIVE_AGENTS.length)-teamPtoDays-(teamHolDays*ACTIVE_AGENTS.length);
+  const teamInter=teamRepl+teamMsg+teamAns+teamPlc;
+  const interDay=teamWorkDays>0?(teamInter/teamWorkDays):0;
+  const interCard={l:"Interactions / Day",v:interDay.toFixed(1),s:`${teamInter} total ÷ ${teamWorkDays} agent-days`};
+
   let cards;
   if(isLatest && w.avail){
     // Pull from CSV snapshot
@@ -779,6 +851,8 @@ function renderDept(){
       {l:"Available Time",v:(w.avail||0).toFixed(2)+"h",s:"team total"},
       {l:"Time Spent",v:(w.spent||0).toFixed(2)+"h",s:"team total"},
       {l:"Used Time",v:w.pct||"—",s:"target: 95%"},
+      satCard,
+      interCard,
       {l:"Replies Sent",v:repl!=null?Math.round(repl):"—",s:"Front"},
       {l:"Messages Sent",v:msg!=null?Math.round(msg):"—",s:"Front — excl. replies"},
       {l:"Reply Time (avg)",v:rt!=null?rt.toFixed(2)+" hrs":"—",s:"target: 4 hrs"},
@@ -810,6 +884,8 @@ function renderDept(){
       {l:"Available Time",v:availHrs.toFixed(2)+"h",s:`base 148.4h − ${ptoDays} PTO${holidayDays?` − ${holidayDays} holiday`:""}`},
       {l:"Time Spent",v:spentHrs.toFixed(2)+"h",s:"team total"},
       {l:"Used Time",v:usedPct.toFixed(2)+"%",s:"target: 95%"},
+      satCard,
+      interCard,
       {l:"Infraction Points",v:infPts.toFixed(1),s:`${infWk.length} event${infWk.length===1?"":"s"}`},
       {l:"Replies Sent",v:Math.round(agg["Replies Sent"]?.sum||0),s:"Front — all agents"},
       {l:"Messages Sent",v:Math.round(agg["Messages Sent (excl. replies)"]?.sum||0),s:"Front — excl. replies"},
