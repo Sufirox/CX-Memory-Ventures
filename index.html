@@ -331,9 +331,9 @@ const URLS={
   dialpadData:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=888035573&single=true&output=csv",
   weekly:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1909086011&single=true&output=csv",
   generalData:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1380055448&single=true&output=csv",
-  kpiAngel:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1537411239&single=true&output=csv",
-  kpiIvan:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1359891429&single=true&output=csv",
-  kpiFatima:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=48753695&single=true&output=csv",
+  kpiAngel:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=2020620642&single=true&output=csv",
+  kpiIvan:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=382540791&single=true&output=csv",
+  kpiFatima:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1915170996&single=true&output=csv",
   kpiLuisa:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1521800009&single=true&output=csv",
   kpiVanessa:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1407071428&single=true&output=csv",
   schedule:"https://docs.google.com/spreadsheets/d/e/2PACX-1vQINTKfEREAnt10bxY_UG9I5GbSANCx6Doq-BGG23MzD1wR2IDfrRc84UEIZlhkYcLuov70Ug2_Pf1x/pub?output=csv",
@@ -377,10 +377,11 @@ async function fetchCSV(url,name){
   async function tryFetch(u){const r=await fetch(u,{redirect:'follow',cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const t=await r.text();if(t.includes('<!DOCTYPE'))throw new Error('HTML response');return parseCSV(t);}
 
   try{const p=await tryFetch(url);console.log("✅ "+name+": "+p.length+" rows");return p;}catch(e){}
-  try{const ts=Date.now();const proxy="https://corsproxy.io/?"+encodeURIComponent(url+(url.includes("?")?"\x26":"?")+"_t="+ts);const p=await tryFetch(proxy);console.log("✅ "+name+" (proxy): "+p.length+" rows");return p;}catch(e2){console.error("❌ "+name+": failed");return [];}
+  try{const ts=Date.now();const proxy="https://corsproxy.io/?"+encodeURIComponent(url+(url.includes("?")?"\x26":"?")+"_t="+ts);const p=await tryFetch(proxy);console.log("✅ "+name+" (proxy): "+p.length+" rows");return p;}catch(e2){console.error("❌ "+name+": failed");if(window.D&&D.failed)D.failed.push(name);return [];}
 }
 
-const D={agents:[],monthlyComm:[],revData:[],salesLog:[],weeklyDept:{},weeklyRaw:[],kpi:{},infractions:[],ptoLog:[],issues:[],schedule:[],front:{},frontAgent:{},dialpadAgent:{}};
+const D={agents:[],monthlyComm:[],revData:[],salesLog:[],weeklyDept:{},weeklyRaw:[],kpi:{},infractions:[],ptoLog:[],issues:[],schedule:[],front:{},frontAgent:{},dialpadAgent:{},failed:[]};
+window.D=D;
 
 async function loadAll(){
   const names=["commOverview","salesOverview","salesLog","weekly","generalData","kpiAngel","kpiIvan","kpiFatima","kpiLuisa","kpiVanessa","schedule","issues","frontData","dialpadData"];
@@ -516,6 +517,15 @@ async function loadAll(){
   // Hide loading, show dashboard
   document.getElementById("loading-overlay").classList.add("done");
   document.getElementById("sf-ver").innerHTML=VER;
+  if(D.failed.length){
+    const mn=document.querySelector(".main");
+    if(mn){
+      const b=document.createElement("div");
+      b.style.cssText="background:#FDECEA;border:1px solid #D4604A;color:#8A2F1F;border-radius:10px;padding:12px 16px;margin:0 0 18px;font-size:13px;font-weight:600";
+      b.innerHTML="⚠️ "+D.failed.length+" data source"+(D.failed.length===1?"":"s")+" failed to load: "+D.failed.join(", ")+". Cards fed by "+(D.failed.length===1?"it":"them")+" are blank or incomplete. Check that the tab is still published to the web in Google Sheets and that the gid matches.";
+      mn.insertBefore(b,mn.firstChild);
+    }
+  }
   renderHome();
 }
 
@@ -718,7 +728,11 @@ function buildKPI(){window._k=1;
 }
 function renderAg(){
   const ag=document.getElementById("kpi-ag").value,wi=+document.getElementById("kpi-wk").value;
-  const d=D.kpi[ag];if(!d)return;
+  const d=D.kpi[ag];
+  if(!d){
+    document.getElementById("kpi-cards").innerHTML=`<div style="grid-column:1/-1;background:var(--bg);border-radius:10px;padding:24px;text-align:center;color:var(--gray);font-size:13px">No KPI data loaded for <b>${ag}</b>. Their sheet tab did not load, so nothing can be shown for this agent.</div>`;
+    return;
+  }
   const km=["Assigned Conversations","Total Messages","Messages Sent (excl. replies)","Replies Sent","First Reply Time (hrs)","Handle Time (min)","SLA Breaches","Satisfaction %","Calls Answered","Calls Placed","Missed Calls","Dialpad Time (hrs)","Days Worked","Time Usage","General Efficiency","Interactions / Day"];
   // Compute Total Messages = Replies + Messages excl replies
   if(d.kpis["Replies Sent"]&&d.kpis["Messages Sent (excl. replies)"]){
@@ -792,6 +806,14 @@ function renderAg(){
 function renderDept(){
   const wi=+document.getElementById("dept-wk-sel").value;
   const agNames=Object.keys(D.kpi);
+  const HRS_PER_DAY=7.42;
+  const ROSTER_FALLBACK=["Angel Jimenez","Ivan Soto","Fatima Soto","Luisa Tona"];
+  // Staffed headcount for this week = agents with real hours logged that week.
+  // Falls back to the current roster if Hours/Week is empty across the board.
+  const hoursAt=(an)=>{const v=D.kpi[an]?.kpis["Hours/Week"]?.v[wi];return(v===null||v===undefined||isNaN(v))?0:v;};
+  let wkAgents=agNames.filter(an=>hoursAt(an)>0);
+  if(!wkAgents.length)wkAgents=ROSTER_FALLBACK.filter(a=>agNames.includes(a));
+  const headcount=wkAgents.length||ROSTER_FALLBACK.length;
   const firstAg=Object.values(D.kpi)[0];
   const weekLabel=firstAg?firstAg.dates[wi]:"";
   const isLatest=firstAg?wi===firstAg.dates.length-1:false;
@@ -802,7 +824,7 @@ function renderDept(){
   const agg={};const metricNames=Object.keys(firstAg?.kpis||{});
   metricNames.forEach(mn=>{
     let sum=0,count=0;
-    agNames.forEach(an=>{const v=D.kpi[an]?.kpis[mn]?.v[wi];if(v!==null&&v!==undefined&&!isNaN(v)){sum+=v;count++;}});
+    wkAgents.forEach(an=>{const v=D.kpi[an]?.kpis[mn]?.v[wi];if(v!==null&&v!==undefined&&!isNaN(v)){sum+=v;count++;}});
     agg[mn]={sum,avg:count?sum/count:0,count};
   });
 
@@ -822,15 +844,14 @@ function renderDept(){
   const wkStart2=parseD2(weekLabel);
   const wkEnd2=wkStart2?new Date(wkStart2.getFullYear(),wkStart2.getMonth(),wkStart2.getDate()+7):null;
   const inWk2=(dateStr)=>{if(!wkStart2)return false;const d=parseD2(dateStr);return d&&d>=wkStart2&&d<wkEnd2;};
-  const ACTIVE_AGENTS=["Angel Jimenez","Ivan Soto","Fatima Soto","Luisa Tona"];
   let teamRepl=0,teamMsg=0,teamAns=0,teamPlc=0;
-  ACTIVE_AGENTS.forEach(a=>{
+  wkAgents.forEach(a=>{
     const f=D.frontAgent?.[a]?.[weekLabel];if(f){teamRepl+=f.replies||0;teamMsg+=f.msgs||0;}
     const d=D.dialpadAgent?.[a]?.[weekLabel];if(d){teamAns+=d.answered||0;teamPlc+=d.placed||0;}
   });
-  const teamPtoDays=(D.ptoLog||[]).filter(x=>inWk2(x.date)&&x.agent!=="Holiday"&&ACTIVE_AGENTS.includes(x.agent)).length;
+  const teamPtoDays=(D.ptoLog||[]).filter(x=>inWk2(x.date)&&x.agent!=="Holiday"&&wkAgents.includes(x.agent)).length;
   const teamHolDays=(D.ptoLog||[]).filter(x=>inWk2(x.date)&&x.agent==="Holiday").length;
-  const teamWorkDays=(5*ACTIVE_AGENTS.length)-teamPtoDays-(teamHolDays*ACTIVE_AGENTS.length);
+  const teamWorkDays=(5*headcount)-teamPtoDays-(teamHolDays*headcount);
   const teamInter=teamRepl+teamMsg+teamAns+teamPlc;
   const interDay=teamWorkDays>0?(teamInter/teamWorkDays):0;
   const interCard={l:"Interactions / Day",v:interDay.toFixed(1),s:`${teamInter} total ÷ ${teamWorkDays} agent-days`};
@@ -865,24 +886,24 @@ function renderDept(){
     ];
   }else{
     // Historical — aggregate from per-agent KPI sheets, adjusted for PTO from General Data
-    const BASE_HRS=148.4, HRS_PER_DAY=7.42;
+    const BASE_HRS=HRS_PER_DAY*headcount*5;
     // Parse weekLabel (MM/DD/YYYY) as week start; span = [weekStart, weekStart+7)
     const parseD=(s)=>{const m=String(s).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(!m)return null;return new Date(+m[3],+m[1]-1,+m[2]);};
     const wkStart=parseD(weekLabel);
     const wkEnd=wkStart?new Date(wkStart.getFullYear(),wkStart.getMonth(),wkStart.getDate()+7):null;
     const inWk=(dateStr)=>{if(!wkStart)return false;const d=parseD(dateStr);return d&&d>=wkStart&&d<wkEnd;};
-    const ptoDays=(D.ptoLog||[]).filter(r=>inWk(r.date)&&r.agent!=="Holiday").length;
+    const ptoDays=(D.ptoLog||[]).filter(r=>inWk(r.date)&&r.agent!=="Holiday"&&wkAgents.includes(r.agent)).length;
     const holidayDays=(D.ptoLog||[]).filter(r=>inWk(r.date)&&r.agent==="Holiday").length;
     const ptoHrs=ptoDays*HRS_PER_DAY;
-    const holidayHrs=holidayDays*HRS_PER_DAY*4; // holiday affects all 4 agents
+    const holidayHrs=holidayDays*HRS_PER_DAY*headcount; // holiday hits everyone staffed
     const availHrs=BASE_HRS-ptoHrs-holidayHrs;
     const spentHrs=agg["Hours/Week"]?.sum||0;
     const usedPct=availHrs>0?(spentHrs/availHrs*100):0;
     const infWk=(D.infractions||[]).filter(r=>inWk(r.date));
     const infPts=infWk.reduce((s,r)=>s+(r.val||0),0);
     cards=[
-      {l:"Available Time",v:availHrs.toFixed(2)+"h",s:`base 148.4h − ${ptoDays} PTO${holidayDays?` − ${holidayDays} holiday`:""}`},
-      {l:"Time Spent",v:spentHrs.toFixed(2)+"h",s:"team total"},
+      {l:"Available Time",v:availHrs.toFixed(2)+"h",s:`base ${BASE_HRS.toFixed(1)}h (${headcount} agents) − ${ptoDays} PTO${holidayDays?` − ${holidayDays} holiday`:""}`},
+      {l:"Time Spent",v:spentHrs.toFixed(2)+"h",s:`${headcount} staffed agents`},
       {l:"Used Time",v:usedPct.toFixed(2)+"%",s:"target: 95%"},
       satCard,
       interCard,
