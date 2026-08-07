@@ -158,6 +158,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 <button class="nav-btn" data-page="schedule"><span class="icon">◆</span> <span>Schedule & Attendance</span></button>
 <button class="nav-btn" data-page="ops"><span class="icon">○</span> <span>Daily Operations</span></button>
 <button class="nav-btn" data-page="refunds"><span class="icon">⟲</span> <span>General Refunds</span></button>
+<button class="nav-btn" data-page="cb"><span class="icon">⚠</span> <span>Chargebacks</span></button>
 </nav>
 <div class="sidebar-footer"><span id="sf-ver">v1.0</span></div>
 </aside>
@@ -320,10 +321,61 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 </div>
 </div>
 
+<div id="page-cb" class="page">
+<div class="page-header">
+  <div><h1>Chargebacks</h1><p id="cb-sub">ScanCafe dispute performance</p></div>
+  <div class="rf-range">
+    <label>From</label><input type="date" id="cb-from">
+    <label>To</label><input type="date" id="cb-to">
+    <div class="rf-preset">
+      <button class="dr-btn" data-cbr="mtd">This Month</button>
+      <button class="dr-btn" data-cbr="30d">Last 30d</button>
+      <button class="dr-btn" data-cbr="ytd">YTD</button>
+      <button class="dr-btn active" data-cbr="all">All</button>
+    </div>
+  </div>
+</div>
+
+<div class="rf-kpis" id="cb-totals"></div>
+<div class="rf-kpis" id="cb-totals2" style="margin-top:-6px"></div>
+
+<div class="cd" style="margin-bottom:16px">
+  <div class="ct">Monthly Volume &amp; Win Rate</div>
+  <div class="csb" id="cb-trend-sub">Chargeback amount by month, with win rate overlay</div>
+  <div class="cw" style="height:200px"><canvas id="cb-trend"></canvas></div>
+</div>
+
+<div class="g2">
+  <div class="cd">
+    <div class="ct" style="font-size:13px;font-weight:600">Dispute Reasons</div>
+    <div class="csb">Amount at stake by reason, ranked</div>
+    <div class="cw"><canvas id="cb-reason" height="220"></canvas></div>
+  </div>
+  <div class="cd">
+    <div class="ct" style="font-size:13px;font-weight:600">Win Rate by Card Brand</div>
+    <div class="csb">Resolved cases only, pending excluded</div>
+    <div class="cw"><canvas id="cb-brand" height="220"></canvas></div>
+  </div>
+</div>
+
+<div class="cd" style="margin-top:16px">
+  <div class="ct" style="font-size:13px;font-weight:600">Open Cases</div>
+  <div class="csb" id="cb-open-sub">Still pending a decision, soonest due date first</div>
+  <div class="tw" style="max-height:320px"><table class="tb" id="cb-open-tbl"></table></div>
+</div>
+
+<div class="cd" style="margin-top:16px">
+  <div class="ct" style="font-size:13px;font-weight:600">Chargeback Log</div>
+  <div class="csb" id="cb-log-sub">All cases in selected range</div>
+  <div class="tw" style="max-height:520px"><table class="tb" id="cb-tbl"></table></div>
+</div>
+</div>
+
 </div>
 <script>
 const VER="v1.1 — Apr 2026";
 const URLS={
+  cbScanCafe:"https://docs.google.com/spreadsheets/d/e/2PACX-1vQ4tGN7IZU_-EFMZvAYj3egQ3Zcbl4z4s9EWvfPpRrZcBfnVn02G1dFt5cWEFKnYiWXQ3mmr_r0Fu5Z/pub?gid=48102920&single=true&output=csv",
   salesOverview:"https://docs.google.com/spreadsheets/d/e/2PACX-1vSMwoSny4boAvjEA1o3fbUB_1ccMyr0TOhtw3JJoXVJ1KpvlaNOfXEe6bQMvbOi-s1w75bOifS2Uvkt/pub?gid=599922517&single=true&output=csv",
   salesLog:"https://docs.google.com/spreadsheets/d/e/2PACX-1vSMwoSny4boAvjEA1o3fbUB_1ccMyr0TOhtw3JJoXVJ1KpvlaNOfXEe6bQMvbOi-s1w75bOifS2Uvkt/pub?gid=589829049&single=true&output=csv",
   commOverview:"https://docs.google.com/spreadsheets/d/e/2PACX-1vQb9MSXK7p3vQOGwYgWmfM_LOE8k7xMAiN-QajJ87771bAfGZXPjfg_wzdRKBEGhZJ_zoU-uOYwv17m/pub?gid=1346274881&single=true&output=csv",
@@ -380,19 +432,44 @@ async function fetchCSV(url,name){
   try{const ts=Date.now();const proxy="https://corsproxy.io/?"+encodeURIComponent(url+(url.includes("?")?"\x26":"?")+"_t="+ts);const p=await tryFetch(proxy);console.log("✅ "+name+" (proxy): "+p.length+" rows");return p;}catch(e2){console.error("❌ "+name+": failed");if(window.D&&D.failed)D.failed.push(name);return [];}
 }
 
-const D={agents:[],monthlyComm:[],revData:[],salesLog:[],weeklyDept:{},weeklyRaw:[],kpi:{},infractions:[],ptoLog:[],issues:[],schedule:[],front:{},frontAgent:{},dialpadAgent:{},failed:[]};
+const D={agents:[],monthlyComm:[],revData:[],salesLog:[],weeklyDept:{},weeklyRaw:[],kpi:{},infractions:[],ptoLog:[],issues:[],schedule:[],front:{},frontAgent:{},dialpadAgent:{},chargebacks:[],failed:[]};
 window.D=D;
 
 async function loadAll(){
-  const names=["commOverview","salesOverview","salesLog","weekly","generalData","kpiAngel","kpiIvan","kpiFatima","kpiLuisa","kpiVanessa","schedule","issues","frontData","dialpadData"];
-  const urls=[URLS.commOverview,URLS.salesOverview,URLS.salesLog,URLS.weekly,URLS.generalData,URLS.kpiAngel,URLS.kpiIvan,URLS.kpiFatima,URLS.kpiLuisa,URLS.kpiVanessa,URLS.schedule,URLS.issues,URLS.frontData,URLS.dialpadData];
+  const names=["commOverview","salesOverview","salesLog","weekly","generalData","kpiAngel","kpiIvan","kpiFatima","kpiLuisa","kpiVanessa","schedule","issues","frontData","dialpadData","cbScanCafe"];
+  const urls=[URLS.commOverview,URLS.salesOverview,URLS.salesLog,URLS.weekly,URLS.generalData,URLS.kpiAngel,URLS.kpiIvan,URLS.kpiFatima,URLS.kpiLuisa,URLS.kpiVanessa,URLS.schedule,URLS.issues,URLS.frontData,URLS.dialpadData,URLS.cbScanCafe];
   const bar=document.getElementById("load-fill");
   const results=[];
   for(let i=0;i<urls.length;i++){
     results.push(await fetchCSV(urls[i],names[i]));
     if(bar)bar.style.width=((i+1)/urls.length*100)+"%";
   }
-  const [commOv,salesOv,salesLg,weekly,genData,kA,kI,kF,kL,kV,sched,issues,frontData,dialpadData]=results;
+  const [commOv,salesOv,salesLg,weekly,genData,kA,kI,kF,kL,kV,sched,issues,frontData,dialpadData,cbSC]=results;
+
+  // ═══ PARSE CHARGEBACKS (ScanCafe) ═══
+  // Row 0 = header. Cols used: 3 Received, 5 Txn, 7 Status, 10 Win/Loss, 11 Reason,
+  // 15 Amount, 16 Due, 19 Disposition, 27 Invoice, 29 Case, 39 Payment Method, 122 Card Brand
+  for(let i=1;i<cbSC.length;i++){
+    const r=cbSC[i];
+    if(!r||!r[3]||!String(r[3]).trim())continue;
+    D.chargebacks.push({
+      brand:"ScanCafe",
+      received:String(r[3]).trim(),
+      txn:String(r[5]||"").trim(),
+      status:String(r[7]||"").trim(),
+      category:String(r[8]||"").trim(),
+      workType:String(r[9]||"").trim(),
+      result:String(r[10]||"").trim(),
+      reason:String(r[11]||"").trim()||"Unknown",
+      amount:pn(r[15]),
+      due:String(r[16]||"").trim(),
+      disposition:String(r[19]||"").trim(),
+      invoice:String(r[27]||"").trim(),
+      caseNo:String(r[29]||"").trim(),
+      method:String(r[39]||"").trim(),
+      brandCard:String(r[122]||"").trim()||"Unknown"
+    });
+  }
 
   // ═══ PARSE COMMISSION OVERVIEW ═══
   // Rows 2-7 = agents, row 8 = totals. Col 0=name, 1=total, 2-6=tiers, 7=ALC, 8=KIT, 9=orders
@@ -588,6 +665,7 @@ document.querySelectorAll(".nav-btn[data-page]").forEach(b=>{b.addEventListener(
   if(b.dataset.page==="schedule"&&!window._sc)buildSched();
   if(b.dataset.page==="ops"&&!window._o)buildOps();
   if(b.dataset.page==="refunds"&&!window._rf)buildRefunds();
+  if(b.dataset.page==="cb"&&!window._cb)buildCB();
 })});
 
 // ═══ SALES ═══
@@ -1465,6 +1543,194 @@ async function buildRefunds(){
   });
 
   rfRenderMain();
+}
+
+// ═══════════════ CHARGEBACKS ═══════════════
+const CB={charts:{}};
+
+// Chargeback dates arrive as MM/DD/YYYY
+function cbParse(s){
+  const m=String(s||"").match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(!m)return null;
+  const d=new Date(+m[3],+m[1]-1,+m[2]);
+  return isNaN(d)?null:d;
+}
+function cbKill(id){if(CB.charts[id]){CB.charts[id].destroy();delete CB.charts[id];}}
+
+function cbApplyPreset(preset,fromEl,toEl){
+  const t=rfToday();let f;
+  if(preset==="mtd")f=new Date(t.getFullYear(),t.getMonth(),1);
+  else if(preset==="30d"){f=new Date(t);f.setDate(f.getDate()-30);}
+  else if(preset==="ytd")f=new Date(t.getFullYear(),0,1);
+  else{f=new Date(2000,0,1);fromEl.value=rfISO(f);toEl.value=rfISO(t);return;}
+  fromEl.value=rfISO(f);toEl.value=rfISO(t);
+}
+
+function buildCB(){window._cb=1;
+  const fromEl=document.getElementById("cb-from"),toEl=document.getElementById("cb-to");
+  cbApplyPreset("all",fromEl,toEl);
+  fromEl.addEventListener("change",cbRender);
+  toEl.addEventListener("change",cbRender);
+  document.querySelectorAll("#page-cb [data-cbr]").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      document.querySelectorAll("#page-cb [data-cbr]").forEach(x=>x.classList.remove("active"));
+      btn.classList.add("active");
+      cbApplyPreset(btn.dataset.cbr,fromEl,toEl);cbRender();
+    });
+  });
+  [fromEl,toEl].forEach(el=>{
+    el.addEventListener("click",()=>{if(typeof el.showPicker==="function"){try{el.showPicker();}catch(e){}}});
+  });
+  cbRender();
+}
+
+function cbRender(){
+  const fromEl=document.getElementById("cb-from"),toEl=document.getElementById("cb-to");
+  const f=fromEl.value?new Date(fromEl.value+"T00:00:00"):new Date(2000,0,1);
+  const t=toEl.value?new Date(toEl.value+"T23:59:59"):new Date(2999,0,1);
+
+  const all=D.chargebacks;
+  const list=all.filter(c=>{const d=cbParse(c.received);return d&&d>=f&&d<=t;});
+
+  if(!all.length){
+    document.getElementById("cb-totals").innerHTML=
+      `<div class="rf-kpi" style="grid-column:1/-1"><div class="rf-kl">No data</div><div class="rf-kv" style="font-size:14px;font-weight:600;color:var(--gray)">Chargeback log did not load. Check that the tab is still published to the web.</div></div>`;
+    document.getElementById("cb-totals2").innerHTML="";
+    return;
+  }
+
+  // ── Headline numbers ──
+  const total=list.reduce((s,c)=>s+c.amount,0);
+  const wins=list.filter(c=>c.result==="Win");
+  const losses=list.filter(c=>c.result==="Loss");
+  const pending=list.filter(c=>c.result==="Pending");
+  const wonAmt=wins.reduce((s,c)=>s+c.amount,0);
+  const lostAmt=losses.reduce((s,c)=>s+c.amount,0);
+  const pendAmt=pending.reduce((s,c)=>s+c.amount,0);
+  const resolved=wins.length+losses.length;
+  const winRate=resolved?(wins.length/resolved*100):0;
+  const avg=list.length?total/list.length:0;
+  const open=list.filter(c=>c.status==="Open");
+
+  document.getElementById("cb-sub").textContent=
+    `ScanCafe dispute performance — ${list.length} case${list.length===1?"":"s"} in range`;
+
+  document.getElementById("cb-totals").innerHTML=`
+    <div class="rf-kpi"><div class="rf-kl">Total Disputed</div><div class="rf-kv" style="color:var(--coral-dark)">${fmt(total)}</div><div class="rf-ks">${list.length} cases in range</div></div>
+    <div class="rf-kpi" style="border-left-color:var(--green)"><div class="rf-kl">Win Rate</div><div class="rf-kv" style="color:var(--green)">${winRate.toFixed(1)}%</div><div class="rf-ks">${wins.length} of ${resolved} resolved</div></div>
+    <div class="rf-kpi" style="border-left-color:var(--coral-dark)"><div class="rf-kl">Net Loss</div><div class="rf-kv" style="color:var(--coral-dark)">${fmt(lostAmt)}</div><div class="rf-ks">${losses.length} cases lost</div></div>
+    <div class="rf-kpi" style="border-left-color:var(--teal)"><div class="rf-kl">Recovered</div><div class="rf-kv" style="color:var(--teal)">${fmt(wonAmt)}</div><div class="rf-ks">${wins.length} cases won</div></div>`;
+
+  document.getElementById("cb-totals2").innerHTML=`
+    <div class="rf-kpi" style="border-left-color:var(--gray)"><div class="rf-kl">Pending</div><div class="rf-kv">${fmt(pendAmt)}</div><div class="rf-ks">${pending.length} awaiting decision</div></div>
+    <div class="rf-kpi" style="border-left-color:var(--gray)"><div class="rf-kl">Open Cases</div><div class="rf-kv" style="${open.length?"color:var(--coral-dark)":""}">${open.length}</div><div class="rf-ks">Status still open</div></div>
+    <div class="rf-kpi" style="border-left-color:var(--gray)"><div class="rf-kl">Avg. Case</div><div class="rf-kv">${fmt(avg)}</div><div class="rf-ks">Per chargeback</div></div>
+    <div class="rf-kpi" style="border-left-color:var(--gray)"><div class="rf-kl">Response Rate</div><div class="rf-kv">${list.length?(list.filter(c=>c.disposition&&!/no response/i.test(c.disposition)).length/list.length*100).toFixed(0):0}%</div><div class="rf-ks">Cases with a disposition</div></div>`;
+
+  // ── Monthly volume + win rate ──
+  const byMonth={};
+  list.forEach(c=>{
+    const d=cbParse(c.received);if(!d)return;
+    const k=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+    if(!byMonth[k])byMonth[k]={amt:0,w:0,l:0};
+    byMonth[k].amt+=c.amount;
+    if(c.result==="Win")byMonth[k].w++;
+    if(c.result==="Loss")byMonth[k].l++;
+  });
+  const mk=Object.keys(byMonth).sort();
+  const mLabels=mk.map(k=>{const[y,m]=k.split("-");return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][+m-1]+" "+y.slice(2);});
+  const mAmt=mk.map(k=>+byMonth[k].amt.toFixed(2));
+  const mWin=mk.map(k=>{const b=byMonth[k];const r=b.w+b.l;return r?+(b.w/r*100).toFixed(1):null;});
+
+  cbKill("trend");
+  CB.charts.trend=new Chart(document.getElementById("cb-trend"),{
+    data:{labels:mLabels,datasets:[
+      {type:"bar",label:"Amount",data:mAmt,backgroundColor:"#E8967A",borderRadius:4,yAxisID:"y",order:2},
+      {type:"line",label:"Win rate %",data:mWin,borderColor:"#2D8A2D",backgroundColor:"#2D8A2D",borderWidth:2,pointRadius:3,tension:.3,fill:false,spanGaps:true,yAxisID:"y1",order:1}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},
+      plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:10,font:{size:10}}},
+        tooltip:{callbacks:{label:c=>c.dataset.yAxisID==="y1"?`Win rate: ${c.parsed.y}%`:`Amount: ${fmt(c.parsed.y)}`}}},
+      scales:{
+        y:{beginAtZero:true,ticks:{font:{size:10},callback:v=>"$"+v.toLocaleString()},grid:{color:"#EEF2F7"}},
+        y1:{position:"right",min:0,max:100,ticks:{font:{size:10},callback:v=>v+"%"},grid:{display:false}},
+        x:{ticks:{font:{size:10}},grid:{display:false}}
+      }}});
+  document.getElementById("cb-trend-sub").textContent=
+    `Chargeback amount by month, with win rate overlay — ${mk.length} month${mk.length===1?"":"s"}`;
+
+  // ── Dispute reasons (top 8 by amount) ──
+  const byReason={};
+  list.forEach(c=>{if(!byReason[c.reason])byReason[c.reason]={amt:0,n:0,w:0,l:0};
+    byReason[c.reason].amt+=c.amount;byReason[c.reason].n++;
+    if(c.result==="Win")byReason[c.reason].w++;if(c.result==="Loss")byReason[c.reason].l++;});
+  const rk=Object.keys(byReason).sort((a,b)=>byReason[b].amt-byReason[a].amt).slice(0,8);
+
+  cbKill("reason");
+  CB.charts.reason=new Chart(document.getElementById("cb-reason"),{
+    type:"bar",
+    data:{labels:rk.map(r=>r.length>28?r.slice(0,27)+"…":r),
+      datasets:[{data:rk.map(r=>+byReason[r].amt.toFixed(2)),backgroundColor:"#2AACB8",borderRadius:4}]},
+    options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{
+        label:c=>{const r=rk[c.dataIndex],b=byReason[r];const res=b.w+b.l;
+          return [fmt(b.amt)+" · "+b.n+" case"+(b.n===1?"":"s"),res?`Win rate ${(b.w/res*100).toFixed(0)}%`:"No resolved cases"];}}}},
+      scales:{x:{beginAtZero:true,ticks:{font:{size:10},callback:v=>"$"+v.toLocaleString()},grid:{color:"#EEF2F7"}},
+        y:{ticks:{font:{size:10}},grid:{display:false}}}}});
+
+  // ── Win rate by card brand ──
+  const byCard={};
+  list.forEach(c=>{if(!byCard[c.brandCard])byCard[c.brandCard]={w:0,l:0,n:0,amt:0};
+    byCard[c.brandCard].n++;byCard[c.brandCard].amt+=c.amount;
+    if(c.result==="Win")byCard[c.brandCard].w++;if(c.result==="Loss")byCard[c.brandCard].l++;});
+  const ck=Object.keys(byCard).sort((a,b)=>byCard[b].n-byCard[a].n);
+
+  cbKill("brand");
+  CB.charts.brand=new Chart(document.getElementById("cb-brand"),{
+    type:"bar",
+    data:{labels:ck,datasets:[
+      {label:"Won",data:ck.map(k=>byCard[k].w),backgroundColor:"#2D8A2D",borderRadius:4},
+      {label:"Lost",data:ck.map(k=>byCard[k].l),backgroundColor:"#D4604A",borderRadius:4},
+      {label:"Pending",data:ck.map(k=>byCard[k].n-byCard[k].w-byCard[k].l),backgroundColor:"#8A9BAE",borderRadius:4}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:10,font:{size:10}}},
+        tooltip:{callbacks:{afterBody:items=>{const k=ck[items[0].dataIndex],b=byCard[k];const r=b.w+b.l;
+          return r?`Win rate ${(b.w/r*100).toFixed(0)}% · ${fmt(b.amt)}`:fmt(b.amt);}}}},
+      scales:{x:{stacked:true,ticks:{font:{size:10}},grid:{display:false}},
+        y:{stacked:true,beginAtZero:true,ticks:{font:{size:10},precision:0},grid:{color:"#EEF2F7"}}}}});
+
+  // ── Open cases, soonest due first ──
+  const openSorted=open.slice().sort((a,b)=>{
+    const da=cbParse(a.due),db=cbParse(b.due);
+    if(!da&&!db)return 0;if(!da)return 1;if(!db)return -1;return da-db;});
+  const today=rfToday();
+  document.getElementById("cb-open-tbl").innerHTML=openSorted.length
+    ?`<thead><tr><th>Due</th><th>Received</th><th>Case #</th><th>Reason</th><th style="text-align:right">Amount</th><th>Stage</th></tr></thead><tbody>`+
+      openSorted.map(c=>{
+        const dd=cbParse(c.due);
+        const overdue=dd&&dd<today;
+        return `<tr><td style="${overdue?"color:var(--coral-dark);font-weight:700":""}">${c.due||"—"}${overdue?" ⚠":""}</td><td>${c.received}</td><td>${c.caseNo||"—"}</td><td>${c.reason}</td><td style="text-align:right">${fmt(c.amount)}</td><td>${c.workType||c.category||"—"}</td></tr>`;
+      }).join("")+`</tbody>`
+    :`<tbody><tr><td style="color:var(--gray);padding:14px">No open cases in this range.</td></tr></tbody>`;
+  const overdueN=openSorted.filter(c=>{const d=cbParse(c.due);return d&&d<today;}).length;
+  document.getElementById("cb-open-sub").textContent=
+    openSorted.length?`${openSorted.length} awaiting a decision${overdueN?` · ${overdueN} past due`:""}`:"Nothing currently open";
+
+  // ── Full log, newest first ──
+  const sorted=list.slice().sort((a,b)=>{
+    const da=cbParse(a.received),db=cbParse(b.received);
+    return (db?db.getTime():0)-(da?da.getTime():0);});
+  const pill=r=>{
+    const col=r==="Win"?"#E6F7F4;color:#0D7A6B":r==="Loss"?"#FDECEA;color:#8A2F1F":"#F1F4F8;color:#5A6B7E";
+    return `<span class="rf-badge" style="background:${col}">${r||"—"}</span>`;};
+  document.getElementById("cb-tbl").innerHTML=
+    `<thead><tr><th>Received</th><th>Txn Date</th><th>Case #</th><th>Invoice</th><th>Reason</th><th>Card</th><th style="text-align:right">Amount</th><th>Result</th><th>Status</th></tr></thead><tbody>`+
+    (sorted.length?sorted.map(c=>
+      `<tr><td>${c.received}</td><td>${c.txn||"—"}</td><td>${c.caseNo||"—"}</td><td>${c.invoice||"—"}</td><td>${c.reason}</td><td>${c.brandCard}</td><td style="text-align:right;${c.amount<0?"color:var(--green)":""}">${fmt(c.amount)}</td><td>${pill(c.result)}</td><td>${c.status||"—"}</td></tr>`
+    ).join(""):`<tr><td colspan="9" style="color:var(--gray);padding:14px">No chargebacks in this range.</td></tr>`)+`</tbody>`;
+  document.getElementById("cb-log-sub").textContent=
+    `${sorted.length} case${sorted.length===1?"":"s"} in selected range · negative amounts are reversals credited back`;
 }
 
 loadAll();
