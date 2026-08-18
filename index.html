@@ -226,13 +226,25 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 </div>
 
 <div id="page-ops" class="page">
-<div class="page-header"><div><h1>Daily Operations</h1><p>Issues tracker</p></div></div>
+<div class="page-header">
+  <div><h1>Daily Operations</h1><p id="ops-sub">Issues tracker</p></div>
+  <div class="rf-range">
+    <label>From</label><input type="date" id="ops-from">
+    <label>To</label><input type="date" id="ops-to">
+    <div class="rf-preset">
+      <button class="dr-btn" data-opsr="mtd">This Month</button>
+      <button class="dr-btn" data-opsr="30d">Last 30d</button>
+      <button class="dr-btn" data-opsr="ytd">YTD</button>
+      <button class="dr-btn active" data-opsr="all">All</button>
+    </div>
+  </div>
+</div>
 <div class="stats-row" id="ops-stats"></div>
-<div class="g2"><div class="cd"><div class="ct">Issues & Department in Charge of Reviewing</div><div class="csb">All-time</div><div class="cw"><canvas id="ch-dept" height="190"></canvas></div></div>
-<div class="cd"><div class="ct">Top Issue Categories</div><div class="csb">Most frequent</div><div class="cw"><canvas id="ch-cat" height="190"></canvas></div></div></div>
-<div class="cd" style="margin-top:20px"><div class="ct">Recent Issues Log</div><div class="csb">Filterable</div>
+<div class="g2"><div class="cd"><div class="ct">Issues &amp; Department in Charge of Reviewing</div><div class="csb" id="ops-dept-sub">Selected range</div><div class="cw"><canvas id="ch-dept" height="190"></canvas></div></div>
+<div class="cd"><div class="ct">Top Issue Categories</div><div class="csb" id="ops-cat-sub">Most frequent</div><div class="cw"><canvas id="ch-cat" height="190"></canvas></div></div></div>
+<div class="cd" style="margin-top:20px"><div class="ct">Recent Issues Log</div><div class="csb" id="ops-log-sub">Filterable</div>
 <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
-<select class="sel" id="ops-df"><option value="All">All Depts</option><option value="OPS">OPS</option><option value="IT">IT</option><option value="CS">CS</option></select>
+<select class="sel" id="ops-df"><option value="All">All Depts</option></select>
 <select class="sel" id="ops-if"><option value="All">All Impact</option><option value="High">High</option><option value="Medium">Medium</option><option value="Low">Low</option></select></div>
 <div class="tw" style="max-height:450px"><table class="tb" id="ops-tbl"></table></div></div>
 </div>
@@ -1035,19 +1047,99 @@ function buildSched(){window._sc=1;
 }
 
 // ═══ OPS ═══
+const OPS={charts:{}};
+
+// Issue dates arrive as M/D/YYYY
+function opsParse(s){
+  const m=String(s||"").trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(!m)return null;
+  const d=new Date(+m[3],+m[1]-1,+m[2]);
+  return isNaN(d)?null:d;
+}
+function opsKill(id){if(OPS.charts[id]){OPS.charts[id].destroy();delete OPS.charts[id];}}
+
+function opsApplyPreset(preset,fromEl,toEl){
+  const t=rfToday();let f;
+  if(preset==="mtd")f=new Date(t.getFullYear(),t.getMonth(),1);
+  else if(preset==="30d"){f=new Date(t);f.setDate(f.getDate()-30);}
+  else if(preset==="ytd")f=new Date(t.getFullYear(),0,1);
+  else{f=new Date(2000,0,1);fromEl.value=rfISO(f);toEl.value=rfISO(t);return;}
+  fromEl.value=rfISO(f);toEl.value=rfISO(t);
+}
+
 function buildOps(){window._o=1;
-  const deptC={},catC={};let total=0;
-  D.issues.forEach(is=>{deptC[is.dept]=(deptC[is.dept]||0)+1;catC[is.desc]=(catC[is.desc]||0)+1;total++;});
+  const fromEl=document.getElementById("ops-from"),toEl=document.getElementById("ops-to");
+  opsApplyPreset("all",fromEl,toEl);
+
+  // Department options come from the data, not a hardcoded list
+  const dfEl=document.getElementById("ops-df");
+  const depts=[...new Set(D.issues.map(i=>i.dept).filter(Boolean))].sort();
+  dfEl.innerHTML=`<option value="All">All Depts</option>`+depts.map(d=>`<option value="${d}">${d}</option>`).join("");
+
+  fromEl.addEventListener("change",renderOps);
+  toEl.addEventListener("change",renderOps);
+  document.querySelectorAll("#page-ops [data-opsr]").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      document.querySelectorAll("#page-ops [data-opsr]").forEach(x=>x.classList.remove("active"));
+      btn.classList.add("active");
+      opsApplyPreset(btn.dataset.opsr,fromEl,toEl);renderOps();
+    });
+  });
+  [fromEl,toEl].forEach(el=>{
+    el.addEventListener("click",()=>{if(typeof el.showPicker==="function"){try{el.showPicker();}catch(e){}}});
+  });
+  document.getElementById("ops-df").addEventListener("change",renderOps);
+  document.getElementById("ops-if").addEventListener("change",renderOps);
+  renderOps();
+}
+
+function renderOps(){
+  const fromEl=document.getElementById("ops-from"),toEl=document.getElementById("ops-to");
+  const f=fromEl.value?new Date(fromEl.value+"T00:00:00"):new Date(2000,0,1);
+  const t=toEl.value?new Date(toEl.value+"T23:59:59"):new Date(2999,0,1);
+
+  // Date range drives the whole page: stats, both charts, and the log
+  const inRange=D.issues.filter(is=>{const d=opsParse(is.date);return d&&d>=f&&d<=t;});
+
+  const deptC={},catC={};
+  inRange.forEach(is=>{deptC[is.dept]=(deptC[is.dept]||0)+1;catC[is.desc]=(catC[is.desc]||0)+1;});
   const topCat=Object.entries(catC).sort((a,b)=>b[1]-a[1]).slice(0,10);
   const topDept=Object.entries(deptC).sort((a,b)=>b[1]-a[1]);
-  document.getElementById("ops-stats").innerHTML=`<div class="sc"><div class="sl">Total Issues</div><div class="sv">${total}</div><div class="ss">All time</div></div><div class="sc"><div class="sl">Top Issue</div><div class="sv" style="font-size:18px">${topCat[0]?.[0]||"—"}</div><div class="ss">${topCat[0]?.[1]||0} occurrences</div></div><div class="sc"><div class="sl">Top Dept</div><div class="sv" style="font-size:18px">${topDept[0]?.[0]||"—"}</div><div class="ss">${topDept[0]?.[1]||0} issues</div></div>`;
-  new Chart(document.getElementById("ch-dept"),{type:"doughnut",data:{labels:topDept.map(d=>d[0]),datasets:[{data:topDept.map(d=>d[1]),backgroundColor:["#2AACB8","#E8967A","#3B6CE7","#88DDE4","#6C5CE7"],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:"65%",plugins:{legend:{position:"bottom",labels:{font:{family:"DM Sans",size:12},padding:16,color:"#3D5066"}}}}});
-  new Chart(document.getElementById("ch-cat"),{type:"bar",data:{labels:topCat.map(c=>c[0]),datasets:[{data:topCat.map(c=>c[1]),backgroundColor:topCat.map((_,i)=>i<3?"#E8967A":i<6?"#2AACB8":"#88DDE4"),borderRadius:4}]},options:{indexAxis:"y",...cb,scales:{x:{grid:{color:"#EEF2F7"},ticks:{font:{family:"DM Sans",size:10},color:"#8A9BAE"}},y:{grid:{display:false},ticks:{font:{family:"DM Sans",size:10},color:"#3D5066"}}}}});
+  const total=inRange.length;
+
+  const dayCount=new Set(inRange.map(is=>is.date)).size;
+  const perDay=dayCount?(total/dayCount):0;
+
+  document.getElementById("ops-sub").textContent=
+    total?`Issues tracker — ${total} issue${total===1?"":"s"} in selected range`:"Issues tracker";
+  document.getElementById("ops-dept-sub").textContent="Selected range";
+  document.getElementById("ops-cat-sub").textContent=`Most frequent — top ${topCat.length}`;
+
+  document.getElementById("ops-stats").innerHTML=
+    `<div class="sc"><div class="sl">Total Issues</div><div class="sv">${total}</div><div class="ss">Selected range</div></div>`+
+    `<div class="sc"><div class="sl">Top Issue</div><div class="sv" style="font-size:18px">${topCat[0]?.[0]||"—"}</div><div class="ss">${topCat[0]?.[1]||0} occurrences</div></div>`+
+    `<div class="sc"><div class="sl">Top Dept</div><div class="sv" style="font-size:18px">${topDept[0]?.[0]||"—"}</div><div class="ss">${topDept[0]?.[1]||0} issues</div></div>`+
+    `<div class="sc"><div class="sl">Issues / Active Day</div><div class="sv">${perDay.toFixed(1)}</div><div class="ss">${dayCount} day${dayCount===1?"":"s"} with issues</div></div>`;
+
+  opsKill("dept");
+  OPS.charts.dept=new Chart(document.getElementById("ch-dept"),{type:"doughnut",data:{labels:topDept.map(d=>d[0]),datasets:[{data:topDept.map(d=>d[1]),backgroundColor:["#2AACB8","#E8967A","#3B6CE7","#88DDE4","#6C5CE7","#D4604A","#2D8A2D","#B8721A","#8A9BAE"],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:"65%",plugins:{legend:{position:"bottom",labels:{font:{family:"DM Sans",size:12},padding:16,color:"#3D5066"}}}}});
+
+  opsKill("cat");
+  OPS.charts.cat=new Chart(document.getElementById("ch-cat"),{type:"bar",data:{labels:topCat.map(c=>c[0]),datasets:[{data:topCat.map(c=>c[1]),backgroundColor:topCat.map((_,i)=>i<3?"#E8967A":i<6?"#2AACB8":"#88DDE4"),borderRadius:4}]},options:{indexAxis:"y",...cb,scales:{x:{grid:{color:"#EEF2F7"},ticks:{font:{family:"DM Sans",size:10},color:"#8A9BAE"}},y:{grid:{display:false},ticks:{font:{family:"DM Sans",size:10},color:"#3D5066"}}}}});
+
   const dc={OPS:"#E8967A",IT:"#3B6CE7",CS:"#2AACB8"},ic={High:"#D43B3B",Medium:"#D4860A",Low:"#2D8A2D"};
-  function rOI(){const dp=document.getElementById("ops-df").value,im=document.getElementById("ops-if").value;
-    let d=D.issues.slice(-100);if(dp!=="All")d=d.filter(x=>x.dept===dp);if(im!=="All")d=d.filter(x=>x.impact===im);
-    document.getElementById("ops-tbl").innerHTML=`<thead><tr><th>Date</th><th>Day</th><th>Dept</th><th>Issue</th><th>Freq</th><th>Impact</th><th>Mgmt</th></tr></thead><tbody>${d.slice().reverse().map(x=>`<tr><td style="color:var(--gray);white-space:nowrap">${x.date}</td><td>${x.day}</td><td><span class="tg" style="background:${dc[x.dept]||'#ccc'}20;color:${dc[x.dept]||'#666'}">${x.dept}</span></td><td style="font-weight:500">${x.desc}</td><td style="font-size:11px">${x.freq}</td><td><span class="tg" style="background:${ic[x.impact]||'#ccc'}18;color:${ic[x.impact]||'#666'}">${x.impact}</span></td><td style="font-size:11px;color:${x.mgmt==='Yes'?'var(--green)':x.mgmt==='No'?'var(--coral-dark)':'var(--gray)'};font-weight:600">${x.mgmt||"—"}</td></tr>`).join("")}</tbody>`;}
-  rOI();document.getElementById("ops-df").addEventListener("change",rOI);document.getElementById("ops-if").addEventListener("change",rOI);
+  const dp=document.getElementById("ops-df").value,im=document.getElementById("ops-if").value;
+  let d=inRange;
+  if(dp!=="All")d=d.filter(x=>x.dept===dp);
+  if(im!=="All")d=d.filter(x=>x.impact===im);
+  d=d.slice().sort((a,b)=>{const da=opsParse(a.date),db=opsParse(b.date);return (db?db.getTime():0)-(da?da.getTime():0);});
+
+  document.getElementById("ops-log-sub").textContent=
+    `${d.length} issue${d.length===1?"":"s"} shown${dp!=="All"||im!=="All"?" after filters":""} · newest first`;
+
+  document.getElementById("ops-tbl").innerHTML=`<thead><tr><th>Date</th><th>Day</th><th>Dept</th><th>Issue</th><th>Freq</th><th>Impact</th><th>Mgmt</th></tr></thead><tbody>`+
+    (d.length?d.map(x=>`<tr><td style="color:var(--gray);white-space:nowrap">${x.date}</td><td>${x.day}</td><td><span class="tg" style="background:${dc[x.dept]||'#ccc'}20;color:${dc[x.dept]||'#666'}">${x.dept}</span></td><td style="font-weight:500">${x.desc}</td><td style="font-size:11px">${x.freq}</td><td><span class="tg" style="background:${ic[x.impact]||'#ccc'}18;color:${ic[x.impact]||'#666'}">${x.impact||"—"}</span></td><td style="font-size:11px;color:${x.mgmt==='Yes'?'var(--green)':x.mgmt==='No'?'var(--coral-dark)':'var(--gray)'};font-weight:600">${x.mgmt||"—"}</td></tr>`).join("")
+      :`<tr><td colspan="7" style="color:var(--gray);padding:14px">No issues match the selected range and filters.</td></tr>`)+`</tbody>`;
 }
 
 // ═══════════════════════════════════════════════════════════════
