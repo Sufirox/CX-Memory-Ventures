@@ -87,41 +87,48 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 /* ═══ REFUNDS MODULE ═══ */
 
 /* ── AI Weekly Signals ── */
-.sig-wrap{background:linear-gradient(180deg,#fff 0%,#FCFDFE 100%);border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
-.sig-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:12px}
-.sig-h{font-size:11px;font-weight:800;letter-spacing:1.6px;color:var(--teal);text-transform:uppercase}
-.sig-meta{font-size:10px;color:var(--gray)}
-.sig-line{font-size:14px;line-height:1.55;color:var(--text);font-weight:500;margin-bottom:16px;max-width:78ch}
-.sig-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:14px}
-.sig-tab{border:1px solid #DDE3EB;background:#fff;color:var(--slate);font-family:inherit;font-size:11px;font-weight:600;padding:5px 12px;border-radius:6px;cursor:pointer;transition:.15s}
-.sig-tab:hover{border-color:var(--teal);color:var(--teal)}
-.sig-tab.active{background:var(--teal);color:#fff;border-color:var(--teal)}
-.sig-tab .n{opacity:.65;margin-left:4px;font-weight:700}
-.sig-list{display:flex;flex-direction:column;gap:9px}
-.sig-item{border:1px solid var(--border);border-left:3px solid var(--gray);border-radius:9px;padding:12px 15px;background:#fff;transition:.15s}
-.sig-item:hover{box-shadow:0 2px 10px rgba(0,0,0,.06)}
-.sig-item.p1{border-left-color:var(--coral-dark)}
-.sig-item.p2{border-left-color:#D4860A}
-.sig-item.p3{border-left-color:var(--green)}
-.sig-item.tw{border-left-color:var(--green)}
-.sig-r1{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.sig-t{font-size:13px;font-weight:700;color:var(--text);flex:1;min-width:200px}
-.sig-b{font-size:12px;line-height:1.55;color:var(--slate);margin-top:6px;max-width:82ch}
-.sig-tag{font-size:9px;font-weight:800;padding:2px 7px;border-radius:9px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
-.sig-tag.action{background:#FDECEA;color:#8A2F1F}
-.sig-tag.watch{background:#FFF4E6;color:#B8721A}
-.sig-tag.win{background:#E9F6E9;color:#1E6B1E}
-.sig-tag.pattern{background:#EAF0FE;color:#2B4FA8}
-.sig-tag.question{background:#F0EBFB;color:#5B3FA8}
-.sig-tag.context,.sig-tag.info{background:#F1F4F8;color:#5A6B7E}
-.sig-who{font-size:10px;color:var(--gray);font-weight:600}
-.sig-ev{font-size:11px;color:var(--gray);margin-top:7px;padding-top:7px;border-top:1px dashed var(--border);line-height:1.5;display:none}
-.sig-ev.open{display:block}
-.sig-ev-btn{font-size:10px;color:var(--teal);cursor:pointer;font-weight:700;margin-top:6px;display:inline-block;user-select:none}
-.sig-conf{font-size:9px;color:var(--gray);border:1px solid var(--border);padding:1px 6px;border-radius:8px;font-weight:600}
-.sig-src{font-size:9px;color:var(--gray);font-style:italic}
-.sig-empty{font-size:12px;color:var(--gray);padding:14px 0}
-@media(max-width:760px){.sig-t{min-width:100%}}
+.sig-quad{display:grid;grid-template-columns:1.1fr 1fr 1fr .8fr;gap:12px;align-items:stretch;margin-bottom:20px}
+.sig-pane{background:var(--card);border-radius:12px;display:flex;flex-direction:column;box-shadow:0 1px 4px rgba(0,0,0,.05);overflow:hidden;height:326px}
+.sig-pane > header{padding:12px 15px 10px;flex:0 0 auto;border-bottom:1px solid var(--border)}
+.sig-pane h2{font-size:12.5px;font-weight:800;display:flex;align-items:center;gap:7px}
+.sig-pane h2 .n{font-size:10px;font-weight:700;color:#fff;background:var(--gray);border-radius:20px;padding:1px 7px;min-width:19px;text-align:center}
+.sig-pane .sub{font-size:10.5px;color:var(--gray);margin-top:3px}
+.sig-pane .body{padding:10px 15px;overflow-y:auto;flex:1 1 auto}
+.sig-pane .body::-webkit-scrollbar{width:5px}
+.sig-pane .body::-webkit-scrollbar-thumb{background:#DDE3EB;border-radius:3px}
+.sig-pane footer{flex:0 0 auto;padding:7px 15px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:33px}
+.sig-pg{font-size:10.5px;color:var(--gray);font-weight:600}
+.sig-nav{display:flex;gap:4px}
+.sig-nav button{border:1px solid #DDE3EB;background:#fff;color:var(--slate);font-family:inherit;font-size:11px;font-weight:700;width:24px;height:22px;border-radius:5px;cursor:pointer;line-height:1;padding:0}
+.sig-nav button:hover:not(:disabled){border-color:var(--teal);color:var(--teal)}
+.sig-nav button:disabled{opacity:.32;cursor:default}
+.sig-op{background:var(--navy);color:#fff}
+.sig-op > header{border-bottom-color:rgba(255,255,255,.13)}
+.sig-op footer{border-top-color:rgba(255,255,255,.13)}
+.sig-op h2 .n{background:rgba(255,255,255,.19)}
+.sig-op .sub,.sig-op .sig-pg{color:rgba(255,255,255,.5)}
+.sig-op .sig-nav button{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.19);color:#fff}
+.sig-op .body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.22)}
+.sig-act > header{box-shadow:inset 0 3px 0 var(--coral-dark)}.sig-act h2 .n{background:var(--coral-dark)}
+.sig-pat > header{box-shadow:inset 0 3px 0 #2B4FA8}.sig-pat h2 .n{background:#2B4FA8}
+.sig-win > header{box-shadow:inset 0 3px 0 var(--green)}.sig-win h2 .n{background:var(--green)}
+.sig-lede{font-size:13.5px;line-height:1.55;font-weight:500}
+.sig-note{font-size:11.5px;line-height:1.55;color:rgba(255,255,255,.72)}
+.sig-note b{color:#fff;font-weight:700;display:block;margin-bottom:3px;font-size:12px}
+.sig-item{padding:9px 0;border-top:1px solid var(--border)}
+.sig-item:first-child{border-top:0;padding-top:0}
+.sig-item .who{font-size:10px;font-weight:700;color:var(--gray);margin-bottom:2px}
+.sig-item .ttl{font-size:12px;font-weight:700;line-height:1.38;cursor:pointer}
+.sig-item .bdy{font-size:11.5px;line-height:1.5;color:var(--slate);margin-top:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sig-item.open .bdy{-webkit-line-clamp:unset;overflow:visible}
+.sig-item .num{font-size:10.5px;line-height:1.5;color:var(--gray);margin-top:7px;padding:7px 9px;background:var(--bg);border-radius:6px;display:none}
+.sig-item.open .num{display:block}
+.sig-item .flag{display:inline-block;font-size:8.5px;font-weight:800;padding:1px 6px;border-radius:8px;margin-bottom:4px;letter-spacing:.3px}
+.sig-f1{background:#FDECEA;color:#8A2F1F}.sig-f2{background:#FFF4E6;color:#B8721A}.sig-fc{background:#F1F4F8;color:#5A6B7E}
+.sig-item .exp{font-size:9.5px;font-weight:700;color:var(--teal);margin-top:5px;display:inline-block;cursor:pointer;user-select:none}
+.sig-empty{font-size:11.5px;color:var(--gray);padding:12px 0;line-height:1.5}
+@media(max-width:1120px){.sig-quad{grid-template-columns:1fr 1fr}}
+@media(max-width:680px){.sig-quad{grid-template-columns:1fr}.sig-pane{height:300px}}
 .rf-range{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .rf-range input[type=date]{font-family:inherit;font-size:12px;padding:7px 10px;border:1px solid #DDE3EB;border-radius:8px;color:var(--slate);background:#fff;cursor:pointer;min-width:140px}
 .rf-range input[type=date]::-webkit-calendar-picker-indicator{cursor:pointer;opacity:.6;position:absolute;right:8px;width:16px;height:16px}
@@ -683,80 +690,110 @@ function renderLB(id){
 
 // ═══ HOME ═══
 // ═══════════════ AI WEEKLY SIGNALS ═══════════════
-const SIG_ORDER={action:0,question:1,watch:2,pattern:3,win:4,context:5,info:6};
+const SIG_PER=2;
+const SIG_RANK={action:0,question:0,watch:1,pattern:1};
+const sigBy=(a,b)=>(a.priority-b.priority)||((SIG_RANK[a.type]??5)-(SIG_RANK[b.type]??5));
+const sigEsc=s=>String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;");
+
+function sigItem(s){
+  const flag = s.source!=="ai" ? '<span class="flag sig-fc">computed</span>'
+             : s.priority===1 ? '<span class="flag sig-f1">act now</span>'
+             : s.type==="watch" ? '<span class="flag sig-f2">watch</span>' : "";
+  return `<div class="sig-item">
+    ${flag}
+    ${s.subject?`<div class="who">${sigEsc(s.subject)}</div>`:""}
+    <div class="ttl">${sigEsc(s.title)}</div>
+    ${s.body&&s.body!==s.title?`<div class="bdy">${sigEsc(s.body)}</div>`:""}
+    ${s.evidence?`<div class="num">${sigEsc(s.evidence)}</div>`:""}
+    ${(s.body&&s.body!==s.title)||s.evidence?'<span class="exp">More</span>':""}
+  </div>`;
+}
+
+// Paged column. Keeps the panel a fixed height instead of growing with the week.
+function sigPager(bodyId,footId,list,emptyMsg){
+  const body=document.getElementById(bodyId),foot=document.getElementById(footId);
+  if(!body||!foot)return;
+  const pages=Math.max(1,Math.ceil(list.length/SIG_PER));
+  let p=0;
+  function draw(){
+    const slice=list.slice(p*SIG_PER,p*SIG_PER+SIG_PER);
+    body.innerHTML=list.length?slice.map(sigItem).join(""):`<div class="sig-empty">${emptyMsg}</div>`;
+    body.scrollTop=0;
+    foot.innerHTML=pages>1
+      ? `<span class="sig-pg">${p*SIG_PER+1}–${Math.min((p+1)*SIG_PER,list.length)} of ${list.length}</span>
+         <span class="sig-nav"><button ${p===0?"disabled":""} data-d="-1">‹</button>
+         <button ${p===pages-1?"disabled":""} data-d="1">›</button></span>`
+      : `<span class="sig-pg">${list.length||"No"} item${list.length===1?"":"s"}</span>`;
+    foot.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{
+      p=Math.min(pages-1,Math.max(0,p+ +b.dataset.d));draw();}));
+  }
+  draw();
+}
 
 function renderSignals(){
   const el=document.getElementById("sig-panel");
   if(!el)return;
-  const all=D.signals;
-  if(!all.length){
-    el.innerHTML=`<div class="sig-wrap"><div class="sig-h">AI Weekly Signals</div><div class="sig-empty">No signals yet. The weekly job writes these Tuesday morning.</div></div>`;
+  const S=D.signals;
+
+  if(!S.length&&!D.headline){
+    el.innerHTML=`<div class="sig-quad"><div class="sig-pane sig-op" style="grid-column:1/-1;height:auto">
+      <header><h2>Weekly signals</h2><div class="sub">Nothing published yet</div></header>
+      <div class="body"><div class="sig-lede">The weekly job writes these Tuesday morning. Once it runs, this is where the week gets summarised.</div></div>
+      </div></div>`;
     return;
   }
 
-  // Model observations lead; computed flags are the verified floor beneath them.
-  const ai=all.filter(s=>s.source==="ai");
-  const comp=all.filter(s=>s.source!=="ai");
-  const prio=n=>all.filter(s=>s.priority===n);
+  const isWin=s=>s.type==="win";
+  const isPat=s=>s.type==="pattern"||s.type==="question";
+  const isOp=s=>s.type==="context"||s.type==="info";
+  const win=S.filter(isWin).sort(sigBy);
+  const pat=S.filter(s=>isPat(s)&&!isWin(s)&&!isOp(s)).sort(sigBy);
+  const act=S.filter(s=>!isWin(s)&&!isPat(s)&&!isOp(s)).sort(sigBy);
+  const op =S.filter(isOp);
 
-  const views={
-    key:{label:"Needs attention",list:all.filter(s=>s.priority===1)},
-    all:{label:"Everything",list:all.slice()},
-    wins:{label:"Wins",list:all.filter(s=>s.type==="win")},
-    patterns:{label:"Patterns",list:all.filter(s=>s.type==="pattern"||s.type==="question")},
-    verified:{label:"Computed",list:comp}
-  };
-  Object.keys(views).forEach(k=>views[k].list.sort((a,b)=>
-    (a.priority-b.priority)||((SIG_ORDER[a.type]??9)-(SIG_ORDER[b.type]??9))));
-
-  const tabs=Object.keys(views).filter(k=>views[k].list.length||k==="all");
-
-  el.innerHTML=`<div class="sig-wrap">
-    <div class="sig-top">
-      <div>
-        <div class="sig-h">AI Weekly Signals</div>
-        <div class="sig-meta">Week of ${D.signalWeek}${D.signalStamp?" · generated "+D.signalStamp:""} · ${ai.length} observations, ${comp.length} computed flags</div>
-      </div>
-    </div>
-    ${D.headline?`<div class="sig-line">${D.headline}</div>`:""}
-    <div class="sig-tabs">${tabs.map((k,i)=>
-      `<button class="sig-tab${i===0?" active":""}" data-sig="${k}">${views[k].label}<span class="n">${views[k].list.length}</span></button>`).join("")}</div>
-    <div class="sig-list" id="sig-list"></div>
+  el.innerHTML=`<div class="sig-quad">
+    <div class="sig-pane sig-op"><header><h2>The read</h2>
+      <div class="sub">Week of ${sigEsc(D.signalWeek)}</div></header>
+      <div class="body" id="sig-c-op"></div><footer id="sig-f-op"></footer></div>
+    <div class="sig-pane sig-act"><header><h2>Needs action <span class="n">${act.length}</span></h2>
+      <div class="sub">Decide or act this week</div></header>
+      <div class="body" id="sig-c-act"></div><footer id="sig-f-act"></footer></div>
+    <div class="sig-pane sig-pat"><header><h2>Patterns <span class="n">${pat.length}</span></h2>
+      <div class="sub">Slow moves and open questions</div></header>
+      <div class="body" id="sig-c-pat"></div><footer id="sig-f-pat"></footer></div>
+    <div class="sig-pane sig-win"><header><h2>Wins <span class="n">${win.length}</span></h2>
+      <div class="sub">Worth telling someone</div></header>
+      <div class="body" id="sig-c-win"></div><footer id="sig-f-win"></footer></div>
   </div>`;
 
-  function paint(k){
-    const list=views[k].list;
-    document.getElementById("sig-list").innerHTML=list.length?list.map((s,i)=>{
-      const cls=s.type==="win"?"tw":("p"+(s.priority||2));
-      return `<div class="sig-item ${cls}">
-        <div class="sig-r1">
-          <span class="sig-tag ${s.type||"info"}">${s.type||"note"}</span>
-          <div class="sig-t">${s.title||"(untitled)"}</div>
-          ${s.subject?`<span class="sig-who">${s.subject}</span>`:""}
-          ${s.confidence&&s.source==="ai"?`<span class="sig-conf">${s.confidence}</span>`:""}
-          ${s.source!=="ai"?`<span class="sig-src">computed</span>`:""}
-        </div>
-        ${s.body&&s.body!==s.title?`<div class="sig-b">${s.body}</div>`:""}
-        ${s.evidence?`<div class="sig-ev-btn" data-ev="${k}-${i}">Show the numbers</div><div class="sig-ev" id="ev-${k}-${i}">${s.evidence}</div>`:""}
-      </div>`;
-    }).join(""):`<div class="sig-empty">Nothing in this view for the week of ${D.signalWeek}.</div>`;
+  // The read pages differently: summary first, then one caveat per page.
+  const opPages=[`<div class="sig-lede">${sigEsc(D.headline||"No summary written for this week.")}</div>`]
+    .concat(op.map(s=>`<div class="sig-note"><b>${sigEsc(s.title)}</b>${sigEsc(s.body)}</div>`));
+  (function(){
+    const body=document.getElementById("sig-c-op"),foot=document.getElementById("sig-f-op");
+    let p=0;
+    function draw(){
+      body.innerHTML=opPages[p];body.scrollTop=0;
+      foot.innerHTML=opPages.length>1
+        ? `<span class="sig-pg">${p===0?"Summary":"Caveat "+p+" of "+(opPages.length-1)}</span>
+           <span class="sig-nav"><button ${p===0?"disabled":""} data-d="-1">‹</button>
+           <button ${p===opPages.length-1?"disabled":""} data-d="1">›</button></span>`
+        : `<span class="sig-pg">Summary</span>`;
+      foot.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{
+        p=Math.min(opPages.length-1,Math.max(0,p+ +b.dataset.d));draw();}));
+    }
+    draw();
+  })();
 
-    document.querySelectorAll("#sig-list [data-ev]").forEach(b=>{
-      b.addEventListener("click",()=>{
-        const box=document.getElementById("ev-"+b.dataset.ev);
-        const open=box.classList.toggle("open");
-        b.textContent=open?"Hide the numbers":"Show the numbers";
-      });
-    });
-  }
+  sigPager("sig-c-act","sig-f-act",act,"Nothing needs you this week.");
+  sigPager("sig-c-pat","sig-f-pat",pat,"No slow-moving trends stood out.");
+  sigPager("sig-c-win","sig-f-win",win,"No standout wins this week.");
 
-  document.querySelectorAll("#sig-panel [data-sig]").forEach(b=>{
-    b.addEventListener("click",()=>{
-      document.querySelectorAll("#sig-panel [data-sig]").forEach(x=>x.classList.remove("active"));
-      b.classList.add("active");paint(b.dataset.sig);
-    });
+  el.addEventListener("click",e=>{
+    const it=e.target.closest(".sig-item");if(!it)return;
+    const o=it.classList.toggle("open");
+    const x=it.querySelector(".exp");if(x)x.textContent=o?"Less":"More";
   });
-  paint(tabs[0]);
 }
 
 function renderHome(){
