@@ -85,6 +85,43 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 @media(max-width:768px){.sidebar{width:60px}.sidebar span:not(.icon),.brand-bottom,.brand-sub,.sidebar-footer{display:none}.sidebar-brand{padding:20px 12px;text-align:center}.nav-btn{padding:12px 0;justify-content:center}.main{margin-left:60px;padding:20px 16px}.stats-row{flex-direction:column}}
 
 /* ═══ REFUNDS MODULE ═══ */
+
+/* ── AI Weekly Signals ── */
+.sig-wrap{background:linear-gradient(180deg,#fff 0%,#FCFDFE 100%);border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.sig-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:12px}
+.sig-h{font-size:11px;font-weight:800;letter-spacing:1.6px;color:var(--teal);text-transform:uppercase}
+.sig-meta{font-size:10px;color:var(--gray)}
+.sig-line{font-size:14px;line-height:1.55;color:var(--text);font-weight:500;margin-bottom:16px;max-width:78ch}
+.sig-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:14px}
+.sig-tab{border:1px solid #DDE3EB;background:#fff;color:var(--slate);font-family:inherit;font-size:11px;font-weight:600;padding:5px 12px;border-radius:6px;cursor:pointer;transition:.15s}
+.sig-tab:hover{border-color:var(--teal);color:var(--teal)}
+.sig-tab.active{background:var(--teal);color:#fff;border-color:var(--teal)}
+.sig-tab .n{opacity:.65;margin-left:4px;font-weight:700}
+.sig-list{display:flex;flex-direction:column;gap:9px}
+.sig-item{border:1px solid var(--border);border-left:3px solid var(--gray);border-radius:9px;padding:12px 15px;background:#fff;transition:.15s}
+.sig-item:hover{box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.sig-item.p1{border-left-color:var(--coral-dark)}
+.sig-item.p2{border-left-color:#D4860A}
+.sig-item.p3{border-left-color:var(--green)}
+.sig-item.tw{border-left-color:var(--green)}
+.sig-r1{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sig-t{font-size:13px;font-weight:700;color:var(--text);flex:1;min-width:200px}
+.sig-b{font-size:12px;line-height:1.55;color:var(--slate);margin-top:6px;max-width:82ch}
+.sig-tag{font-size:9px;font-weight:800;padding:2px 7px;border-radius:9px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+.sig-tag.action{background:#FDECEA;color:#8A2F1F}
+.sig-tag.watch{background:#FFF4E6;color:#B8721A}
+.sig-tag.win{background:#E9F6E9;color:#1E6B1E}
+.sig-tag.pattern{background:#EAF0FE;color:#2B4FA8}
+.sig-tag.question{background:#F0EBFB;color:#5B3FA8}
+.sig-tag.context,.sig-tag.info{background:#F1F4F8;color:#5A6B7E}
+.sig-who{font-size:10px;color:var(--gray);font-weight:600}
+.sig-ev{font-size:11px;color:var(--gray);margin-top:7px;padding-top:7px;border-top:1px dashed var(--border);line-height:1.5;display:none}
+.sig-ev.open{display:block}
+.sig-ev-btn{font-size:10px;color:var(--teal);cursor:pointer;font-weight:700;margin-top:6px;display:inline-block;user-select:none}
+.sig-conf{font-size:9px;color:var(--gray);border:1px solid var(--border);padding:1px 6px;border-radius:8px;font-weight:600}
+.sig-src{font-size:9px;color:var(--gray);font-style:italic}
+.sig-empty{font-size:12px;color:var(--gray);padding:14px 0}
+@media(max-width:760px){.sig-t{min-width:100%}}
 .rf-range{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .rf-range input[type=date]{font-family:inherit;font-size:12px;padding:7px 10px;border:1px solid #DDE3EB;border-radius:8px;color:var(--slate);background:#fff;cursor:pointer;min-width:140px}
 .rf-range input[type=date]::-webkit-calendar-picker-indicator{cursor:pointer;opacity:.6;position:absolute;right:8px;width:16px;height:16px}
@@ -166,6 +203,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 
 <div id="page-home" class="page active">
 <div class="page-header"><div><h1>Team Overview</h1><p>CS team at a glance</p></div></div>
+<div id="sig-panel"></div>
 <div class="stats-row" id="home-stats"></div>
 <div class="gs"><div class="cd"><div class="ct">Weekly Schedule</div><div class="csb" id="home-sched-label"></div><div style="overflow-x:auto"><table class="st" id="home-sched-tbl"></table></div></div>
 <div class="cd"><div class="ct">PTO Earned</div><div class="csb">Earned so far out of 15 annual days</div><div id="pto-box"></div></div></div>
@@ -387,6 +425,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 <script>
 const VER="v1.1 — Apr 2026";
 const URLS={
+  aiSignals:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1225470280&single=true&output=csv",
   cbScanCafe:"https://docs.google.com/spreadsheets/d/e/2PACX-1vQ4tGN7IZU_-EFMZvAYj3egQ3Zcbl4z4s9EWvfPpRrZcBfnVn02G1dFt5cWEFKnYiWXQ3mmr_r0Fu5Z/pub?gid=48102920&single=true&output=csv",
   salesOverview:"https://docs.google.com/spreadsheets/d/e/2PACX-1vSMwoSny4boAvjEA1o3fbUB_1ccMyr0TOhtw3JJoXVJ1KpvlaNOfXEe6bQMvbOi-s1w75bOifS2Uvkt/pub?gid=599922517&single=true&output=csv",
   salesLog:"https://docs.google.com/spreadsheets/d/e/2PACX-1vSMwoSny4boAvjEA1o3fbUB_1ccMyr0TOhtw3JJoXVJ1KpvlaNOfXEe6bQMvbOi-s1w75bOifS2Uvkt/pub?gid=589829049&single=true&output=csv",
@@ -444,19 +483,36 @@ async function fetchCSV(url,name){
   try{const ts=Date.now();const proxy="https://corsproxy.io/?"+encodeURIComponent(url+(url.includes("?")?"\x26":"?")+"_t="+ts);const p=await tryFetch(proxy);console.log("✅ "+name+" (proxy): "+p.length+" rows");return p;}catch(e2){console.error("❌ "+name+": failed");if(window.D&&D.failed)D.failed.push(name);return [];}
 }
 
-const D={agents:[],monthlyComm:[],revData:[],salesLog:[],weeklyDept:{},weeklyRaw:[],kpi:{},infractions:[],ptoLog:[],issues:[],schedule:[],front:{},frontAgent:{},dialpadAgent:{},chargebacks:[],failed:[]};
+const D={agents:[],monthlyComm:[],revData:[],salesLog:[],weeklyDept:{},weeklyRaw:[],kpi:{},infractions:[],ptoLog:[],issues:[],schedule:[],front:{},frontAgent:{},dialpadAgent:{},chargebacks:[],signals:[],signalWeek:"",signalStamp:"",headline:"",failed:[]};
 window.D=D;
 
 async function loadAll(){
-  const names=["commOverview","salesOverview","salesLog","weekly","generalData","kpiAngel","kpiIvan","kpiFatima","kpiLuisa","kpiVanessa","schedule","issues","frontData","dialpadData","cbScanCafe"];
-  const urls=[URLS.commOverview,URLS.salesOverview,URLS.salesLog,URLS.weekly,URLS.generalData,URLS.kpiAngel,URLS.kpiIvan,URLS.kpiFatima,URLS.kpiLuisa,URLS.kpiVanessa,URLS.schedule,URLS.issues,URLS.frontData,URLS.dialpadData,URLS.cbScanCafe];
+  const names=["commOverview","salesOverview","salesLog","weekly","generalData","kpiAngel","kpiIvan","kpiFatima","kpiLuisa","kpiVanessa","schedule","issues","frontData","dialpadData","cbScanCafe","aiSignals"];
+  const urls=[URLS.commOverview,URLS.salesOverview,URLS.salesLog,URLS.weekly,URLS.generalData,URLS.kpiAngel,URLS.kpiIvan,URLS.kpiFatima,URLS.kpiLuisa,URLS.kpiVanessa,URLS.schedule,URLS.issues,URLS.frontData,URLS.dialpadData,URLS.cbScanCafe,URLS.aiSignals];
   const bar=document.getElementById("load-fill");
   const results=[];
   for(let i=0;i<urls.length;i++){
     results.push(await fetchCSV(urls[i],names[i]));
     if(bar)bar.style.width=((i+1)/urls.length*100)+"%";
   }
-  const [commOv,salesOv,salesLg,weekly,genData,kA,kI,kF,kL,kV,sched,issues,frontData,dialpadData,cbSC]=results;
+  const [commOv,salesOv,salesLg,weekly,genData,kA,kI,kF,kL,kV,sched,issues,frontData,dialpadData,cbSC,aiSig]=results;
+
+  // ═══ PARSE AI WEEKLY SIGNALS ═══
+  // Cols: Week, Generated, Priority, Type, Category, Subject, Title, Body, Evidence, Confidence, Source
+  for(let i=1;i<aiSig.length;i++){
+    const r=aiSig[i];
+    if(!r||!r[0]||!String(r[0]).trim())continue;
+    const type=String(r[3]||"").trim();
+    if(!D.signalWeek){D.signalWeek=String(r[0]).trim();D.signalStamp=String(r[1]||"").trim();}
+    if(type==="headline"){D.headline=String(r[6]||"").trim();continue;}
+    D.signals.push({
+      week:String(r[0]).trim(),priority:parseInt(r[2],10)||2,type:type,
+      category:String(r[4]||"").trim(),subject:String(r[5]||"").trim(),
+      title:String(r[6]||"").trim(),body:String(r[7]||"").trim(),
+      evidence:String(r[8]||"").trim(),confidence:String(r[9]||"").trim(),
+      source:String(r[10]||"").trim()
+    });
+  }
 
   // ═══ PARSE CHARGEBACKS (ScanCafe) ═══
   // Row 0 = header. Cols used: 3 Received, 5 Txn, 7 Status, 10 Win/Loss, 11 Reason,
@@ -615,6 +671,7 @@ async function loadAll(){
       mn.insertBefore(b,mn.firstChild);
     }
   }
+  renderSignals();
   renderHome();
 }
 
@@ -625,6 +682,83 @@ function renderLB(id){
 }
 
 // ═══ HOME ═══
+// ═══════════════ AI WEEKLY SIGNALS ═══════════════
+const SIG_ORDER={action:0,question:1,watch:2,pattern:3,win:4,context:5,info:6};
+
+function renderSignals(){
+  const el=document.getElementById("sig-panel");
+  if(!el)return;
+  const all=D.signals;
+  if(!all.length){
+    el.innerHTML=`<div class="sig-wrap"><div class="sig-h">AI Weekly Signals</div><div class="sig-empty">No signals yet. The weekly job writes these Tuesday morning.</div></div>`;
+    return;
+  }
+
+  // Model observations lead; computed flags are the verified floor beneath them.
+  const ai=all.filter(s=>s.source==="ai");
+  const comp=all.filter(s=>s.source!=="ai");
+  const prio=n=>all.filter(s=>s.priority===n);
+
+  const views={
+    key:{label:"Needs attention",list:all.filter(s=>s.priority===1)},
+    all:{label:"Everything",list:all.slice()},
+    wins:{label:"Wins",list:all.filter(s=>s.type==="win")},
+    patterns:{label:"Patterns",list:all.filter(s=>s.type==="pattern"||s.type==="question")},
+    verified:{label:"Computed",list:comp}
+  };
+  Object.keys(views).forEach(k=>views[k].list.sort((a,b)=>
+    (a.priority-b.priority)||((SIG_ORDER[a.type]??9)-(SIG_ORDER[b.type]??9))));
+
+  const tabs=Object.keys(views).filter(k=>views[k].list.length||k==="all");
+
+  el.innerHTML=`<div class="sig-wrap">
+    <div class="sig-top">
+      <div>
+        <div class="sig-h">AI Weekly Signals</div>
+        <div class="sig-meta">Week of ${D.signalWeek}${D.signalStamp?" · generated "+D.signalStamp:""} · ${ai.length} observations, ${comp.length} computed flags</div>
+      </div>
+    </div>
+    ${D.headline?`<div class="sig-line">${D.headline}</div>`:""}
+    <div class="sig-tabs">${tabs.map((k,i)=>
+      `<button class="sig-tab${i===0?" active":""}" data-sig="${k}">${views[k].label}<span class="n">${views[k].list.length}</span></button>`).join("")}</div>
+    <div class="sig-list" id="sig-list"></div>
+  </div>`;
+
+  function paint(k){
+    const list=views[k].list;
+    document.getElementById("sig-list").innerHTML=list.length?list.map((s,i)=>{
+      const cls=s.type==="win"?"tw":("p"+(s.priority||2));
+      return `<div class="sig-item ${cls}">
+        <div class="sig-r1">
+          <span class="sig-tag ${s.type||"info"}">${s.type||"note"}</span>
+          <div class="sig-t">${s.title||"(untitled)"}</div>
+          ${s.subject?`<span class="sig-who">${s.subject}</span>`:""}
+          ${s.confidence&&s.source==="ai"?`<span class="sig-conf">${s.confidence}</span>`:""}
+          ${s.source!=="ai"?`<span class="sig-src">computed</span>`:""}
+        </div>
+        ${s.body&&s.body!==s.title?`<div class="sig-b">${s.body}</div>`:""}
+        ${s.evidence?`<div class="sig-ev-btn" data-ev="${k}-${i}">Show the numbers</div><div class="sig-ev" id="ev-${k}-${i}">${s.evidence}</div>`:""}
+      </div>`;
+    }).join(""):`<div class="sig-empty">Nothing in this view for the week of ${D.signalWeek}.</div>`;
+
+    document.querySelectorAll("#sig-list [data-ev]").forEach(b=>{
+      b.addEventListener("click",()=>{
+        const box=document.getElementById("ev-"+b.dataset.ev);
+        const open=box.classList.toggle("open");
+        b.textContent=open?"Hide the numbers":"Show the numbers";
+      });
+    });
+  }
+
+  document.querySelectorAll("#sig-panel [data-sig]").forEach(b=>{
+    b.addEventListener("click",()=>{
+      document.querySelectorAll("#sig-panel [data-sig]").forEach(x=>x.classList.remove("active"));
+      b.classList.add("active");paint(b.dataset.sig);
+    });
+  });
+  paint(tabs[0]);
+}
+
 function renderHome(){
   const lr=D.revData.length?D.revData[D.revData.length-1]:null;
   const tRev=lr?(lr.AJ+lr.LT+lr.IS+lr.VD+lr.FS):0;
