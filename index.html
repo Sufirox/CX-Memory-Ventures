@@ -308,6 +308,15 @@ padding:9px 3px;margin-right:18px;cursor:pointer;border-bottom:2px solid transpa
 <div class="page-header">
   <div><h1>Front Daily Records</h1><p id="fd-sub">Inbox at open and at close, each working day</p></div>
   <div class="rf-range">
+    <label>Who</label>
+    <select class="sel" id="fd-who" style="margin-right:10px">
+      <option value="ALL">Whole team</option>
+      <option value="Angel">Angel</option>
+      <option value="Fatima">Fatima</option>
+      <option value="Luisa">Luisa</option>
+      <option value="Ivan">Ivan (social)</option>
+      <option value="Vanessa">Vanessa (social)</option>
+    </select>
     <label>From</label><input type="date" id="fd-from">
     <label>To</label><input type="date" id="fd-to">
     <div class="rf-preset">
@@ -496,10 +505,10 @@ const URLS={
   dialpadData:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=888035573&single=true&output=csv",
   weekly:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1909086011&single=true&output=csv",
   generalData:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1380055448&single=true&output=csv",
-  kpiAngel:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=2020620642&single=true&output=csv",
+  kpiAngel:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1581893103&single=true&output=csv",
   kpiIvan:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=382540791&single=true&output=csv",
   kpiFatima:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1501473843&single=true&output=csv",
-  kpiLuisa:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1581893103&single=true&output=csv",
+  kpiLuisa:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1521800009&single=true&output=csv",
   kpiVanessa:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1407071428&single=true&output=csv",
   schedule:"https://docs.google.com/spreadsheets/d/e/2PACX-1vQINTKfEREAnt10bxY_UG9I5GbSANCx6Doq-BGG23MzD1wR2IDfrRc84UEIZlhkYcLuov70Ug2_Pf1x/pub?output=csv",
   issues:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTWF963vZC_H_A9nrbVL8Flpuwp5Te3aeOo1TxaLAs0pRU-E5GgqSOgW4MO9vGCkML4A4Q_XT37hePv/pub?gid=89929469&single=true&output=csv",
@@ -580,7 +589,13 @@ async function loadAll(){
       if(lab==="At Open")blk.open=tot;
       else if(lab==="At Close")blk.close=tot;
       else if(lab==="Snoozed tickets")blk.snoozed=tot;
-      else if(lab==="Oldest ticket")blk.oldest=String(rr[3]||"").trim();
+      else if(lab==="Oldest ticket"){
+        blk.oldest=String(rr[3]||"").trim();
+        for(const nm in FD_MAIN){const v=String(rr[FD_MAIN[nm]]||"").trim();
+          if(v){if(!blk.byAgent[nm])blk.byAgent[nm]={};blk.byAgent[nm].old=v;}}
+        for(const nm in FD_SOC){const v=String(rr[FD_SOC[nm]]||"").trim();
+          if(v){if(!blk.social[nm])blk.social[nm]={};blk.social[nm].old=v;}}
+      }
       if(lab==="At Open"||lab==="At Close"||lab==="Snoozed tickets"){
         const key=lab==="At Open"?"o":lab==="At Close"?"c":"s";
         for(const nm in FD_MAIN){
@@ -921,6 +936,7 @@ function buildFrontDaily(){
   fdPreset("30d",fromEl,toEl);
   fromEl.addEventListener("change",renderFrontDaily);
   toEl.addEventListener("change",renderFrontDaily);
+  document.getElementById("fd-who").addEventListener("change",renderFrontDaily);
   document.querySelectorAll("#page-ops [data-fdr]").forEach(b=>{
     b.addEventListener("click",()=>{
       document.querySelectorAll("#page-ops [data-fdr]").forEach(x=>x.classList.remove("active"));
@@ -932,14 +948,31 @@ function buildFrontDaily(){
   renderFrontDaily();
 }
 
+// Resolve one day's numbers for whoever is selected.
+// ALL uses the sheet's Totals column, which is Angel+Fatima+Luisa.
+function fdPick(b,who){
+  if(who==="ALL")return {open:b.open,close:b.close,oldest:b.oldest,snoozed:b.snoozed,
+                         partial:b.partial,has:b.open!==null||b.close!==null};
+  const src=(FD_AGENTS.indexOf(who)>=0?b.byAgent:b.social)[who];
+  if(!src)return {open:null,close:null,oldest:"",snoozed:null,partial:true,has:false};
+  return {open:src.o??null,close:src.c??null,oldest:src.old||"",snoozed:src.s??null,
+          partial:src.c===undefined,has:src.o!==undefined||src.c!==undefined};
+}
+
 function renderFrontDaily(){
   const fromEl=document.getElementById("fd-from"),toEl=document.getElementById("fd-to");
   if(!fromEl)return;
+  const who=document.getElementById("fd-who").value;
+  const isTeam=who==="ALL";
   const f=fromEl.value?new Date(fromEl.value+"T00:00:00"):new Date(2000,0,1);
   const t=toEl.value?new Date(toEl.value+"T23:59:59"):new Date(2999,0,1);
 
   const list=D.frontDaily.filter(b=>{const d=fdParse(b.date);return d&&d>=f&&d<=t;})
-    .sort((a,b)=>fdParse(a.date)-fdParse(b.date));
+    .sort((a,b)=>fdParse(a.date)-fdParse(b.date))
+    .map(b=>{const v=fdPick(b,who);
+      return {date:b.date,weekday:b.weekday,open:v.open,close:v.close,oldest:v.oldest,
+              snoozed:v.snoozed,partial:v.partial,has:v.has,byAgent:b.byAgent};})
+    .filter(b=>b.has);
 
   if(!D.frontDaily.length){
     document.getElementById("fd-stats").innerHTML=
@@ -965,14 +998,22 @@ function renderFrontDaily(){
   }).filter(v=>v!==null&&v>=0);
 
   document.getElementById("fd-sub").textContent=
-    `Inbox at open and at close — ${done.length} completed day${done.length===1?"":"s"} in range`+
+    (isTeam?"Whole team":who+"'s inbox")+` — ${done.length} completed day${done.length===1?"":"s"} in range`+
     (partialN?`, ${partialN} still in progress`:"");
 
   document.getElementById("fd-stats").innerHTML=
     `<div class="sc"><div class="sl">Avg. at Open</div><div class="sv">${avg(opens).toFixed(1)}</div><div class="ss">Waiting when the day starts</div></div>`+
     `<div class="sc"><div class="sl">Avg. at Close</div><div class="sv" style="color:${avg(closes)>avg(opens)*0.5?"var(--coral-dark)":"var(--green)"}">${avg(closes).toFixed(1)}</div><div class="ss">Carried into the next day</div></div>`+
     `<div class="sc"><div class="sl">Cleared / Day</div><div class="sv">${avg(cleared).toFixed(1)}</div><div class="ss">${opens.length?(avg(cleared)/avg(opens)*100).toFixed(0):0}% of the morning queue</div></div>`+
-    `<div class="sc"><div class="sl">Inbox Zero</div><div class="sv">${closedDays?Math.round(zero/closedDays*100):0}%</div><div class="ss">${zero} of ${closedDays} days ended empty</div></div>`+
+    (isTeam
+      ? `<div class="sc"><div class="sl">Inbox Zero</div><div class="sv">${closedDays?Math.round(zero/closedDays*100):0}%</div><div class="ss">${zero} of ${closedDays} days ended empty</div></div>`
+      : `<div class="sc"><div class="sl">Share of Team</div><div class="sv">${(function(){
+          let mine=0,team=0;
+          done.forEach(b=>{
+            FD_AGENTS.forEach(nm=>{const a=b.byAgent[nm];
+              if(a&&a.o!==undefined&&a.c!==undefined){const c=a.o-a.c;team+=c;if(nm===who)mine+=c;}});
+          });
+          return team?Math.round(mine/team*100)+"%":"—";})()}</div><div class="ss">Of all tickets cleared</div></div>`)+
     `<div class="sc"><div class="sl">Oldest Ticket</div><div class="sv">${ages.length?avg(ages).toFixed(1):"—"}<span style="font-size:13px;color:var(--gray)">d</span></div><div class="ss">Avg. age of the oldest waiting</div></div>`;
 
   const labels=list.map(b=>b.date.slice(0,5));
@@ -993,7 +1034,7 @@ function renderFrontDaily(){
       scales:{y:{beginAtZero:true,ticks:{font:{size:10}},grid:{color:"#EEF2F7"}},
         x:{ticks:{font:{size:9},maxTicksLimit:14},grid:{display:false}}}}});
   document.getElementById("fd-trend-sub").textContent=
-    `Tickets waiting at open versus left at close — the gap is what the team cleared`;
+    `Tickets waiting at open versus left at close — the gap is what ${isTeam?"the team":who} cleared`;
 
   // Per-agent cleared per day
   const perAgent=FD_AGENTS.map(nm=>{
@@ -1009,7 +1050,9 @@ function renderFrontDaily(){
     type:"bar",
     data:{labels:perAgent.map(a=>a.nm),
       datasets:[{data:perAgent.map(a=>+a.val.toFixed(1)),
-        backgroundColor:["#2AACB8","#E8967A","#3B6CE7"],borderRadius:5}]},
+        backgroundColor:FD_AGENTS.map((nm,i)=>{
+          const base=["#2AACB8","#E8967A","#3B6CE7"][i];
+          return (isTeam||nm===who)?base:"#DDE3EB";}),borderRadius:5}]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},tooltip:{callbacks:{
         label:c=>c.parsed.y+" cleared/day over "+perAgent[c.dataIndex].n+" days"}}},
@@ -1039,7 +1082,7 @@ function renderFrontDaily(){
   const rows=list.slice().reverse();
   document.getElementById("fd-tbl").innerHTML=
     `<thead><tr><th>Date</th><th>Day</th><th style="text-align:right">Open</th><th style="text-align:right">Close</th><th style="text-align:right">Cleared</th>`+
-    FD_AGENTS.map(n=>`<th style="text-align:right">${n}</th>`).join("")+
+    (isTeam?FD_AGENTS.map(n=>`<th style="text-align:right">${n}</th>`).join(""):"")+
     `<th style="text-align:right">Snoozed</th><th>Oldest</th></tr></thead><tbody>`+
     (rows.length?rows.map(b=>{
       const cl=(b.open!==null&&b.close!==null)?b.open-b.close:null;
@@ -1047,14 +1090,14 @@ function renderFrontDaily(){
         `<td style="text-align:right">${b.open??"—"}</td>`+
         `<td style="text-align:right;font-weight:600;color:${b.partial?"var(--gray)":b.close===0?"var(--green)":"inherit"}">${b.partial?"—":(b.close??"—")}</td>`+
         `<td style="text-align:right;color:var(--teal)">${b.partial||cl===null?"—":cl}</td>`+
-        FD_AGENTS.map(n=>{const a=b.byAgent[n];
-          return `<td style="text-align:right;font-size:11px;color:var(--gray)">${a&&a.o!==undefined?a.o:"—"}<span style="opacity:.5">/</span>${a&&a.c!==undefined?a.c:"—"}</td>`;}).join("")+
+        (isTeam?FD_AGENTS.map(n=>{const a=b.byAgent[n];
+          return `<td style="text-align:right;font-size:11px;color:var(--gray)">${a&&a.o!==undefined?a.o:"—"}<span style="opacity:.5">/</span>${a&&a.c!==undefined?a.c:"—"}</td>`;}).join(""):"")+
         `<td style="text-align:right;font-size:11px">${b.snoozed??"—"}</td>`+
         `<td style="font-size:11px;color:var(--gray)">${b.oldest||"—"}</td></tr>`;
-    }).join(""):`<tr><td colspan="10" style="color:var(--gray);padding:14px">No records in this range.</td></tr>`)+
+    }).join(""):`<tr><td colspan="${isTeam?10:7}" style="color:var(--gray);padding:14px">No records in this range.</td></tr>`)+
     `</tbody>`;
   document.getElementById("fd-log-sub").textContent=
-    `${rows.length} day${rows.length===1?"":"s"}, newest first. Agent columns show open/close.`;
+    `${rows.length} day${rows.length===1?"":"s"}, newest first.`+(isTeam?" Agent columns show open/close.":"");
 }
 
 function renderHome(){
