@@ -91,6 +91,51 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 padding:9px 3px;margin-right:18px;cursor:pointer;border-bottom:2px solid transparent;transition:.15s}
 .ops-sub:hover{color:var(--slate)}
 .ops-sub.active{color:var(--teal);border-bottom-color:var(--teal)}
+/* ── Glossary tooltip (dashboard-wide) ── */
+.tip{border-bottom:1px dotted var(--gray);cursor:help}
+.tipbox{position:fixed;max-width:400px;max-height:88vh;overflow:auto;background:var(--navy);color:#fff;
+font-size:11.5px;font-weight:400;line-height:1.55;padding:12px 14px;border-radius:9px;z-index:400;
+box-shadow:0 6px 24px rgba(0,0,0,.22);display:none;pointer-events:none}
+.tipbox.on{display:block}
+.tipbox b{display:block;font-size:12px;margin-bottom:5px;color:#8FE3EC}
+.tipbox .f{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;line-height:1.6;
+background:rgba(255,255,255,.09);border-radius:6px;padding:8px 10px;margin-top:8px;color:#D6E6F2;white-space:pre-wrap}
+.tipbox .mt{font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#8FE3EC;margin:11px 0 5px}
+.tipbox .mrow{display:flex;justify-content:space-between;gap:10px;align-items:baseline;margin-top:7px}
+.tipbox .mnm{font-size:11.5px;font-weight:700}
+.tipbox .mval{font-size:11px;color:#8FE3EC;font-weight:700;white-space:nowrap}
+.tipbox .sm2{margin-top:4px;font-size:10px}
+.tipbox .sm{font-size:10.5px;color:rgba(255,255,255,.62);margin-top:7px}
+
+/* ── Scorecard ── */
+.sc-big{display:flex;align-items:center;gap:26px;flex-wrap:wrap;padding-bottom:16px;margin-bottom:16px;border-bottom:1px solid var(--border)}
+.sc-num{font-size:52px;font-weight:800;line-height:1}
+.sc-meta{font-size:12.5px;color:var(--slate);line-height:1.65;max-width:56ch}
+.sc-sub{font-size:10.5px;color:var(--gray);margin-top:4px}
+.sc-drow{display:grid;grid-template-columns:repeat(auto-fit,minmax(152px,1fr));gap:10px}
+.sc-dcell{background:var(--bg);border-radius:9px;padding:12px 14px}
+.sc-dcell .dl{font-size:10px;font-weight:700;color:var(--gray);letter-spacing:.5px;text-transform:uppercase}
+.sc-dcell .dv{font-size:25px;font-weight:800;margin-top:4px}
+.sc-dcell .ds{font-size:10px;color:var(--gray);margin-top:3px}
+.sc-rings{display:grid;grid-template-columns:repeat(auto-fit,minmax(252px,1fr));gap:22px;margin-bottom:22px}
+.sc-card{background:var(--card);border-radius:12px;padding:20px 18px;box-shadow:0 1px 4px rgba(0,0,0,.05);text-align:center}
+.sc-card h3{font-size:13.5px;font-weight:700;margin-bottom:12px}
+.sc-bars{margin-top:15px;text-align:left}
+.sc-rb{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.sc-rb .lb{font-size:10.5px;color:var(--slate);width:100px;flex:0 0 100px;font-weight:600}
+.sc-rb .tr{flex:1;display:block;height:8px;background:var(--bg);border-radius:4px;overflow:hidden}
+.sc-rb .fl{display:block;height:100%;border-radius:4px}
+.sc-rb .vn{font-size:11px;font-weight:800;width:34px;text-align:right}
+.sc-weak{font-size:10.5px;color:var(--gray);margin-top:7px}
+.sc-none{font-size:12px;color:var(--gray);padding:14px 0;line-height:1.6}
+/* ── Collapsible section ── */
+.fold{background:var(--card);border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.05);margin-bottom:22px;overflow:hidden}
+.foldhd{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;cursor:pointer;user-select:none}
+.foldhd:hover{background:#FCFDFE}
+.foldhd .arw{font-size:12px;color:var(--gray);font-weight:700;transition:transform .18s;flex:0 0 auto}
+.fold.open .foldhd .arw{transform:rotate(90deg)}
+.foldbody{display:none;padding:0 20px 20px}
+.fold.open .foldbody{display:block}
 /* ── AI Weekly Signals ── */
 .sig-quad{display:grid;grid-template-columns:1.1fr 1fr 1fr .8fr;gap:12px;align-items:stretch;margin-bottom:20px}
 .sig-pane{background:var(--card);border-radius:12px;display:flex;flex-direction:column;box-shadow:0 1px 4px rgba(0,0,0,.05);overflow:hidden;height:326px}
@@ -253,16 +298,31 @@ padding:9px 3px;margin-right:18px;cursor:pointer;border-bottom:2px solid transpa
 
 <div id="page-kpi" class="page">
 <div class="page-header"><div><h1>Agent KPIs</h1><p>Weekly performance</p></div>
-<div style="display:flex;gap:10px;flex-wrap:wrap" id="kpi-ctrls">
+<div style="display:flex;gap:10px;flex-wrap:wrap;display:none" id="kpi-ctrls">
 <select class="sel" id="kpi-ag"><option>Angel Jimenez</option><option>Fatima Soto</option><option>Luisa Tona</option><option>Ivan Soto</option><option>Vanessa Duran</option></select>
 <select class="sel" id="kpi-wk"></select></div></div>
-<div class="kt"><button class="ktb active" data-v="agent">Agent View</button><button class="ktb" data-v="dept">Department</button><button class="ktb" data-v="inf">Infractions & PTO</button></div>
-<div id="kv-agent"><div class="kg" id="kpi-cards"></div>
+<div class="kt"><button class="ktb active" data-v="dept">Department</button><button class="ktb" data-v="agent">Agent View</button><button class="ktb" data-v="inf">Infractions & PTO</button></div>
+<div id="kv-agent" style="display:none"><div class="kg" id="kpi-cards"></div>
 <div class="g2"><div class="cd"><div class="ct">Front Performance</div><div class="csb">Replies, messages & reply time</div><div class="cw"><canvas id="ch-kf" height="190"></canvas></div></div>
 <div class="cd"><div class="ct">Dialpad Activity</div><div class="csb">Calls answered, placed, missed</div><div class="cw"><canvas id="ch-kd" height="190"></canvas></div></div></div>
 <div class="cd" style="margin-top:20px"><div class="ct">Infraction Summary</div><div class="csb">By quarter</div><div id="kpi-inf-sum"></div></div></div>
-<div id="kv-dept" style="display:none"><div class="cd" style="margin-bottom:22px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div><div class="ct">Department Weekly Summary</div><div class="csb" style="margin-bottom:0" id="dept-sub"></div></div><select class="sel" id="dept-wk-sel"></select></div><div class="kg" id="dept-cards"></div></div>
-<div class="cd"><div class="ct">Online Rating & Public Perception</div><div class="csb">External reviews</div><div id="dept-rat"></div></div></div>
+<div id="kv-dept">
+<div class="cd" style="margin-bottom:22px">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:14px">
+    <div><div class="ct" id="sc-title">Department Score</div>
+    <div class="csb" style="margin-bottom:0" id="sc-sub"></div></div>
+    <select class="sel" id="dept-wk-sel"></select>
+  </div>
+  <div id="sc-head"></div>
+  <div class="sc-drow" id="sc-cats"></div>
+</div>
+<div class="sc-rings" id="sc-rings"></div>
+<div class="fold" id="fold-dept">
+  <div class="foldhd"><div><div class="ct">Department Weekly Summary</div>
+  <div class="csb" style="margin:2px 0 0" id="dept-sub"></div></div><span class="arw">&#9654;</span></div>
+  <div class="foldbody"><div class="kg" id="dept-cards"></div></div>
+</div>
+<div class="cd"><div class="ct">Online Rating &amp; Public Perception</div><div class="csb">External reviews</div><div id="dept-rat"></div></div></div>
 <div id="kv-inf" style="display:none"><div class="g2"><div class="cd"><div class="ct">Infraction Log</div><div class="csb">All records</div><div style="max-height:500px;overflow-y:auto"><table class="tb" id="inf-tbl"></table></div></div>
 <div class="cd"><div class="ct">PTO History</div><div class="csb">All entries</div><div style="max-height:500px;overflow-y:auto"><table class="tb" id="pto-tbl"></table></div></div></div>
 <div class="cd" style="margin-top:20px"><div class="ct">Infractions by Agent</div><div class="csb">Total accumulated</div><div class="cw"><canvas id="ch-inf" height="190"></canvas></div></div></div>
@@ -770,7 +830,15 @@ async function loadAll(){
     if(!isNaN(satAvg)){D.front[wk].avgSum+=satAvg;D.front[wk].avgN++;}
     if(agent){
       if(!D.frontAgent[agent])D.frontAgent[agent]={};
-      D.frontAgent[agent][wk]={replies:pn(r[5]),msgs:pn(r[6])};
+      // Scorecard fields. col 8 first reply (s), 14 archived with reply, 17 SLA achieved,
+      // 23 resolved, 25 replies to resolution, 26 resolved on first reply.
+      D.frontAgent[agent][wk]={replies:pn(r[5]),msgs:pn(r[6]),
+        frtHrs:(pn(r[8])!==null?pn(r[8])/3600:null),
+        closedWithReply:pn(r[14]),
+        slaPct:(pn(r[17])!==null?pn(r[17])*100:null),
+        resolved:pn(r[23]),
+        replToRes:pn(r[25]),
+        resFirstPct:(pn(r[26])!==null?pn(r[26])*100:null)};
     }
   }
 
@@ -782,7 +850,7 @@ async function loadAll(){
     const wk=r[0].trim(); const agent=(r[2]||"").trim();
     if(!agent)continue;
     if(!D.dialpadAgent[agent])D.dialpadAgent[agent]={};
-    D.dialpadAgent[agent][wk]={placed:pn(r[19]),answered:pn(r[20])};
+    D.dialpadAgent[agent][wk]={placed:pn(r[19]),answered:pn(r[20]),missed:pn(r[21])};
   }
 
   // ═══ SCHEDULE ═══
@@ -1304,7 +1372,10 @@ function buildKPI(){window._k=1;
     if(v==="dept")renderDept();if(v==="inf"&&!window._inf)buildInf();})});
   document.getElementById("kpi-ag").addEventListener("change",renderAg);
   document.getElementById("kpi-wk").addEventListener("change",renderAg);
+  document.querySelectorAll("#page-kpi .foldhd").forEach(hd=>
+    hd.addEventListener("click",()=>hd.parentElement.classList.toggle("open")));
   renderAg();
+  renderDept();   // Department is the tab that opens first
 }
 function renderAg(){
   const ag=document.getElementById("kpi-ag").value,wi=+document.getElementById("kpi-wk").value;
@@ -1382,6 +1453,268 @@ function renderAg(){
   }).join("");
   document.getElementById("kpi-inf-sum").innerHTML=infHtml;
 }
+
+// ═══════════════ GLOSSARY (dashboard-wide tooltips) ═══════════════
+// One place to edit every definition. Any element with class "tip" and a
+// data-g matching a key here gets a hover card with the formula.
+const GLOSSARY={
+"Department Score":{d:"The average of every scored agent's composite. Supervisors are excluded, because supervisor work is a different job and measuring it against agent targets would be misleading.",
+ f:"Department Score = average( agent composites )\n\nEach agent composite = average of their 5 category\nscores, with every category capped at 100 first.\n\nCapping means a very strong area can never lift the\ncomposite high enough to hide a weak one.",
+ s:"Scale: categories run 0 to 120, where above 100 means Exceeds. The composite always lands between 0 and 100."},
+"Responsiveness":{d:"How quickly a customer gets a first answer. Two metrics, weighted equally.",
+ f:"Responsiveness = ( First reply time score\n                + SLA achieved score ) / 2"},
+"Throughput":{d:"How much real work got done. Both metrics need an outbound message, so clearing spam cannot move either one.",
+ f:"Throughput = ( Outbound per day score\n             + Closed with reply per day score ) / 2"},
+"Efficiency":{d:"How much effort each resolution took.",
+ f:"Efficiency = ( Replies to resolution score\n             + Resolved on first reply score ) / 2"},
+"Voice":{d:"Phone performance, judged against the volume actually received rather than a fixed target.",
+ f:"Voice = ( Calls answered per day score\n        + Missed call rate score ) / 2"},
+"Reliability":{d:"Presence and conduct.",
+ f:"Reliability = ( Time usage score\n              + Infraction points score ) / 2"},
+"First reply time":{d:"Hours between a customer writing in and the first human reply. Lower is better.",
+ f:"value = Front 'First reply time (avg)' / 3600\nscore = (20 - value) / (20 - 5) x 100\nclamped 0..100,  under 3h scores above 100",s:"100 at 5h or less. 0 at 20h or more."},
+"SLA achieved":{d:"Share of conversations answered inside the SLA window, as Front calculates it.",
+ f:"value = Front 'SLA Achieved (%)' x 100\nscore = (value - 30) / (80 - 30) x 100",s:"100 at 80%. 0 at 30%."},
+"Outbound per day":{d:"Replies plus messages sent, per day worked. Spam gets no reply, so it adds nothing here.",
+ f:"value = (Replies sent + Messages sent excl. replies)\n        / Days worked\nscore = (value - 20) / (52 - 20) x 100",s:"52 per agent-day is the expectation, from team volume."},
+"Closed with reply per day":{d:"Conversations archived after a human replied, per day worked. Spam closed without a reply never counts.",
+ f:"value = Front 'Archived with reply' / Days worked\nscore = (value - 4) / (12.5 - 4) x 100",s:"12.5 per agent-day, from team volume."},
+"Replies to resolution":{d:"Average replies needed to close a conversation. Lower is more efficient, but a very low number usually means a heavy spam week rather than skill.",
+ f:"value = Front 'Replies to resolution'\nscore = (3.5 - value) / (3.5 - 1.0) x 100\n\nif value < 0.6 : score caps at 100 and is flagged",s:"100 at 1.0. 0 at 3.5."},
+"Resolved on first reply":{d:"Share of conversations closed on the very first response.",
+ f:"value = Front 'Resolved on first reply' x 100\nscore = (value - 5) / (35 - 5) x 100",s:"100 at 35%. 0 at 5%."},
+"Calls answered per day":{d:"Judged against the calls the team actually received, so a quiet week does not punish anyone.",
+ f:"expected = team calls answered\n           / people on phones / 5\n\nvalue = Calls answered / Days worked\nscore = (value - 0.35 x expected)\n        / (expected - 0.35 x expected) x 100",
+ s:"The expectation recalculates every week from trailing team volume."},
+"Missed call rate":{d:"Missed calls as a share of everything routed to the agent.",
+ f:"value = Missed / (Answered + Missed) x 100\n\nif value <= 2 : score = 100 - (value / 2 x 40)\nif value >  2 : score = 60 - ((value - 2) / 3 x 60)",s:"100 at 0%. 60 at the 2% limit. 0 at 5%."},
+"Time usage":{d:"Logged working time against scheduled time.",
+ f:"value = KPI sheet 'Time Usage'\nscore = (value - 70) / (95 - 70) x 100",s:"100 at 95%. 0 at 70%. Above 105% reads as Exceeds."},
+"Infraction points":{d:"Points logged against the agent this quarter.",
+ f:"value = sum of infraction points this quarter\nscore = (6 - value) / 6 x 100",s:"100 at zero points. 0 at 6 points."},
+"Available Time":{d:"Hours the team was scheduled to be available, after PTO and holidays.",
+ f:"Available = 7.42 x staffed agents x 5\n          - 7.42 x PTO days\n          - 7.42 x holidays x staffed agents"},
+"Time Spent":{d:"Hours actually logged, taken straight from the CE Weekly Report."},
+"Used Time":{d:"How much of the available time was used.",f:"Used Time = Time Spent / Available Time x 100",s:"Target 95%."},
+"Interactions / Day":{d:"Everything outbound, per agent-day worked.",
+ f:"(Replies + Messages + Calls answered + Calls placed)\n  / (5 x agents - PTO days - holidays x agents)"}};
+
+const SC_MET={Responsiveness:["First reply time","SLA achieved"],
+ Throughput:["Outbound per day","Closed with reply per day"],
+ Efficiency:["Replies to resolution","Resolved on first reply"],
+ Voice:["Calls answered per day","Missed call rate"],
+ Reliability:["Time usage","Infraction points"]};
+
+const gEsc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+// Wrap a label so it shows its glossary card on hover.
+function tipLabel(t,agent){
+  return GLOSSARY[t]?`<span class="tip" data-g="${gEsc(t)}"${agent?` data-a="${gEsc(agent)}"`:""}>${t}</span>`:t;
+}
+function initGlossary(){
+  if(window._gloss)return;window._gloss=1;
+  const box=document.createElement("div");box.className="tipbox";box.id="tipbox";
+  document.body.appendChild(box);
+  document.addEventListener("mouseover",e=>{
+    const el=e.target.closest(".tip");if(!el)return;
+    const g=GLOSSARY[el.dataset.g];if(!g)return;
+    let h=`<b>${gEsc(el.dataset.g)}</b>${gEsc(g.d)}`;
+    if(SC_MET[el.dataset.g]){
+      h+=(g.f?`<div class="f">${gEsc(g.f)}</div>`:"")+`<div class="mt">Built from</div>`;
+      SC_MET[el.dataset.g].forEach(mn=>{
+        const gm=GLOSSARY[mn]||{};
+        h+=`<div class="mrow"><span class="mnm">${gEsc(mn)}</span>`;
+        const a=el.dataset.a;
+        if(a&&SC.agents&&SC.agents[a]){
+          const m=SC.agents[a].cats[el.dataset.g].metrics.find(x=>x.label===mn);
+          if(m&&m.value!==null)h+=`<span class="mval">${m.value}${m.unit} &rarr; ${m.score}</span>`;
+        }
+        h+=`</div>`+(gm.f?`<div class="f sm2">${gEsc(gm.f)}</div>`:"");
+      });
+    }else if(g.f)h+=`<div class="f">${gEsc(g.f)}</div>`;
+    if(g.s)h+=`<div class="sm">${gEsc(g.s)}</div>`;
+    box.innerHTML=h;box.classList.add("on");
+    const r=el.getBoundingClientRect(),bw=Math.min(400,innerWidth-24);
+    box.style.left=Math.max(12,Math.min(r.left,innerWidth-bw-12))+"px";
+    const bh=box.offsetHeight;
+    box.style.top=(r.bottom+8+bh>innerHeight?Math.max(8,innerHeight-bh-8):r.bottom+8)+"px";
+  });
+  document.addEventListener("mouseout",e=>{if(e.target.closest(".tip"))box.classList.remove("on");});
+}
+
+// ═══════════════ AGENT SCORECARD ═══════════════
+const SC={agents:{},dept:null};
+const SUPERVISORS=["Luisa Tona"];
+const SC_HIST=13;            // weeks averaged for the scorecard
+const scCol=s=>s>=85?"#2D8A2D":s>=70?"#2AACB8":s>=50?"#B8721A":"#D4604A";
+
+function scBand(v,good,floor,lower,ceil,soft){
+  if(v===null||v===undefined||isNaN(v))return null;
+  if(soft!==undefined&&soft!==null&&((lower&&v<soft)||(!lower&&v>soft)))return 100;
+  let s;
+  if(lower){
+    if(ceil!==undefined&&ceil!==null&&v<=ceil)return Math.min(120,100+(ceil-v)/Math.max(ceil,1e-9)*20);
+    s=(floor-v)/(floor-good)*100;
+  }else{
+    if(ceil!==undefined&&ceil!==null&&v>=ceil)return Math.min(120,100+(v-ceil)/Math.max(ceil,1e-9)*20);
+    s=(v-floor)/(good-floor)*100;
+  }
+  return Math.max(0,Math.min(100,s));
+}
+const scMean=a=>{a=a.filter(x=>x!==null&&x!==undefined&&!isNaN(x));return a.length?a.reduce((x,y)=>x+y,0)/a.length:null;};
+
+// Build per-agent scores from the trailing SC_HIST weeks ending at the selected week.
+function computeScores(weekLabel){
+  SC.agents={};SC.dept=null;
+  const fa=Object.values(D.kpi)[0];
+  if(!fa)return;
+  let wi=fa.dates.indexOf(weekLabel);if(wi<0)wi=fa.dates.length-1;
+  const wlabels=fa.dates.slice(Math.max(0,wi-SC_HIST+1),wi+1);
+  const inWindow=l=>wlabels.indexOf(l)>=0;
+
+  // trailing team call volume sets the Voice expectation
+  let callTot=0,callWeeks={};
+  for(const nm in D.dialpadAgent){
+    for(const w in D.dialpadAgent[nm]){
+      if(!inWindow(w))continue;
+      callWeeks[w]=(callWeeks[w]||0)+(D.dialpadAgent[nm][w].answered||0);
+    }
+  }
+  const cwk=Object.keys(callWeeks);
+  const teamCalls=cwk.length?cwk.reduce((s,k)=>s+callWeeks[k],0)/cwk.length:0;
+  const phoneHeads=Math.max(1,new Set(Object.keys(D.dialpadAgent).filter(n=>{
+    return Object.keys(D.dialpadAgent[n]).some(w=>inWindow(w)&&D.dialpadAgent[n][w].answered>0);})).size);
+  const callExp=teamCalls/phoneHeads/5||12;
+
+  const roster=Object.keys(D.kpi).filter(n=>SUPERVISORS.indexOf(n)<0&&INACTIVE.indexOf(n)<0);
+
+  roster.forEach(n=>{
+    const k=D.kpi[n];if(!k)return;
+    const idx=[];for(let i=0;i<k.dates.length;i++)if(inWindow(k.dates[i]))idx.push(i);
+    const kv=(metric)=>scMean(idx.map(i=>k.kpis[metric]?.v[i]).filter(v=>v!==null&&v!==undefined&&!isNaN(v)));
+    const days=kv("Days Worked")||5;
+    const fr=(field)=>scMean(wlabels.map(w=>D.frontAgent?.[n]?.[w]?.[field]).filter(v=>v!==null&&v!==undefined&&!isNaN(v)));
+    const dpa=(field)=>scMean(wlabels.map(w=>D.dialpadAgent?.[n]?.[w]?.[field]).filter(v=>v!==null&&v!==undefined&&!isNaN(v)));
+
+    const replies=fr("replies"),msgs=fr("msgs");
+    const outday=(replies!==null&&msgs!==null&&days)?(replies+msgs)/days:null;
+    const closed=fr("closedWithReply");
+    const closedday=(closed!==null&&days)?closed/days:null;
+    const ans=dpa("answered"),miss=dpa("missed");
+    const callsday=(ans!==null&&days)?ans/days:null;
+    const misspct=(ans!==null&&miss!==null&&(ans+miss)>0)?miss/(ans+miss)*100:null;
+
+    const vals={
+      "First reply time":fr("frtHrs"),
+      "SLA achieved":fr("slaPct"),
+      "Outbound per day":outday,
+      "Closed with reply per day":closedday,
+      "Replies to resolution":fr("replToRes"),
+      "Resolved on first reply":fr("resFirstPct"),
+      "Calls answered per day":callsday,
+      "Missed call rate":misspct,
+      "Time usage":kv("Time Usage"),
+      "Infraction points":scInfractions(n)
+    };
+    const units={"First reply time":"h","SLA achieved":"%","Resolved on first reply":"%","Missed call rate":"%","Time usage":"%"};
+    const BANDS={
+      "First reply time":[5,20,true,3,null],"SLA achieved":[80,30,false,90,null],
+      "Outbound per day":[52,20,false,70,null],"Closed with reply per day":[12.5,4,false,18,null],
+      "Replies to resolution":[1.0,3.5,true,null,0.6],"Resolved on first reply":[35,5,false,45,null],
+      "Calls answered per day":[callExp,callExp*0.35,false,callExp*1.4,null],
+      "Missed call rate":null,
+      "Time usage":[95,70,false,105,null],"Infraction points":[0,6,true,null,null]
+    };
+    const cats={};const comp=[];
+    for(const cat in SC_MET){
+      const mets=SC_MET[cat].map(mn=>{
+        const v=vals[mn];let sc;
+        if(mn==="Missed call rate"){
+          sc=(v===null)?null:(v<=2?100-(v/2*40):Math.max(0,60-((v-2)/3*60)));
+        }else{
+          const b=BANDS[mn];sc=b?scBand(v,b[0],b[1],b[2],b[3],b[4]):null;
+        }
+        return {label:mn,value:v===null?null:Math.round(v*100)/100,unit:units[mn]||"",
+                score:sc===null?null:Math.round(sc)};
+      });
+      const cs=scMean(mets.map(m=>m.score));
+      if(cs===null)continue;
+      cats[cat]={score:Math.round(cs),capped:Math.round(Math.min(100,cs)),metrics:mets};
+      comp.push(Math.min(100,cs));
+    }
+    if(!comp.length)return;
+    let weak=null;for(const c in cats)if(!weak||cats[c].capped<cats[weak].capped)weak=c;
+    SC.agents[n]={cats:cats,composite:Math.round(scMean(comp)),weakest:weak,weakScore:cats[weak].capped};
+  });
+
+  const ns=Object.keys(SC.agents);
+  if(!ns.length)return;
+  const dcats={};
+  for(const cat in SC_MET){
+    const vs=ns.map(n=>SC.agents[n].cats[cat]?.capped).filter(v=>v!==undefined&&v!==null);
+    if(vs.length)dcats[cat]=Math.round(scMean(vs));
+  }
+  let dw=null;for(const c in dcats)if(dw===null||dcats[c]<dcats[dw])dw=c;
+  SC.dept={cats:dcats,composite:Math.round(scMean(Object.values(dcats))),
+           weakest:dw,weakScore:dw?dcats[dw]:null,callExp:Math.round(callExp*10)/10,
+           teamCalls:Math.round(teamCalls),weeks:wlabels.length};
+}
+
+// Infraction points logged in the quarter containing the selected week
+function scInfractions(agent){
+  const now=new Date();const q=Math.floor(now.getMonth()/3);
+  const qs=new Date(now.getFullYear(),q*3,1);
+  let pts=0;
+  (D.infractions||[]).forEach(r=>{
+    if(r.agent!==agent)return;
+    const m=String(r.date||"").match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if(!m)return;
+    const d=new Date(+m[3],+m[1]-1,+m[2]);
+    if(d>=qs)pts+=(r.val||0);
+  });
+  return pts;
+}
+
+function scRing(s){
+  const r=36,c=2*Math.PI*r,o=c*(1-Math.min(s,100)/100);
+  return `<svg width="108" height="108" viewBox="0 0 100 100"><circle cx="50" cy="50" r="${r}" fill="none" stroke="#EEF2F7" stroke-width="10"/>`+
+  `<circle cx="50" cy="50" r="${r}" fill="none" stroke="${scCol(s)}" stroke-width="10" stroke-linecap="round" `+
+  `stroke-dasharray="${c}" stroke-dashoffset="${o}" transform="rotate(-90 50 50)"/>`+
+  `<text x="50" y="57" text-anchor="middle" font-size="26" font-weight="800" fill="${scCol(s)}">${s}</text></svg>`;
+}
+
+function renderScorecard(weekLabel){
+  initGlossary();
+  computeScores(weekLabel);
+  const head=document.getElementById("sc-head"),cl=document.getElementById("sc-cats"),rg=document.getElementById("sc-rings");
+  if(!head)return;
+  const sub=document.getElementById("sc-sub");
+  if(!SC.dept){
+    head.innerHTML=`<div class="sc-none">Not enough data to score this week. The scorecard needs Front and Dialpad history for at least one non-supervisor agent.</div>`;
+    cl.innerHTML="";rg.innerHTML="";if(sub)sub.textContent="";
+    return;
+  }
+  const ns=Object.keys(SC.agents);
+  if(sub)sub.textContent=`${ns.length} scored agent${ns.length===1?"":"s"} · ${SC.dept.weeks}-week average to ${weekLabel} · supervisors excluded`;
+  head.innerHTML=`<div class="sc-big">
+    <div><div class="sc-num" style="color:${scCol(SC.dept.composite)}">${SC.dept.composite}</div>
+      <div class="sc-sub">out of 100</div></div>
+    <div class="sc-meta">Weakest area is <b>${SC.dept.weakest}</b> at ${SC.dept.weakScore}.
+      ${ns.length>1&&ns.every(n=>SC.agents[n].weakest===SC.dept.weakest)
+        ? "Every agent is weakest in the same place, which points at process or volume rather than at any individual."
+        : "Each agent's own weakest area is shown on their card."}
+      <br><span style="color:var(--gray)">Hover any underlined label for its definition and the exact formula.</span></div></div>`;
+  cl.innerHTML=Object.keys(SC.dept.cats).map(c=>`<div class="sc-dcell"><div class="dl">${tipLabel(c)}</div>
+    <div class="dv" style="color:${scCol(SC.dept.cats[c])}">${SC.dept.cats[c]}</div>
+    <div class="ds">${ns.map(n=>n.split(" ")[0]+" "+SC.agents[n].cats[c].capped).join(" · ")}</div></div>`).join("");
+  rg.innerHTML=ns.map(n=>{const a=SC.agents[n];
+    return `<div class="sc-card"><h3>${n}</h3>${scRing(a.composite)}
+      <div class="sc-weak">weakest: ${a.weakest} (${a.weakScore})</div>
+      <div class="sc-bars">${Object.keys(a.cats).map(c=>{const v=a.cats[c];
+        return `<div class="sc-rb"><span class="lb">${tipLabel(c,n)}</span>
+          <span class="tr"><span class="fl" style="width:${Math.min(100,v.capped)}%;background:${scCol(v.capped)}"></span></span>
+          <span class="vn" style="color:${scCol(v.capped)}">${v.score>100?v.score+"+":v.score}</span></div>`;}).join("")}</div></div>`;}).join("");
+}
+
 
 function renderDept(){
   const wi=+document.getElementById("dept-wk-sel").value;
@@ -1510,7 +1843,8 @@ function renderDept(){
     ];
   }
 
-  document.getElementById("dept-cards").innerHTML=cards.map(c=>`<div class="dsc"><div class="dsl">${c.l}</div><div class="dsv">${c.v}</div><div class="dss">${c.s}</div></div>`).join("");
+  document.getElementById("dept-cards").innerHTML=cards.map(c=>`<div class="dsc"><div class="dsl">${tipLabel(c.l)}</div><div class="dsv">${c.v}</div><div class="dss">${c.s}</div></div>`).join("");
+  renderScorecard(weekLabel);
 
   // Ratings from weekly data
   if(w.ratings?.length){
