@@ -91,6 +91,31 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 padding:9px 3px;margin-right:18px;cursor:pointer;border-bottom:2px solid transparent;transition:.15s}
 .ops-sub:hover{color:var(--slate)}
 .ops-sub.active{color:var(--teal);border-bottom-color:var(--teal)}
+/* ── ScanCafe refund realms ── */
+.rf-realms{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-bottom:14px}
+.rf-realm{background:var(--card);border:1px solid var(--border);border-top:3px solid var(--gray);border-radius:10px;
+padding:13px 15px;cursor:pointer;transition:.15s}
+.rf-realm:hover{box-shadow:0 3px 12px rgba(0,0,0,.07)}
+.rf-realm.on{border-color:var(--teal);background:var(--teal-mist)}
+.rf-realm .rl{font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--gray)}
+.rf-realm .rv{font-size:22px;font-weight:800;margin-top:4px}
+.rf-realm .rs{font-size:10.5px;color:var(--gray);margin-top:2px}
+.rf-cat{display:grid;grid-template-columns:1fr 92px 58px 34px;gap:10px;align-items:center;
+padding:8px 0;border-bottom:1px solid #F6F8FA;font-size:12px}
+.rf-cat:last-child{border-bottom:0}
+.rf-cat.zero{opacity:.42}
+.rf-cat.clickable{cursor:pointer}
+.rf-cat.clickable:hover{background:var(--teal-mist)}
+.rf-cat .cn{font-weight:500}
+.rf-cat .cbar{height:7px;background:var(--bg);border-radius:4px;overflow:hidden}
+.rf-cat .cbf{display:block;height:100%;border-radius:4px}
+.rf-cat .cv{text-align:right;font-weight:700;font-size:11.5px}
+.rf-cat .cc{text-align:right;font-size:11px;color:var(--gray)}
+.rf-pend{font-size:8.5px;font-weight:800;background:#FFF4E6;color:#B8721A;padding:1px 6px;border-radius:8px;margin-left:6px}
+.rf-oth{background:var(--bg);border-radius:8px;padding:10px 12px;margin:4px 0 8px;display:none}
+.rf-oth.on{display:block}
+.rf-oth .orow{display:flex;justify-content:space-between;gap:10px;font-size:11.5px;padding:3px 0;color:var(--slate)}
+.rf-oth .orow span:last-child{color:var(--gray);font-weight:700;white-space:nowrap}
 /* ── Glossary tooltip (dashboard-wide) ── */
 .tip{border-bottom:1px dotted var(--gray);cursor:help}
 .tipbox{position:fixed;max-width:400px;max-height:88vh;overflow:auto;background:var(--navy);color:#fff;
@@ -225,6 +250,7 @@ background:rgba(255,255,255,.09);border-radius:6px;padding:8px 10px;margin-top:8
 .rf-sub{display:none}
 .rf-sub.active{display:block;animation:fu .35s ease}
 .rf-reasons{display:flex;flex-direction:column;gap:8px;max-height:320px;overflow-y:auto}
+#rf-d-reasons.rf-cats{display:block;max-height:560px}
 .rf-rr{display:flex;align-items:center;gap:10px}
 .rf-rn{flex:1;font-size:12px;font-weight:500;color:var(--slate);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rf-rb{width:110px;height:8px;background:var(--bg);border-radius:4px;overflow:hidden}
@@ -454,6 +480,7 @@ background:rgba(255,255,255,.09);border-radius:6px;padding:8px 10px;margin-top:8
     </div>
   </div>
 </div>
+<div class="rf-realms" id="rf-d-realms" style="display:none"></div>
 <div class="rf-kpis" id="rf-d-totals"></div>
 
 <!-- Row 1: Refunds Trend | (Top SKUs Returned for compound | Refund Reasons for single) -->
@@ -2035,6 +2062,47 @@ function rfNormReason(s){
 }
 
 // ═══ PARSERS ═══ return array of {date:Date, amount:Number (positive), reason:String (normalized), rawReason:String, raw:Object}
+
+// ═══ ScanCafe refund realms ═══
+// Two separate refund flows in the admin tool, each with its own reason dropdown.
+// Accidental subscription and Overpayment are not yet dropdown options, so agents
+// type them into "Other" free text. Both are promoted to real categories here, and
+// the three ways agents write the accidental case are merged into one.
+const SC_REALMS={
+  Subscription:{label:"Subscription",color:"#2AACB8",
+    cats:["Accidental subscription","I no longer need to store my photos and videos",
+      "I found a better alternative for photo and video storage",
+      "I experienced technical issues with accessing my media",
+      "I am not satisfied with the quality of the service",
+      "The service is too expensive","Other"],
+    pending:["Accidental subscription"]},
+  Order:{label:"Order",color:"#E8967A",
+    cats:["Customer Cancellation","Payment Error","Overpayment","Service Issue","Duplicate Order","Other"],
+    pending:["Overpayment"]}
+};
+// The three free-text spellings of the same event.
+// Inside the Subscription realm, "not aware" always means the customer did not
+// realise they had subscribed, so the bare phrase is safe to match.
+const SC_ACCIDENT=[/not aware/i,/subs?crib\w*\s+by\s+accident/i,/accidental\s+subscription/i,
+  /did(n'?t| not)\s+(remember|know)/i,/without\s+(his|her|their)\s+knowledge/i];
+function scNorm(x){return String(x||"").replace(/\s+/g," ").trim().toLowerCase().replace(/[.]+$/,"");}
+function scClassify(realm,comment){
+  const cfg=SC_REALMS[realm];
+  const n=scNorm(comment);
+  if(!cfg)return {cat:null,other:null};
+  if(realm==="Subscription"&&SC_ACCIDENT.some(re=>re.test(n)))return {cat:"Accidental subscription",other:null};
+  // strip the "Other - " prefix agents use before free text
+  const isOther=/^other\b/.test(n);
+  const free=isOther?n.replace(/^other\s*[-:]?\s*/,"").trim():n;
+  if(realm==="Order"&&/^overpayment/.test(free))return {cat:"Overpayment",other:null};
+  for(const c of cfg.cats){
+    if(c==="Other")continue;
+    if(cfg.pending.indexOf(c)>=0)continue;
+    if(n===scNorm(c)||(!isOther&&n.indexOf(scNorm(c))>=0))return {cat:c,other:null};
+  }
+  return {cat:"Other",other:free||"(no detail given)"};
+}
+
 function pScanCafe(rows){
   // Headers: Customer Email, Customer Name, Refund Type, Details, Refund Amount, Comments, Refund Date
   const out=[];
@@ -2042,8 +2110,11 @@ function pScanCafe(rows){
     const d=rfDate(r[6],"mdy-");if(!d)continue;
     const amt=Math.abs(pn(r[4]));if(!amt)continue;
     const rawR=(r[5]||"").trim();
+    const realm=(r[2]||"").trim();
+    const cls=scClassify(realm,rawR);
     out.push({date:d,amount:amt,reason:rfNormReason(rawR),rawReason:rawR,
-      raw:{email:r[0]||"",customer:r[1]||"",type:r[2]||"",details:r[3]||""}});
+      realm:realm, cat:cls.cat, catOther:cls.other,
+      raw:{email:r[0]||"",customer:r[1]||"",type:realm,details:r[3]||""}});
   }
   return out;
 }
@@ -2234,6 +2305,7 @@ function rfRenderMain(){
 
 // ═══ DETAIL VIEW ═══
 function rfOpenDetail(brandId){
+  RF.realm="ALL";
   const b=RF_BRANDS.find(x=>x.id===brandId);if(!b||!b.live)return;
   document.getElementById("rf-main").classList.remove("active");
   document.getElementById("rf-detail").classList.add("active");
@@ -2247,11 +2319,71 @@ function rfOpenDetail(brandId){
   document.querySelector(".main").scrollTo({top:0,behavior:"smooth"});
 }
 
+
+// Realm selector for ScanCafe: All / Subscription / Order, counted over the date range.
+function renderRealmPicker(enabled,all){
+  const el=document.getElementById("rf-d-realms");
+  if(!el)return;
+  if(!enabled){el.style.display="none";el.innerHTML="";return;}
+  el.style.display="";
+  const sum=arr=>arr.reduce((s,x)=>s+x.amount,0);
+  const opts=[{k:"ALL",label:"All refunds",list:all}].concat(
+    Object.keys(SC_REALMS).map(k=>({k:k,label:SC_REALMS[k].label,list:all.filter(x=>x.realm===k)})));
+  el.innerHTML=opts.map(o=>{
+    const on=(RF.realm||"ALL")===o.k;
+    const c=o.k==="ALL"?"var(--navy)":SC_REALMS[o.k].color;
+    return `<div class="rf-realm${on?" on":""}" data-realm="${o.k}" style="border-top-color:${c}">
+      <div class="rl">${o.label}</div>
+      <div class="rv" style="color:${on?"var(--teal)":"var(--text)"}">${fmt(sum(o.list))}</div>
+      <div class="rs">${o.list.length} refund${o.list.length===1?"":"s"}</div></div>`;}).join("");
+  el.querySelectorAll("[data-realm]").forEach(d=>d.addEventListener("click",()=>{
+    RF.realm=d.dataset.realm;rfRenderDetail();}));
+}
+
+// Category breakdown inside the selected realm, using the admin tool's own dropdown order.
+function renderRealmCats(list){
+  const panel=document.getElementById("rf-d-reasons");
+  const realms=(RF.realm&&RF.realm!=="ALL")?[RF.realm]:Object.keys(SC_REALMS);
+  let html="";
+  realms.forEach(rk=>{
+    const cfg=SC_REALMS[rk];
+    const sub=list.filter(x=>x.realm===rk);
+    const tot=sub.length;
+    const agg={};cfg.cats.forEach(c=>agg[c]={n:0,amt:0,other:{}});
+    sub.forEach(x=>{const c=agg[x.cat]||agg["Other"];if(!c)return;
+      c.n++;c.amt+=x.amount;
+      if(x.catOther)c.other[x.catOther]=(c.other[x.catOther]||0)+1;});
+    const mx=Math.max(1,...cfg.cats.map(c=>agg[c].amt));
+    if(realms.length>1)html+=`<div style="font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;
+      color:${cfg.color};margin:${html?"18px":"2px"} 0 7px">${cfg.label} · ${tot} refund${tot===1?"":"s"}</div>`;
+    cfg.cats.forEach(c=>{
+      const a=agg[c],isOther=c==="Other",keys=Object.keys(a.other);
+      const id="oth-"+rk+"-"+c.replace(/\W+/g,"");
+      html+=`<div class="rf-cat${a.n?"":" zero"}${isOther&&keys.length?" clickable":""}"${isOther&&keys.length?` data-oth="${id}"`:""}>
+        <div class="cn">${c}${cfg.pending.indexOf(c)>=0?'<span class="rf-pend">not in dropdown yet</span>':""}${isOther&&keys.length?' <span style="color:var(--teal);font-size:10px;font-weight:700">view</span>':""}</div>
+        <div class="cbar"><span class="cbf" style="width:${(a.amt/mx*100).toFixed(1)}%;background:${cfg.color}"></span></div>
+        <div class="cv">${a.n?fmt(a.amt):"—"}</div>
+        <div class="cc">${a.n?a.n+"×":"0"}</div></div>`;
+      if(isOther&&keys.length){
+        html+=`<div class="rf-oth" id="${id}">`+keys.sort((x,y)=>a.other[y]-a.other[x])
+          .map(k=>`<div class="orow"><span>${k}</span><span>${a.other[k]}×</span></div>`).join("")+`</div>`;
+      }
+    });
+  });
+  panel.innerHTML=html;
+  panel.querySelectorAll("[data-oth]").forEach(d=>d.addEventListener("click",()=>{
+    const t=document.getElementById(d.dataset.oth);if(t)t.classList.toggle("on");}));
+}
+
 function rfRenderDetail(){
   const b=RF_BRANDS.find(x=>x.id===RF.currentBrand);if(!b)return;
   const fromEl=document.getElementById("rf-d-from"),toEl=document.getElementById("rf-d-to");
   const{from,to}=rfReadRange(fromEl,toEl);
-  const list=rfFilter(rfGetRefunds(b.id),from,to);
+  let list=rfFilter(rfGetRefunds(b.id),from,to);
+  const hasRealms=b.id==="scancafe";
+  const allRealm=list;                    // before the realm filter, for the selector counts
+  if(hasRealms&&RF.realm&&RF.realm!=="ALL")list=list.filter(x=>x.realm===RF.realm);
+  renderRealmPicker(hasRealms,allRealm);
   const total=list.reduce((s,x)=>s+x.amount,0);
   const avg=list.length?total/list.length:0;
   const isAmzn=b.id.startsWith("amzn_");
@@ -2378,6 +2510,13 @@ function rfRenderDetail(){
     }
     breakdown=Object.entries(reasons).sort((a,b)=>b[1].amt-a[1].amt);
   }
+  if(hasRealms){
+    // Use the classified categories so the tile agrees with the panel below it
+    const cc={};
+    for(const r of list){const k=r.cat||"Other";
+      if(!cc[k])cc[k]={count:0,amt:0};cc[k].count++;cc[k].amt+=r.amount;}
+    breakdown=Object.entries(cc).sort((a,b)=>b[1].amt-a[1].amt);
+  }
   const topLabel=breakdown[0]?breakdown[0][0]:"—";
   const topLabelShort=topLabel.length>50?topLabel.slice(0,47)+"…":topLabel;
 
@@ -2406,6 +2545,15 @@ function rfRenderDetail(){
   document.getElementById("rf-d-reasons-sub").textContent=isAmzn
     ?`${breakdown.length} distinct product${breakdown.length===1?'':'s'} refunded — Amazon does not expose refund reasons`
     :`${breakdown.length} unique reason${breakdown.length===1?'':'s'} — normalized groupings`;
+  if(hasRealms){
+    const n=(RF.realm&&RF.realm!=="ALL")?SC_REALMS[RF.realm].label+" refunds only":"both refund flows";
+    if(panelTitle)panelTitle.textContent="Refund Reasons";
+    document.getElementById("rf-d-reasons-sub").textContent=
+      `Admin tool categories, ${n}. Click Other to see what was typed in.`;
+    document.getElementById("rf-d-reasons").classList.add("rf-cats");
+    renderRealmCats(list);
+  }else{
+  document.getElementById("rf-d-reasons").classList.remove("rf-cats");
   document.getElementById("rf-d-reasons").innerHTML=breakdown.length?breakdown.slice(0,50).map(([name,d])=>{
     const shown=name.length>60?name.slice(0,57)+"…":name;
     return `<div class="rf-rr" title="${name.replace(/"/g,'&quot;')}">
@@ -2415,6 +2563,7 @@ function rfRenderDetail(){
       <div class="rf-rc">${d.count}×</div>
     </div>`;
   }).join(""):'<div style="color:var(--gray);font-size:12px;padding:12px 0">No refunds in selected range</div>';
+  }
 
   // Refund log table — columns depend on brand
   const isSC=b.id==="scancafe";
