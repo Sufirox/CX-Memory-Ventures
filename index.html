@@ -91,6 +91,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 padding:9px 3px;margin-right:18px;cursor:pointer;border-bottom:2px solid transparent;transition:.15s}
 .ops-sub:hover{color:var(--slate)}
 .ops-sub.active{color:var(--teal);border-bottom-color:var(--teal)}
+/* ── Refunds page sections ── */
+.zone-pend{background:#FFF6F3;border:1px solid #F6DACE;border-radius:14px;padding:16px;margin-bottom:22px}
+.zone-pend .pend-card{box-shadow:none;border:1px solid #F3DED5;margin-bottom:0}
+.sect-lab{display:flex;align-items:center;gap:10px;margin:0 0 11px}
+.sect-lab .t{font-size:11px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;white-space:nowrap}
+.sect-lab .rule{flex:1;height:1px;background:var(--border)}
+.sect-lab .cnt{font-size:11px;color:var(--gray);font-weight:600;white-space:nowrap}
+.inline-fold{border-top:1px solid var(--border);margin-top:14px;padding-top:12px}
+.inline-hd{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;color:var(--teal);cursor:pointer;user-select:none}
+.inline-hd .a2{font-size:10px;transition:transform .18s;display:inline-block}
+.inline-fold.open .inline-hd .a2{transform:rotate(90deg)}
+.inline-body{display:none;margin-top:14px}
+.inline-fold.open .inline-body{display:block}
 /* ── Pending refund queue ── */
 .pq-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:10px;margin-bottom:14px}
 .pq-t{background:var(--bg);border-radius:9px;padding:13px 15px;border-left:3px solid var(--teal)}
@@ -488,14 +501,29 @@ background:rgba(255,255,255,.09);border-radius:6px;padding:8px 10px;margin-top:8
     </div>
   </div>
 </div>
-<div class="fold open" id="fold-pending" style="margin-bottom:18px">
-  <div class="foldhd"><div><div class="ct" id="pend-title">Pending to Process</div>
-  <div class="csb" style="margin:2px 0 0" id="pend-sub"></div></div><span class="arw">&#9654;</span></div>
-  <div class="foldbody"><div id="pend-body"></div></div>
+<div class="zone-pend">
+  <div class="sect-lab"><span class="t" style="color:var(--coral-dark)">Needs action</span>
+    <span class="rule" style="background:#F0CFC2"></span><span class="cnt" id="pend-cnt"></span></div>
+  <div class="cd pend-card">
+    <div class="ct" id="pend-title">Pending to Process</div>
+    <div class="csb" style="margin:2px 0 13px" id="pend-sub"></div>
+    <div id="pend-tiles"></div>
+    <div class="inline-fold" id="pend-more">
+      <div class="inline-hd"><span class="a2">&#9654;</span> Show priority breakdown and the full queue</div>
+      <div class="inline-body" id="pend-body"></div>
+    </div>
+  </div>
 </div>
-<div class="ct" style="font-size:15px;margin:4px 0 10px" id="rf-proc-h"></div>
+
+<div class="sect-lab"><span class="t" id="rf-proc-h" style="color:var(--teal)"></span>
+  <span class="rule"></span><span class="cnt" id="proc-cnt"></span></div>
 <div class="rf-kpis" id="rf-totals"></div>
-<div class="cd" style="margin-bottom:16px"><div class="ct">Refund Trend — All Connected Brands</div><div class="csb" id="rf-trend-sub">Daily refund totals in selected range</div><div class="cw" style="height:180px"><canvas id="rf-trend"></canvas></div></div>
+<div class="fold" id="fold-trend" style="margin-top:16px">
+  <div class="foldhd"><div><div class="ct">Refund Trend, all connected brands</div>
+  <div class="csb" style="margin:2px 0 0" id="rf-trend-sub">Daily refund totals in selected range</div></div>
+  <span class="arw">&#9654;</span></div>
+  <div class="foldbody"><div class="cw" style="height:180px"><canvas id="rf-trend"></canvas></div></div>
+</div>
 <div class="ct" style="font-size:15px;margin:18px 0 10px">Brands</div>
 <div class="rf-grid" id="rf-cards"></div>
 </div>
@@ -1556,7 +1584,7 @@ const GLOSSARY={
  s:"Turns amber past 21 days."},
 "By priority":{d:"Pending requests grouped by the urgency the agent set on the form. The age shown is the oldest request in that group, so a High group older than a Low group means the queue is not being worked in order.",
  s:"Priority comes from the form, column K."},
-"Processed refunds":{d:"Refunds already paid back to customers, read from each brand's own refund log. Requests still waiting are in Pending to Process above.",
+"Already paid out":{d:"Refunds already paid back to customers, read from each brand's own refund log. Requests still waiting are in Pending to Process above.",
  s:"Six brand feeds: ScanCafe, ScanDigital, Crema Shopify, and three Amazon accounts."},
 "Refund policy":{d:"The rules used to decide what a ScanCafe MyHeritage subscription refund should be, by situation and by plan type.",
  s:"Click the link in the Subscription header to open the full table."},
@@ -2312,7 +2340,7 @@ function rfKill(id){if(RF.charts[id]){RF.charts[id].destroy();delete RF.charts[i
 function rfRenderMain(){
   renderPending();
   {const h=document.getElementById("rf-proc-h");
-   if(h)h.innerHTML=tipLabel("Processed refunds");}
+   if(h)h.innerHTML=tipLabel("Already paid out");}
   const fromEl=document.getElementById("rf-from"),toEl=document.getElementById("rf-to");
   const{from,to}=rfReadRange(fromEl,toEl);
 
@@ -2328,6 +2356,8 @@ function rfRenderMain(){
     allRefunds.push(...filtered);
   }
   const avg=grandCount?grandTotal/grandCount:0;
+  {const c=document.getElementById("proc-cnt");
+   if(c)c.textContent=`${grandCount} refund${grandCount===1?"":"s"} in range \u00b7 ${fmt(grandTotal)}`;}
 
   // KPIs
   document.getElementById("rf-totals").innerHTML=`
@@ -2478,12 +2508,14 @@ function pqDays(dateStr){
 }
 function renderPending(){
   const body=document.getElementById("pend-body");
-  if(!body)return;
+  const tiles=document.getElementById("pend-tiles");
+  if(!body||!tiles)return;
   const sub=document.getElementById("pend-sub");
+  const cnt=document.getElementById("pend-cnt");
   const all=(D.pending||[]).filter(x=>!x.handled);
   if(!D.pending||!D.pending.length){
-    body.innerHTML=`<div style="font-size:12px;color:var(--gray);padding:8px 0">Pending refund sheet did not load.</div>`;
-    if(sub)sub.textContent="";return;
+    tiles.innerHTML=`<div style="font-size:12px;color:var(--gray);padding:8px 0">Pending refund sheet did not load.</div>`;
+    body.innerHTML="";if(sub)sub.textContent="";if(cnt)cnt.textContent="";return;
   }
   const known=all.filter(x=>x.amount!==null);
   const unknown=all.filter(x=>x.amount===null);
@@ -2503,7 +2535,8 @@ function renderPending(){
     const a=pqDays(x.date);if(a!==null&&a>b.old)b.old=a;});
   const mx=Math.max(1,...Object.values(byPri).map(v=>v.amt));
 
-  body.innerHTML=`
+  if(cnt)cnt.textContent=`${all.length} request${all.length===1?"":"s"} waiting \u00b7 ${fmt(total)}`;
+  tiles.innerHTML=`
   <div class="pq-tiles">
     <div class="pq-t"><div class="l">${tipLabel("Pending total")}</div><div class="v" style="color:var(--coral-dark)">${fmt(total)}</div>
       <div class="s">${all.length} request${all.length===1?"":"s"}</div></div>
@@ -2515,7 +2548,9 @@ function renderPending(){
     ${Object.keys(byBrand).filter(b=>byBrand[b].amt>0).sort((a,b)=>byBrand[b].amt-byBrand[a].amt).map(b=>
       `<div class="pq-t" style="border-left-color:var(--teal)"><div class="l">${b}</div>
        <div class="v">${fmt(byBrand[b].amt)}</div><div class="s">${byBrand[b].n} request${byBrand[b].n===1?"":"s"}</div></div>`).join("")}
-  </div>
+  </div>`;
+
+  body.innerHTML=`
   <div class="pq-split">
     <div><div class="pq-h">${tipLabel("By priority")}</div>
       ${PQ_ORDER.filter(k=>byPri[k]).map(k=>{const v=byPri[k];
@@ -2821,6 +2856,8 @@ async function buildRefunds(){
   document.getElementById("rf-back").addEventListener("click",rfCloseDetail);
   initGlossary();
   document.querySelectorAll("#page-refunds .foldhd").forEach(hd=>
+    hd.addEventListener("click",()=>hd.parentElement.classList.toggle("open")));
+  document.querySelectorAll("#page-refunds .inline-hd").forEach(hd=>
     hd.addEventListener("click",()=>hd.parentElement.classList.toggle("open")));
 
   // Make entire date input clickable (not just the tiny calendar icon)
