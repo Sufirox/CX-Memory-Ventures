@@ -91,6 +91,35 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 padding:9px 3px;margin-right:18px;cursor:pointer;border-bottom:2px solid transparent;transition:.15s}
 .ops-sub:hover{color:var(--slate)}
 .ops-sub.active{color:var(--teal);border-bottom-color:var(--teal)}
+/* ── Pending refund queue ── */
+.pq-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:10px;margin-bottom:14px}
+.pq-t{background:var(--bg);border-radius:9px;padding:13px 15px;border-left:3px solid var(--teal)}
+.pq-t.warn{border-left-color:var(--coral-dark)}
+.pq-t .l{font-size:10px;font-weight:700;color:var(--gray);letter-spacing:.5px;text-transform:uppercase}
+.pq-t .v{font-size:23px;font-weight:800;margin-top:4px}
+.pq-t .s{font-size:10px;color:var(--gray);margin-top:3px}
+.pq-split{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px}
+.pq-row{display:grid;grid-template-columns:78px 1fr 84px 52px;gap:9px;align-items:center;font-size:12px;padding:6px 0;border-bottom:1px solid #F6F8FA}
+.pq-row:last-child{border-bottom:0}
+.pq-h{font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--gray);margin-bottom:5px}
+.pq-pill{display:inline-block;font-size:9px;font-weight:800;padding:2px 8px;border-radius:9px;text-align:center}
+.pq-High{background:#FDECEA;color:#8A2F1F}.pq-Medium{background:#FFF4E6;color:#B8721A}
+.pq-Low{background:#F1F4F8;color:#5A6B7E}
+.pq-bar{height:7px;background:var(--bg);border-radius:4px;overflow:hidden}
+.pq-bar span{display:block;height:100%;border-radius:4px}
+.pq-age{font-weight:700}
+.pq-age.old{color:var(--coral-dark)}
+/* ── Refund policy ── */
+.pol{background:var(--card);border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.05);padding:0;margin:16px 0 0;display:none}
+.pol.on{display:block;padding:18px 20px}
+.pol h4{font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--teal);margin-bottom:9px}
+.pol table{width:100%;border-collapse:collapse;font-size:12px}
+.pol th{text-align:left;font-size:9.5px;letter-spacing:.4px;text-transform:uppercase;color:var(--gray);
+padding:5px 8px;border-bottom:1px solid var(--border)}
+.pol td{padding:7px 8px;border-bottom:1px solid #EEF2F7;vertical-align:top;line-height:1.5}
+.pol td:first-child{font-weight:600;width:34%}
+.pol .note{font-size:11px;color:var(--slate);margin-top:10px;line-height:1.55}
+.pol-btn{font-size:10.5px;font-weight:700;color:var(--teal);cursor:pointer;user-select:none;margin-left:8px}
 /* ── ScanCafe refund realms ── */
 .rf-realms{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-bottom:14px}
 .rf-realm{background:var(--card);border:1px solid var(--border);border-top:3px solid var(--gray);border-radius:10px;
@@ -459,6 +488,12 @@ background:rgba(255,255,255,.09);border-radius:6px;padding:8px 10px;margin-top:8
     </div>
   </div>
 </div>
+<div class="fold open" id="fold-pending" style="margin-bottom:18px">
+  <div class="foldhd"><div><div class="ct" id="pend-title">Pending to Process</div>
+  <div class="csb" style="margin:2px 0 0" id="pend-sub"></div></div><span class="arw">&#9654;</span></div>
+  <div class="foldbody"><div id="pend-body"></div></div>
+</div>
+<div class="ct" style="font-size:15px;margin:4px 0 10px" id="rf-proc-h"></div>
 <div class="rf-kpis" id="rf-totals"></div>
 <div class="cd" style="margin-bottom:16px"><div class="ct">Refund Trend — All Connected Brands</div><div class="csb" id="rf-trend-sub">Daily refund totals in selected range</div><div class="cw" style="height:180px"><canvas id="rf-trend"></canvas></div></div>
 <div class="ct" style="font-size:15px;margin:18px 0 10px">Brands</div>
@@ -516,6 +551,7 @@ background:rgba(255,255,255,.09);border-radius:6px;padding:8px 10px;margin-top:8
 <!-- Row 3: Logs — refund log always, returns log compound-only, side by side when both present -->
 <div class="g2">
   <div class="cd">
+<div id="mh-pol-wrap"></div>
     <div class="ct" style="font-size:13px;font-weight:600">Refund Log</div>
     <div class="csb" id="rf-d-log-sub">All refunds in selected range</div>
     <div class="tw" style="max-height:500px"><table class="tb" id="rf-d-tbl"></table></div>
@@ -583,6 +619,7 @@ background:rgba(255,255,255,.09);border-radius:6px;padding:8px 10px;margin-top:8
 <script>
 const VER="v1.1 — Apr 2026";
 const URLS={
+  pendingRefunds:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTWF963vZC_H_A9nrbVL8Flpuwp5Te3aeOo1TxaLAs0pRU-E5GgqSOgW4MO9vGCkML4A4Q_XT37hePv/pub?gid=1756284187&single=true&output=csv",
   frontDaily:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTWF963vZC_H_A9nrbVL8Flpuwp5Te3aeOo1TxaLAs0pRU-E5GgqSOgW4MO9vGCkML4A4Q_XT37hePv/pub?gid=269820540&single=true&output=csv",
   aiSignals:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1225470280&single=true&output=csv",
   cbScanCafe:"https://docs.google.com/spreadsheets/d/e/2PACX-1vQ4tGN7IZU_-EFMZvAYj3egQ3Zcbl4z4s9EWvfPpRrZcBfnVn02G1dFt5cWEFKnYiWXQ3mmr_r0Fu5Z/pub?gid=48102920&single=true&output=csv",
@@ -656,19 +693,42 @@ async function fetchCSV(url,name){
   return [];
 }
 
-const D={agents:[],monthlyComm:[],revData:[],salesLog:[],weeklyDept:{},weeklyRaw:[],kpi:{},infractions:[],ptoLog:[],issues:[],schedule:[],front:{},frontAgent:{},dialpadAgent:{},chargebacks:[],frontDaily:[],signals:[],signalWeek:"",signalStamp:"",headline:"",failed:[]};
+const D={agents:[],monthlyComm:[],revData:[],salesLog:[],weeklyDept:{},weeklyRaw:[],kpi:{},infractions:[],ptoLog:[],issues:[],schedule:[],front:{},frontAgent:{},dialpadAgent:{},chargebacks:[],frontDaily:[],pending:[],signals:[],signalWeek:"",signalStamp:"",headline:"",failed:[]};
 window.D=D;
 
 async function loadAll(){
-  const names=["commOverview","salesOverview","salesLog","weekly","generalData","kpiAngel","kpiIvan","kpiFatima","kpiLuisa","kpiVanessa","schedule","issues","frontData","dialpadData","cbScanCafe","aiSignals","frontDaily"];
-  const urls=[URLS.commOverview,URLS.salesOverview,URLS.salesLog,URLS.weekly,URLS.generalData,URLS.kpiAngel,URLS.kpiIvan,URLS.kpiFatima,URLS.kpiLuisa,URLS.kpiVanessa,URLS.schedule,URLS.issues,URLS.frontData,URLS.dialpadData,URLS.cbScanCafe,URLS.aiSignals,URLS.frontDaily];
+  const names=["commOverview","salesOverview","salesLog","weekly","generalData","kpiAngel","kpiIvan","kpiFatima","kpiLuisa","kpiVanessa","schedule","issues","frontData","dialpadData","cbScanCafe","aiSignals","frontDaily","pendingRefunds"];
+  const urls=[URLS.commOverview,URLS.salesOverview,URLS.salesLog,URLS.weekly,URLS.generalData,URLS.kpiAngel,URLS.kpiIvan,URLS.kpiFatima,URLS.kpiLuisa,URLS.kpiVanessa,URLS.schedule,URLS.issues,URLS.frontData,URLS.dialpadData,URLS.cbScanCafe,URLS.aiSignals,URLS.frontDaily,URLS.pendingRefunds];
   const bar=document.getElementById("load-fill");
   const results=[];
   for(let i=0;i<urls.length;i++){
     results.push(await fetchCSV(urls[i],names[i]));
     if(bar)bar.style.width=((i+1)/urls.length*100)+"%";
   }
-  const [commOv,salesOv,salesLg,weekly,genData,kA,kI,kF,kL,kV,sched,issues,frontData,dialpadData,cbSC,aiSig,fDaily]=results;
+  const [commOv,salesOv,salesLg,weekly,genData,kA,kI,kF,kL,kV,sched,issues,frontData,dialpadData,cbSC,aiSig,fDaily,pendRef]=results;
+
+  // ═══ PARSE PENDING REFUND REQUESTS ═══
+  // A=Handled TRUE/FALSE, C=date of request, D=company, E=team member,
+  // F=order id, G=email, H=amount, I=reason, J=description, K=priority
+  for(let i=1;i<pendRef.length;i++){
+    const r=pendRef[i];
+    if(!r||!r[0]||!String(r[0]).trim())continue;
+    const raw=String(r[7]||"").trim();
+    const clean=raw.replace(/[$,]/g,"").trim();
+    const amt=(clean!==""&&!isNaN(parseFloat(clean))&&/^-?[\d.]+$/.test(clean))?parseFloat(clean):null;
+    D.pending.push({
+      handled:String(r[0]).trim().toUpperCase()==="TRUE",
+      date:String(r[2]||"").trim(),
+      brand:String(r[3]||"").trim()||"(not set)",
+      member:String(r[4]||"").trim()||"(not set)",
+      order:String(r[5]||"").trim(),
+      email:String(r[6]||"").trim(),
+      amount:amt, rawAmount:raw,
+      reason:String(r[8]||"").trim()||"(no reason given)",
+      note:String(r[9]||"").trim(),
+      priority:String(r[10]||"").trim()||"(not set)"
+    });
+  }
 
   // ═══ PARSE FRONT DAILY RECORDS ═══
   // 4-row block per day: At Open / At Close / Oldest ticket / Snoozed tickets.
@@ -1485,6 +1545,22 @@ function renderAg(){
 // One place to edit every definition. Any element with class "tip" and a
 // data-g matching a key here gets a hover card with the formula.
 const GLOSSARY={
+"Pending total":{d:"Money owed to customers from refund requests that have been submitted but not yet paid out. This is separate from everything below, which is money already returned.",
+ f:"sum of Refund Amount where Handled = FALSE",
+ s:"Source: the refund request form sheet. Requests with an unreadable amount are listed but left out of this total."},
+"Days to clear":{d:"How long the current queue would take to work through at the standard daily limit.",
+ f:"Days to clear = Pending total / 500",
+ s:"Policy is to process refunds in order of urgency, up to $500 a day."},
+"Oldest request":{d:"Age of the longest waiting request still unprocessed, counted from the date it was raised.",
+ f:"today - earliest 'Date of request' where Handled = FALSE",
+ s:"Turns amber past 21 days."},
+"By priority":{d:"Pending requests grouped by the urgency the agent set on the form. The age shown is the oldest request in that group, so a High group older than a Low group means the queue is not being worked in order.",
+ s:"Priority comes from the form, column K."},
+"Processed refunds":{d:"Refunds already paid back to customers, read from each brand's own refund log. Requests still waiting are in Pending to Process above.",
+ s:"Six brand feeds: ScanCafe, ScanDigital, Crema Shopify, and three Amazon accounts."},
+"Refund policy":{d:"The rules used to decide what a ScanCafe MyHeritage subscription refund should be, by situation and by plan type.",
+ s:"Click the link in the Subscription header to open the full table."},
+
 "Department Score":{d:"The average of every scored agent's composite. Supervisors are excluded, because supervisor work is a different job and measuring it against agent targets would be misleading.",
  f:"Department Score = average( agent composites )\n\nEach agent composite = average of their 5 category\nscores, with every category capped at 100 first.\n\nCapping means a very strong area can never lift the\ncomposite high enough to hide a weak one.",
  s:"Scale: categories run 0 to 120, where above 100 means Exceeds. The composite always lands between 0 and 100."},
@@ -2234,6 +2310,9 @@ function rfKill(id){if(RF.charts[id]){RF.charts[id].destroy();delete RF.charts[i
 
 // ═══ MAIN VIEW ═══
 function rfRenderMain(){
+  renderPending();
+  {const h=document.getElementById("rf-proc-h");
+   if(h)h.innerHTML=tipLabel("Processed refunds");}
   const fromEl=document.getElementById("rf-from"),toEl=document.getElementById("rf-to");
   const{from,to}=rfReadRange(fromEl,toEl);
 
@@ -2354,8 +2433,12 @@ function renderRealmCats(list){
       c.n++;c.amt+=x.amount;
       if(x.catOther)c.other[x.catOther]=(c.other[x.catOther]||0)+1;});
     const mx=Math.max(1,...cfg.cats.map(c=>agg[c].amt));
-    if(realms.length>1)html+=`<div style="font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;
-      color:${cfg.color};margin:${html?"18px":"2px"} 0 7px">${cfg.label} · ${tot} refund${tot===1?"":"s"}</div>`;
+    const hdr=`${cfg.label} \u00b7 ${tot} refund${tot===1?"":"s"}`+
+      (rk==="Subscription"?`<span class="pol-btn" id="pol-toggle">see refund policy</span>`:"");
+    if(realms.length>1||rk==="Subscription")
+      html+=`<div style="font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;
+      color:${cfg.color};margin:${html?"18px":"2px"} 0 7px">${hdr}</div>`;
+
     cfg.cats.forEach(c=>{
       const a=agg[c],isOther=c==="Other",keys=Object.keys(a.other);
       const id="oth-"+rk+"-"+c.replace(/\W+/g,"");
@@ -2373,6 +2456,119 @@ function renderRealmCats(list){
   panel.innerHTML=html;
   panel.querySelectorAll("[data-oth]").forEach(d=>d.addEventListener("click",()=>{
     const t=document.getElementById(d.dataset.oth);if(t)t.classList.toggle("on");}));
+  {const w=document.getElementById("mh-pol-wrap");
+   if(w)w.innerHTML=(realms.indexOf("Subscription")>=0)?policyHTML():"";}
+  const pt=panel.querySelector("#pol-toggle");
+  if(pt)pt.addEventListener("click",()=>{
+    const el=document.getElementById("mh-pol");if(!el)return;
+    const on=el.classList.toggle("on");pt.textContent=on?"hide refund policy":"see refund policy";});
+}
+
+// ═══════════════ PENDING REFUND QUEUE ═══════════════
+// Requests submitted but not yet processed. Separate from the processed
+// refund logs below, which only contain money already returned.
+const PQ_CAP=500;                       // refunds processed per day, by policy
+const PQ_ORDER=["High","Medium","Low","(not set)"];
+
+function pqDays(dateStr){
+  const m=String(dateStr||"").match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(!m)return null;
+  const d=new Date(+m[3],+m[1]-1,+m[2]);
+  return Math.floor((rfToday()-d)/864e5);
+}
+function renderPending(){
+  const body=document.getElementById("pend-body");
+  if(!body)return;
+  const sub=document.getElementById("pend-sub");
+  const all=(D.pending||[]).filter(x=>!x.handled);
+  if(!D.pending||!D.pending.length){
+    body.innerHTML=`<div style="font-size:12px;color:var(--gray);padding:8px 0">Pending refund sheet did not load.</div>`;
+    if(sub)sub.textContent="";return;
+  }
+  const known=all.filter(x=>x.amount!==null);
+  const unknown=all.filter(x=>x.amount===null);
+  const total=known.reduce((s,x)=>s+x.amount,0);
+  const ages=all.map(x=>pqDays(x.date)).filter(v=>v!==null);
+  const oldest=ages.length?Math.max.apply(null,ages):null;
+  const days=total/PQ_CAP;
+
+  const noBrand=all.filter(x=>x.brand==="(not set)").length;
+  if(sub)sub.textContent=`${all.length} request${all.length===1?"":"s"} submitted and not yet processed`+
+    (unknown.length?` · ${unknown.length} with no usable amount`:"")+
+    (noBrand?` · ${noBrand} with no brand set`:"");
+
+  const byBrand={};all.forEach(x=>{const b=byBrand[x.brand]=byBrand[x.brand]||{n:0,amt:0};b.n++;b.amt+=(x.amount||0);});
+  const byPri={};all.forEach(x=>{const k=PQ_ORDER.indexOf(x.priority)>=0?x.priority:"(not set)";
+    const b=byPri[k]=byPri[k]||{n:0,amt:0,old:0};b.n++;b.amt+=(x.amount||0);
+    const a=pqDays(x.date);if(a!==null&&a>b.old)b.old=a;});
+  const mx=Math.max(1,...Object.values(byPri).map(v=>v.amt));
+
+  body.innerHTML=`
+  <div class="pq-tiles">
+    <div class="pq-t"><div class="l">${tipLabel("Pending total")}</div><div class="v" style="color:var(--coral-dark)">${fmt(total)}</div>
+      <div class="s">${all.length} request${all.length===1?"":"s"}</div></div>
+    <div class="pq-t"><div class="l">${tipLabel("Days to clear")}</div><div class="v">${days.toFixed(1)}</div>
+      <div class="s">at ${fmt(PQ_CAP)} per day</div></div>
+    <div class="pq-t${oldest!==null&&oldest>21?" warn":""}"><div class="l">${tipLabel("Oldest request")}</div>
+      <div class="v"${oldest!==null&&oldest>21?' style="color:var(--coral-dark)"':''}>${oldest===null?"—":oldest+"d"}</div>
+      <div class="s">since the request was raised</div></div>
+    ${Object.keys(byBrand).filter(b=>byBrand[b].amt>0).sort((a,b)=>byBrand[b].amt-byBrand[a].amt).map(b=>
+      `<div class="pq-t" style="border-left-color:var(--teal)"><div class="l">${b}</div>
+       <div class="v">${fmt(byBrand[b].amt)}</div><div class="s">${byBrand[b].n} request${byBrand[b].n===1?"":"s"}</div></div>`).join("")}
+  </div>
+  <div class="pq-split">
+    <div><div class="pq-h">${tipLabel("By priority")}</div>
+      ${PQ_ORDER.filter(k=>byPri[k]).map(k=>{const v=byPri[k];
+        return `<div class="pq-row"><span class="pq-pill pq-${k.replace(/\W/g,"")}">${k}</span>
+          <span class="pq-bar"><span style="width:${(v.amt/mx*100).toFixed(1)}%;background:${k==="High"?"#D4604A":k==="Medium"?"#B8721A":"#8A9BAE"}"></span></span>
+          <span style="text-align:right;font-weight:700">${fmt(v.amt)}</span>
+          <span style="text-align:right;color:var(--gray)" class="pq-age${v.old>21?" old":""}">${v.old}d</span></div>`;}).join("")}
+    </div>
+    <div><div class="pq-h">Reasons</div>
+      ${Object.entries(all.reduce((o,x)=>{o[x.reason]=(o[x.reason]||0)+1;return o;},{}))
+        .sort((a,b)=>b[1]-a[1]).slice(0,6).map(([r,n])=>
+        `<div class="pq-row" style="grid-template-columns:1fr 46px"><span>${r}</span>
+         <span style="text-align:right;color:var(--gray);font-weight:700">${n}×</span></div>`).join("")}
+    </div>
+  </div>
+  <div class="tw" style="max-height:300px"><table class="tb">
+    <thead><tr><th>Requested</th><th>Age</th><th>Brand</th><th>Raised by</th><th>Order</th>
+    <th style="text-align:right">Amount</th><th>Reason</th><th>Priority</th></tr></thead><tbody>
+    ${all.slice().sort((a,b)=>(pqDays(b.date)||0)-(pqDays(a.date)||0)).map(x=>{
+      const a=pqDays(x.date);
+      return `<tr><td style="white-space:nowrap;color:var(--gray)">${x.date||"—"}</td>
+        <td class="pq-age${a!==null&&a>21?" old":""}">${a===null?"—":a+"d"}</td>
+        <td>${x.brand}</td><td>${x.member}</td>
+        <td style="font-size:11px;color:var(--gray)">${x.order||"—"}</td>
+        <td style="text-align:right;font-weight:600">${x.amount!==null?fmt(x.amount):`<span style="color:var(--gray);font-style:italic" title="${(x.rawAmount||"").replace(/"/g,"&quot;")}">needs review</span>`}</td>
+        <td style="font-size:11px">${x.reason}</td>
+        <td><span class="pq-pill pq-${(PQ_ORDER.indexOf(x.priority)>=0?x.priority:"(not set)").replace(/\W/g,"")}">${x.priority}</span></td></tr>`;
+    }).join("")}
+  </tbody></table></div>`;
+}
+
+// ScanCafe MyHeritage subscription refund policy, shown on request.
+const MH_POLICY=[
+ ["Subscribed by mistake, customer wanted USB",
+  "1 to 3 months since the initial charge: refund the unused months, always minus one. 4 to 6 months: refund 6 months. Over 6 months: refund the unused months only.",
+  "No cash refund for past charges, offer a gift card instead. 1 to 3 months: full amount. 4 to 6 months: 3 months. 7 to 12 months: 6 months."],
+ ["Checkbox left ticked and the customer was unaware, no other delivery method chosen",
+  "Same as above.","Same as above."],
+ ["Video order without photos. The subscription was placed but MyHeritage cannot deliver video downloads",
+  "Full refund.","Full refund."],
+ ["MyHeritage is not what the customer expected, for example images cannot be downloaded in bulk",
+  "Refund the unused months.","No refund."],
+ ["Customer cancelled, then placed a new order, MyHeritage reactivated automatically and billed again",
+  "Full refund.","Full refund."],
+ ["The 30 day free trial ended and converted","Full refund.","Full refund."]
+];
+function policyHTML(){
+  return `<div class="pol" id="mh-pol"><h4>ScanCafe subscription refund policy</h4>
+  <table><thead><tr><th>Situation</th><th>Yearly plan</th><th>Monthly plan</th></tr></thead><tbody>
+  ${MH_POLICY.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join("")}
+  </tbody></table>
+  <div class="note">Video orders cannot be served because the MyHeritage site is not set up to download orders containing video.
+  Across every brand, refunds are worked in order of urgency with a maximum of ${fmt(PQ_CAP)} processed per day.</div></div>`;
 }
 
 function rfRenderDetail(){
@@ -2623,6 +2819,9 @@ async function buildRefunds(){
     btn.addEventListener("click",()=>{rfApplyPreset(btn.dataset.rfdr,dFromEl,dToEl);rfRenderDetail();});
   });
   document.getElementById("rf-back").addEventListener("click",rfCloseDetail);
+  initGlossary();
+  document.querySelectorAll("#page-refunds .foldhd").forEach(hd=>
+    hd.addEventListener("click",()=>hd.parentElement.classList.toggle("open")));
 
   // Make entire date input clickable (not just the tiny calendar icon)
   [fromEl,toEl,dFromEl,dToEl].forEach(el=>{
