@@ -66,6 +66,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .ktb{padding:10px 22px;font-size:13px;font-weight:600;color:var(--gray);border:none;background:0 0;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-2px}
 .ktb.active{color:var(--teal);border-bottom-color:var(--teal)}
 .kg{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:16px}
+.sq{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.sq>.cd{margin:0!important}
+.mgrp{font-size:10.5px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;color:var(--slate);margin:18px 0 9px;display:flex;align-items:center;gap:10px}
+.mgrp:first-child{margin-top:4px}
+.mgrp .rl{flex:1;height:1px;background:var(--border)}
+.mgrp .gbg{font-size:11px;font-weight:800;letter-spacing:0;text-transform:none;background:var(--bg);border-radius:20px;padding:2px 9px}
+.ag-hero .sc-rb{margin-bottom:9px}
+.ag-hero .sc-rb .lb{width:118px;flex:0 0 118px}
+#kpi-cards .kg:last-child{margin-bottom:0}
+.ag-hero{display:flex;gap:26px;align-items:center;flex-wrap:wrap}
+.ag-hero .hb{flex:1;min-width:260px;margin-top:0}
+.ag-hero .hn{font-size:11.5px;color:var(--gray);line-height:1.55;flex:0 0 210px}
+@media(max-width:820px){.sq{grid-template-columns:1fr}}
 .km{background:var(--card);border-radius:8px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
 .kh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
 .kn{font-size:11px;font-weight:600;color:var(--slate)}
@@ -195,7 +208,8 @@ background:rgba(255,255,255,.09);border-radius:6px;padding:8px 10px;margin-top:8
 .sc-card h3{font-size:13.5px;font-weight:700;margin-bottom:12px}
 .sc-bars{margin-top:15px;text-align:left}
 .sc-rb{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.sc-rb .lb{font-size:10.5px;color:var(--slate);width:100px;flex:0 0 100px;font-weight:600}
+.sc-rb .lb{font-size:10.5px;color:var(--slate);width:100px;flex:0 0 100px;font-weight:600;
+height:auto;background:none;border-radius:0;overflow:visible;line-height:1.5}
 .sc-rb .tr{flex:1;display:block;height:8px;background:var(--bg);border-radius:4px;overflow:hidden}
 .sc-rb .fl{display:block;height:100%;border-radius:4px}
 .sc-rb .vn{font-size:11px;font-weight:800;width:34px;text-align:right}
@@ -377,13 +391,24 @@ background:rgba(255,255,255,.09);border-radius:6px;padding:8px 10px;margin-top:8
 <select class="sel" id="kpi-wk"></select></div></div>
 <div class="kt"><button class="ktb active" data-v="dept">Department</button><button class="ktb" data-v="agent">Agent View</button><button class="ktb" data-v="inf">Infractions & PTO</button></div>
 <div id="kv-agent" style="display:none">
-<div class="cd" id="ag-pto-card" style="margin-bottom:16px;display:none">
-  <div class="ct" id="ag-pto-title"></div><div class="csb" id="ag-pto-sub"></div>
-  <div id="ag-pto"></div></div>
-<div class="kg" id="kpi-cards"></div>
+<div class="cd" id="ag-hero" style="margin-bottom:16px;display:none">
+  <div class="ct" id="ag-hero-title"></div><div class="csb" id="ag-hero-sub"></div>
+  <div class="ag-hero">
+    <div id="ag-hero-ring"></div>
+    <div class="sc-bars hb" id="ag-hero-bars"></div>
+    <div class="hn" id="ag-hero-note"></div>
+  </div></div>
+<div class="cd" style="margin-bottom:16px"><div class="ct">Metrics behind the score</div>
+  <div class="csb">Grouped the same way the score is built. Hover any underlined label for its definition and formula.</div>
+  <div id="kpi-cards"></div></div>
 <div class="g2"><div class="cd"><div class="ct">Front Performance</div><div class="csb">Replies, messages & reply time</div><div class="cw"><canvas id="ch-kf" height="190"></canvas></div></div>
 <div class="cd"><div class="ct">Dialpad Activity</div><div class="csb">Calls answered, placed, missed</div><div class="cw"><canvas id="ch-kd" height="190"></canvas></div></div></div>
-<div class="cd" style="margin-top:20px"><div class="ct">Infraction Summary</div><div class="csb">By quarter</div><div id="kpi-inf-sum"></div></div></div>
+<div class="sq">
+<div class="cd" id="ag-pto-card" style="display:none">
+  <div class="ct" id="ag-pto-title"></div><div class="csb" id="ag-pto-sub"></div>
+  <div id="ag-pto"></div></div>
+<div class="cd"><div class="ct">Infraction Summary</div><div class="csb">By quarter</div><div id="kpi-inf-sum"></div></div>
+</div></div>
 <div id="kv-dept">
 <div class="cd" style="margin-bottom:22px">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:14px">
@@ -1606,24 +1631,19 @@ function renderAgentPTO(agent){
   const pct=Math.max(0,Math.min(100,b.available/PTO_ANNUAL*100));
   const accPct=Math.max(0,Math.min(100,b.accrued/PTO_ANNUAL*100));
   box.innerHTML=`
-  <div class="kg" style="margin-bottom:12px">
-    <div class="dsc"><div class="dsl">Available now</div>
-      <div class="dsv" style="color:${col}">${b.available.toFixed(2)}</div>
-      <div class="dss">of ${PTO_ANNUAL} days a year</div></div>
-    <div class="dsc"><div class="dsl">Earned this year</div>
-      <div class="dsv">${b.accrued.toFixed(2)}</div>
-      <div class="dss">${b.weeks} scheduled week${b.weeks===1?"":"s"}</div></div>
-    <div class="dsc"><div class="dsl">Days used</div>
-      <div class="dsv">${b.taken}</div><div class="dss">taken so far in ${year}</div></div>
-    <div class="dsc"><div class="dsl">Booked ahead</div>
-      <div class="dsv"${b.booked?' style="color:var(--amber)"':''}>${b.booked}</div>
-      <div class="dss">${b.booked?`leaves ${b.committed.toFixed(2)}`:"nothing scheduled"}</div></div>
-  </div>
-  <div style="height:10px;background:var(--border);border-radius:5px;overflow:hidden;position:relative">
+  <div style="display:flex;align-items:baseline;gap:9px;margin-bottom:8px">
+    <div style="font-size:30px;font-weight:800;line-height:1;color:${col}">${b.available.toFixed(2)}</div>
+    <div style="font-size:12px;color:var(--gray)">of ${PTO_ANNUAL} days available</div></div>
+  <div style="height:9px;background:var(--border);border-radius:5px;overflow:hidden;position:relative">
     <div style="position:absolute;inset:0;width:${accPct}%;background:${col};opacity:.22"></div>
     <div style="position:absolute;top:0;bottom:0;left:0;width:${pct}%;background:${col};border-radius:5px"></div>
   </div>
-  <div style="font-size:10.5px;color:var(--gray);margin-top:6px">Solid is available now, pale is total earned this year.</div>`;
+  <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--gray);margin-top:9px">
+    <span>earned <b style="color:var(--text)">${b.accrued.toFixed(2)}</b> over ${b.weeks} wk${b.weeks===1?"":"s"}</span>
+    <span>used <b style="color:var(--text)">${b.taken}</b></span>
+    <span>booked <b style="color:${b.booked?"var(--amber)":"var(--text)"}">${b.booked}</b>${b.booked?` (leaves ${b.committed.toFixed(2)})`:""}</span>
+  </div>
+  <div style="font-size:10px;color:var(--gray);margin-top:6px">Solid is available now, pale is total earned this year.</div>`;
 }
 
 // Jump from a department ring to that agent's own page.
@@ -1644,12 +1664,61 @@ function openAgent(name){
   const m=document.querySelector(".main");if(m)m.scrollTop=0;
 }
 
+// Score header on one agent's own page: the same ring and five bars the
+// Department tab shows, so both pages speak the same language.
+function renderAgentScore(agent,weekLabel){
+  const card=document.getElementById("ag-hero");if(!card)return;
+  const t=document.getElementById("ag-hero-title"),s=document.getElementById("ag-hero-sub"),
+        r=document.getElementById("ag-hero-ring"),b=document.getElementById("ag-hero-bars"),
+        n=document.getElementById("ag-hero-note");
+  card.style.display="";
+  t.textContent=agent;
+  computeScores(weekLabel);
+  const a=SC.agents[agent];
+  if(!a){
+    const nc=(SC.newcomers||[]).find(x=>x.name===agent);
+    r.innerHTML="";b.innerHTML="";
+    s.textContent=`Week of ${weekLabel}`;
+    n.style.flex="1";
+    n.innerHTML=SUPERVISORS.indexOf(agent)>=0
+      ? `Supervisors are left out of the scorecard, so there is no score here. The metrics below are still live.`
+      : nc ? `Not scored yet: ${nc.weeks} week${nc.weeks===1?"":"s"} of activity, and ${SC_MIN_WEEKS} are needed. A score on this little history would say more about the sample than the person.`
+           : `No score for this agent in the selected week.`;
+    return;
+  }
+  n.style.flex="0 0 210px";
+  s.textContent=`Week of ${weekLabel} · ${SC.dept?SC.dept.weeks:SC_HIST}-week average · same scoring as the Department tab`;
+  r.innerHTML=scRing(a.composite);
+  b.innerHTML=Object.keys(a.cats).map(c=>{const v=a.cats[c];
+    return `<div class="sc-rb"><span class="lb">${tipLabel(c,agent)}</span>
+      <span class="tr"><span class="fl" style="width:${Math.min(100,v.capped)}%;background:${scCol(v.capped)}"></span></span>
+      <span class="vn" style="color:${scCol(v.capped)}">${v.score>100?v.score+"+":v.score}</span></div>`;}).join("");
+  const dept=SC.dept?SC.dept.composite:null;
+  const gap=dept!==null?a.composite-dept:null;
+  n.innerHTML=`Weakest area is <b>${a.weakest}</b> at ${a.weakScore}.`+
+    (gap!==null?`<br>${gap===0?"Level with":(gap>0?`${gap} point${gap===1?"":"s"} above`:`${Math.abs(gap)} point${Math.abs(gap)===1?"":"s"} below`)} the department score of ${dept}.`:"")+
+    `<br><span style="color:var(--gray)">Hover a category for its formula.</span>`;
+}
+
+// Which of the 16 metrics sit under each scoring category.
+const AG_GROUPS={
+  Responsiveness:["First Reply Time (hrs)","SLA Breaches","Satisfaction %"],
+  Throughput:["Assigned Conversations","Replies Sent","Messages Sent (excl. replies)","Interactions / Day"],
+  Efficiency:["Handle Time (min)","Total Messages","General Efficiency"],
+  Voice:["Calls Answered","Calls Placed","Missed Calls","Dialpad Time (hrs)"],
+  Reliability:["Days Worked","Time Usage"]
+};
+
 function renderAg(){
-  const ag=document.getElementById("kpi-ag").value,wi=+document.getElementById("kpi-wk").value;
+  const wsel=document.getElementById("kpi-wk");
+  const ag=document.getElementById("kpi-ag").value,wi=+wsel.value;
+  let wkLabel=wsel.options[wsel.selectedIndex]?wsel.options[wsel.selectedIndex].textContent:"";
+  if(!wkLabel){const fa=Object.values(D.kpi)[0];if(fa&&fa.dates.length)wkLabel=fa.dates[fa.dates.length-1];}
+  renderAgentScore(ag,wkLabel);
   renderAgentPTO(ag);
   const d=D.kpi[ag];
   if(!d){
-    document.getElementById("kpi-cards").innerHTML=`<div style="grid-column:1/-1;background:var(--bg);border-radius:10px;padding:24px;text-align:center;color:var(--gray);font-size:13px">No KPI data loaded for <b>${ag}</b>. Their sheet tab did not load, so nothing can be shown for this agent.</div>`;
+    document.getElementById("kpi-cards").innerHTML=`<div style="background:var(--bg);border-radius:10px;padding:24px;text-align:center;color:var(--gray);font-size:13px">No KPI data loaded for <b>${ag}</b>. Their sheet tab did not load, so nothing can be shown for this agent.</div>`;
     return;
   }
   const km=["Assigned Conversations","Total Messages","Messages Sent (excl. replies)","Replies Sent","First Reply Time (hrs)","Handle Time (min)","SLA Breaches","Satisfaction %","Calls Answered","Calls Placed","Missed Calls","Dialpad Time (hrs)","Days Worked","Time Usage","General Efficiency","Interactions / Day"];
@@ -1675,7 +1744,7 @@ function renderAg(){
     });
     d.kpis["Interactions / Day"]={v:vArr,t:null,p:"General"};
   }
-  document.getElementById("kpi-cards").innerHTML=km.map(n=>{const m=d.kpis[n];if(!m)return"";
+  const tileHTML=(n)=>{const m=d.kpis[n];if(!m)return"";
     const v=m.v[wi];const pv=wi>0?m.v[wi-1]:null;
     // Format value
     let vs;
@@ -1689,7 +1758,20 @@ function renderAg(){
       if(lo.includes(n))st=v<=m.t?"good":v<=m.t*1.5?"warn":"bad";
       else st=v>=m.t?"good":v>=m.t*.8?"warn":"bad";}
     const ts=m.t!==null?m.t+(n.includes("%")||n==="Satisfaction %"||n==="Time Usage"||n==="General Efficiency"?"%":""):"—";
-    return`<div class="km"><div class="kh"><div><span class="ks ${st}"></span><span class="kn">${n}</span></div><span class="kp ${m.p.toLowerCase()}">${m.p}</span></div><div class="kv-num">${vs}</div><div class="ktar">Target: ${ts}</div></div>`;}).join("");
+    return`<div class="km"><div class="kh"><div><span class="ks ${st}"></span><span class="kn">${n}</span></div><span class="kp ${m.p.toLowerCase()}">${m.p}</span></div><div class="kv-num">${vs}</div><div class="ktar">Target: ${ts}</div></div>`;};
+
+  const sa=SC.agents[ag];
+  const grouped=Object.keys(AG_GROUPS).map(cat=>{
+    const tiles=AG_GROUPS[cat].map(tileHTML).filter(Boolean).join("");
+    if(!tiles)return"";
+    const cv=sa&&sa.cats[cat]?sa.cats[cat]:null;
+    const badge=cv?`<span class="gbg" style="color:${scCol(cv.capped)}">${cv.score>100?cv.score+"+":cv.score}</span>`:"";
+    return`<div class="mgrp"><span>${tipLabel(cat,ag)}</span>${badge}<span class="rl"></span></div><div class="kg">${tiles}</div>`;
+  }).join("");
+  const placed=Object.values(AG_GROUPS).flat();
+  const extra=km.filter(n=>placed.indexOf(n)<0).map(tileHTML).filter(Boolean).join("");
+  document.getElementById("kpi-cards").innerHTML=grouped+
+    (extra?`<div class="mgrp"><span>Other</span><span class="rl"></span></div><div class="kg">${extra}</div>`:"");
 
   // Front chart - Replies + Messages + First Reply Time
   const dates12=d.dates.slice(-12);
@@ -1720,6 +1802,7 @@ function renderAg(){
     return`<div style="display:flex;align-items:center;gap:16px;padding:10px 16px;margin-bottom:6px;background:${isLast?'var(--teal-mist)':'var(--bg)'};border-radius:8px"><div style="width:100px;font-size:13px;font-weight:${isLast?700:600}">${q}</div><div style="flex:1;display:flex;gap:20px"><span style="font-size:12px"><span class="inf-o">Op:</span> ${o}</span><span style="font-size:12px"><span class="inf-a">Att:</span> ${a}</span></div><div style="font-size:15px;font-weight:700;color:${total>0?'var(--coral-dark)':'var(--green)'}"> ${total} pts</div></div>`;
   }).join("");
   document.getElementById("kpi-inf-sum").innerHTML=infHtml;
+  initGlossary();
 }
 
 // ═══════════════ GLOSSARY (dashboard-wide tooltips) ═══════════════
