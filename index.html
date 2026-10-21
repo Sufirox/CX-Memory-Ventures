@@ -175,6 +175,12 @@ background:rgba(255,255,255,.09);border-radius:6px;padding:8px 10px;margin-top:8
 .tipbox .sm{font-size:10.5px;color:rgba(255,255,255,.62);margin-top:7px}
 
 /* ── Scorecard ── */
+.sc-click{cursor:pointer;transition:transform .15s,box-shadow .15s}
+.sc-click:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.09)}
+.sc-click:active{transform:translateY(0)}
+.sc-card .openhint{font-size:10px;color:var(--teal);font-weight:700;margin-top:10px;opacity:0;transition:opacity .15s}
+.sc-click:hover .openhint{opacity:1}
+
 .sc-big{display:flex;align-items:center;gap:26px;flex-wrap:wrap;padding-bottom:16px;margin-bottom:16px;border-bottom:1px solid var(--border)}
 .sc-num{font-size:52px;font-weight:800;line-height:1}
 .sc-meta{font-size:12.5px;color:var(--slate);line-height:1.65;max-width:56ch}
@@ -370,7 +376,11 @@ background:rgba(255,255,255,.09);border-radius:6px;padding:8px 10px;margin-top:8
 <select class="sel" id="kpi-ag"><option>Angel Jimenez</option><option>Fatima Soto</option><option>Luisa Tona</option><option>Manuel Acosta</option><option>Ivan Soto</option><option>Vanessa Duran</option></select>
 <select class="sel" id="kpi-wk"></select></div></div>
 <div class="kt"><button class="ktb active" data-v="dept">Department</button><button class="ktb" data-v="agent">Agent View</button><button class="ktb" data-v="inf">Infractions & PTO</button></div>
-<div id="kv-agent" style="display:none"><div class="kg" id="kpi-cards"></div>
+<div id="kv-agent" style="display:none">
+<div class="cd" id="ag-pto-card" style="margin-bottom:16px;display:none">
+  <div class="ct" id="ag-pto-title"></div><div class="csb" id="ag-pto-sub"></div>
+  <div id="ag-pto"></div></div>
+<div class="kg" id="kpi-cards"></div>
 <div class="g2"><div class="cd"><div class="ct">Front Performance</div><div class="csb">Replies, messages & reply time</div><div class="cw"><canvas id="ch-kf" height="190"></canvas></div></div>
 <div class="cd"><div class="ct">Dialpad Activity</div><div class="csb">Calls answered, placed, missed</div><div class="cw"><canvas id="ch-kd" height="190"></canvas></div></div></div>
 <div class="cd" style="margin-top:20px"><div class="ct">Infraction Summary</div><div class="csb">By quarter</div><div id="kpi-inf-sum"></div></div></div>
@@ -1579,8 +1589,64 @@ function buildKPI(){window._k=1;
   renderAg();
   renderDept();   // Department is the tab that opens first
 }
+// PTO for one agent, shown on their own KPI page.
+function renderAgentPTO(agent){
+  const card=document.getElementById("ag-pto-card"),box=document.getElementById("ag-pto");
+  if(!card||!box)return;
+  const year=rfToday().getFullYear();
+  const b=ptoBalance(agent,year);
+  if(!b){card.style.display="none";return;}
+  card.style.display="";
+  {const t=document.getElementById("ag-pto-title");if(t)t.innerHTML=tipLabel("PTO Balance");}
+  {const sv=document.getElementById("ag-pto-sub");
+   if(sv)sv.textContent=`${year} · ${PTO_ANNUAL} days a year, earned per scheduled week`+
+     (b.start?` · accruing since ${b.start.getMonth()+1}/${b.start.getDate()}/${b.start.getFullYear()}`:"");}
+  const neg=b.available<0;
+  const col=neg?"var(--coral-dark)":AC[agent]||"var(--teal)";
+  const pct=Math.max(0,Math.min(100,b.available/PTO_ANNUAL*100));
+  const accPct=Math.max(0,Math.min(100,b.accrued/PTO_ANNUAL*100));
+  box.innerHTML=`
+  <div class="kg" style="margin-bottom:12px">
+    <div class="dsc"><div class="dsl">Available now</div>
+      <div class="dsv" style="color:${col}">${b.available.toFixed(2)}</div>
+      <div class="dss">of ${PTO_ANNUAL} days a year</div></div>
+    <div class="dsc"><div class="dsl">Earned this year</div>
+      <div class="dsv">${b.accrued.toFixed(2)}</div>
+      <div class="dss">${b.weeks} scheduled week${b.weeks===1?"":"s"}</div></div>
+    <div class="dsc"><div class="dsl">Days used</div>
+      <div class="dsv">${b.taken}</div><div class="dss">taken so far in ${year}</div></div>
+    <div class="dsc"><div class="dsl">Booked ahead</div>
+      <div class="dsv"${b.booked?' style="color:var(--amber)"':''}>${b.booked}</div>
+      <div class="dss">${b.booked?`leaves ${b.committed.toFixed(2)}`:"nothing scheduled"}</div></div>
+  </div>
+  <div style="height:10px;background:var(--border);border-radius:5px;overflow:hidden;position:relative">
+    <div style="position:absolute;inset:0;width:${accPct}%;background:${col};opacity:.22"></div>
+    <div style="position:absolute;top:0;bottom:0;left:0;width:${pct}%;background:${col};border-radius:5px"></div>
+  </div>
+  <div style="font-size:10.5px;color:var(--gray);margin-top:6px">Solid is available now, pale is total earned this year.</div>`;
+}
+
+// Jump from a department ring to that agent's own page.
+function openAgent(name){
+  const sel=document.getElementById("kpi-ag");
+  if(!sel)return;
+  if(![...sel.options].some(o=>o.value===name)){
+    const o=document.createElement("option");o.textContent=name;sel.appendChild(o);
+  }
+  sel.value=name;
+  document.querySelectorAll(".ktb").forEach(x=>x.classList.remove("active"));
+  const tab=document.querySelector('.ktb[data-v="agent"]');if(tab)tab.classList.add("active");
+  document.getElementById("kv-agent").style.display="block";
+  document.getElementById("kv-dept").style.display="none";
+  document.getElementById("kv-inf").style.display="none";
+  document.getElementById("kpi-ctrls").style.display="flex";
+  renderAg();
+  const m=document.querySelector(".main");if(m)m.scrollTop=0;
+}
+
 function renderAg(){
   const ag=document.getElementById("kpi-ag").value,wi=+document.getElementById("kpi-wk").value;
+  renderAgentPTO(ag);
   const d=D.kpi[ag];
   if(!d){
     document.getElementById("kpi-cards").innerHTML=`<div style="grid-column:1/-1;background:var(--bg);border-radius:10px;padding:24px;text-align:center;color:var(--gray);font-size:13px">No KPI data loaded for <b>${ag}</b>. Their sheet tab did not load, so nothing can be shown for this agent.</div>`;
@@ -1936,7 +2002,7 @@ function renderScorecard(weekLabel){
   cl.innerHTML=Object.keys(SC.dept.cats).map(c=>`<div class="sc-dcell"><div class="dl">${tipLabel(c)}</div>
     <div class="dv" style="color:${scCol(SC.dept.cats[c])}">${SC.dept.cats[c]}</div>
     <div class="ds">${ns.map(n=>n.split(" ")[0]+" "+SC.agents[n].cats[c].capped).join(" · ")}</div></div>`).join("");
-  const newCards=(SC.newcomers||[]).map(x=>`<div class="sc-card" style="opacity:.72">
+  const newCards=(SC.newcomers||[]).map(x=>`<div class="sc-card sc-click" data-agent="${x.name}" style="opacity:.72" title="Open ${x.name}'s KPIs">
     <h3>${x.name}</h3>
     <div style="height:108px;display:flex;align-items:center;justify-content:center">
       <div style="width:84px;height:84px;border-radius:50%;border:9px solid var(--border);
@@ -1946,12 +2012,14 @@ function renderScorecard(weekLabel){
       Not scored yet and left out of the department average. A score on this little history would
       say more about the sample than the person.</div></div>`).join("");
   rg.innerHTML=ns.map(n=>{const a=SC.agents[n];
-    return `<div class="sc-card"><h3>${n}</h3>${scRing(a.composite)}
+    return `<div class="sc-card sc-click" data-agent="${n}" title="Open ${n}'s KPIs"><h3>${n}</h3>${scRing(a.composite)}
       <div class="sc-weak">weakest: ${a.weakest} (${a.weakScore})</div>
       <div class="sc-bars">${Object.keys(a.cats).map(c=>{const v=a.cats[c];
         return `<div class="sc-rb"><span class="lb">${tipLabel(c,n)}</span>
           <span class="tr"><span class="fl" style="width:${Math.min(100,v.capped)}%;background:${scCol(v.capped)}"></span></span>
-          <span class="vn" style="color:${scCol(v.capped)}">${v.score>100?v.score+"+":v.score}</span></div>`;}).join("")}</div></div>`;}).join("")+newCards;
+          <span class="vn" style="color:${scCol(v.capped)}">${v.score>100?v.score+"+":v.score}</span></div>`;}).join("")}</div>
+      <div class="openhint">Open full KPIs &rarr;</div></div>`;}).join("")+newCards;
+  rg.querySelectorAll("[data-agent]").forEach(el=>el.addEventListener("click",()=>openAgent(el.dataset.agent)));
 }
 
 
