@@ -331,7 +331,7 @@ background:rgba(255,255,255,.09);border-radius:6px;padding:8px 10px;margin-top:8
 <div id="sig-panel"></div>
 <div class="stats-row" id="home-stats"></div>
 <div class="gs"><div class="cd"><div class="ct">Weekly Schedule</div><div class="csb" id="home-sched-label"></div><div style="overflow-x:auto"><table class="st" id="home-sched-tbl"></table></div></div>
-<div class="cd"><div class="ct">PTO Earned</div><div class="csb">Earned so far out of 15 annual days</div><div id="pto-box"></div></div></div>
+<div class="cd"><div class="ct" id="pto-title"></div><div class="csb" id="pto-sub"></div><div id="pto-box"></div></div></div>
 <div class="g2"><div class="cd"><div class="ct">Commission Leaderboard</div><div class="csb">All-time cumulative earnings</div><div id="lb-home"></div></div>
 <div class="cd"><div class="ct">Revenue by Month</div><div class="csb">Total team revenue</div><div class="cw"><canvas id="ch-rev-home" height="200"></canvas></div></div></div>
 </div>
@@ -1299,7 +1299,92 @@ function renderFrontDaily(){
     `${rows.length} day${rows.length===1?"":"s"}, newest first.`+(isTeam?" Agent columns show open/close.":"");
 }
 
+// ═══════════════ PTO ACCRUAL ═══════════════
+const PTO_ANNUAL=15;
+const PTO_WEEKS=52;
+const PTO_RATE=PTO_ANNUAL/PTO_WEEKS;   // days earned per scheduled week
+
+function ptoParse(x){
+  const m=String(x||"").trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(!m)return null;
+  const d=new Date(+m[3],+m[1]-1,+m[2]);
+  return isNaN(d)?null:d;
+}
+// First week the agent shows real work. Hours/Week is a template constant on every
+// tab, so it cannot be used to find a start date.
+function ptoStartWeek(agent){
+  const k=D.kpi[agent];if(!k)return null;
+  const probe=["Assigned Conversations","Replies Sent","Calls Answered"];
+  for(let i=0;i<k.dates.length;i++){
+    for(const m of probe){
+      const v=k.kpis[m]?.v[i];
+      if(v!==null&&v!==undefined&&!isNaN(v)&&v>0)return ptoParse(k.dates[i]);
+    }
+  }
+  return null;
+}
+function ptoBalance(agent,year){
+  const k=D.kpi[agent];if(!k)return null;
+  const today=rfToday();
+  const start=ptoStartWeek(agent);
+  let weeks=0;
+  k.dates.forEach(ds=>{
+    const d=ptoParse(ds);
+    if(!d||d.getFullYear()!==year)return;
+    if(d>today)return;                 // weeks that have not happened yet
+    if(start&&d<start)return;          // before they joined
+    weeks++;
+  });
+  const accrued=weeks*PTO_RATE;
+  let taken=0,booked=0;
+  (D.ptoLog||[]).forEach(r=>{
+    if(r.agent!==agent)return;
+    const d=ptoParse(r.date);
+    if(!d||d.getFullYear()!==year)return;
+    if(d<=today)taken++;else booked++;
+  });
+  return {weeks,accrued,taken,booked,available:accrued-taken,
+          committed:accrued-taken-booked,start};
+}
+
+function renderPTO(){
+  const box=document.getElementById("pto-box");
+  if(!box)return;
+  const year=rfToday().getFullYear();
+  const names=Object.keys(D.kpi).filter(n=>INACTIVE.indexOf(n)<0);
+  const rows=names.map(n=>({n:n,b:ptoBalance(n,year)})).filter(x=>x.b);
+  {const t=document.getElementById("pto-title");if(t)t.innerHTML=tipLabel("PTO Balance");}
+  const sub=document.getElementById("pto-sub");
+  if(sub)sub.textContent=`${PTO_ANNUAL} days a year, earned per scheduled week. Resets 1 January.`;
+  if(!rows.length){box.innerHTML=`<div style="font-size:12px;color:var(--gray)">No agent data loaded.</div>`;return;}
+
+  box.innerHTML=rows.map(({n,b})=>{
+    const pct=Math.max(0,Math.min(100,b.available/PTO_ANNUAL*100));
+    const accPct=Math.max(0,Math.min(100,b.accrued/PTO_ANNUAL*100));
+    const neg=b.available<0;
+    const col=neg?"var(--coral-dark)":AC[n]||"var(--teal)";
+    return `<div style="margin-bottom:13px">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px">
+        <div style="width:78px;font-size:12px;font-weight:600">${n.split(" ")[0]}</div>
+        <div style="flex:1;font-size:10.5px;color:var(--gray)">
+          earned ${b.accrued.toFixed(2)} &middot; used ${b.taken}${b.booked?` &middot; booked ${b.booked}`:""}</div>
+        <div style="font-size:12.5px;font-weight:800;color:${col}">${b.available.toFixed(2)}<span style="color:var(--gray);font-weight:600">/${PTO_ANNUAL}</span></div>
+      </div>
+      <div style="height:9px;background:var(--border);border-radius:5px;overflow:hidden;position:relative">
+        <div style="position:absolute;inset:0;width:${accPct}%;background:${col};opacity:.22"></div>
+        <div style="position:absolute;top:0;bottom:0;left:0;width:${pct}%;background:${col};border-radius:5px"></div>
+      </div>
+      ${b.booked?`<div style="font-size:10px;color:var(--amber);margin-top:3px">${b.booked} day${b.booked===1?"":"s"} booked ahead, leaving ${b.committed.toFixed(2)}</div>`:""}
+      ${neg?`<div style="font-size:10px;color:var(--coral-dark);margin-top:3px">over by ${Math.abs(b.available).toFixed(2)} day${Math.abs(b.available)===1?"":"s"}</div>`:""}
+    </div>`;
+  }).join("")+
+  `<div style="font-size:10px;color:var(--gray);margin-top:10px;line-height:1.5">
+    Solid bar is available now, pale bar is total earned this year.
+    Pro rated from each agent's first active week.</div>`;
+}
+
 function renderHome(){
+  initGlossary();
   const lr=D.revData.length?D.revData[D.revData.length-1]:null;
   const tRev=lr?(lr.AJ+lr.LT+lr.IS+lr.VD+lr.FS):0;
   const tOrd=lr?(lr.AJo+lr.LTo+lr.ISo+lr.VDo+lr.FSo):0;
@@ -1308,11 +1393,12 @@ function renderHome(){
 
   renderLB("lb-home");
 
-  // PTO earned = 15 days * (months elapsed / 12). Available PTO from sheet is what's REMAINING.
-  const now=new Date();const monthsElapsed=now.getMonth()+(now.getDate()/30);// 0-indexed months
-  const earnedSoFar=Math.round((15*monthsElapsed/12)*100)/100;
-  const ptoData=Object.entries(D.kpi).map(([n,k])=>({n:n.split(" ")[0],e:Math.min(earnedSoFar,15),c:AC[n]}));
-  document.getElementById("pto-box").innerHTML=ptoData.map(p=>`<div style="display:flex;align-items:center;gap:12px;margin-bottom:11px"><div style="width:80px;font-size:12px;font-weight:500">${p.n}</div><div style="flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden"><div style="height:100%;width:${(p.e/15*100)}%;background:${p.c};border-radius:4px"></div></div><div style="width:55px;font-size:11px;font-weight:700;text-align:right">${p.e.toFixed(1)} / 15</div></div>`).join("");
+  // ═══ PTO ACCRUAL ═══
+  // 15 days a year, earned per scheduled week rather than per day actually worked,
+  // so PTO and holidays still accrue and a full year reaches exactly 15.
+  // Pro rated from the agent's first active week. Resets every 1 January with no
+  // carryover in either direction.
+  renderPTO();
 
   // Schedule
   if(D.schedule.length>2){
@@ -1574,6 +1660,10 @@ function renderAg(){
 // One place to edit every definition. Any element with class "tip" and a
 // data-g matching a key here gets a hover card with the formula.
 const GLOSSARY={
+"PTO Balance":{d:"Paid time off earned so far this year, less the days already used. Pro rated from each agent's first active week, so a new joiner earns from their start date rather than from January.",
+ f:"accrued = scheduled weeks this year x (15 / 52)\n        = 0.2885 days per week\n\navailable = accrued - days already taken\n\nA full 52 week year earns exactly 15.00 days.\nPTO and holidays still accrue, so taking time off\ndoes not reduce what you earn.",
+ s:"Resets every 1 January with no carryover in either direction. Days booked for a future date are shown separately and do not reduce the available figure."},
+
 "Pending total":{d:"Money owed to customers from refund requests that have been submitted but not yet paid out. This is separate from everything below, which is money already returned.",
  f:"sum of Refund Amount where Handled = FALSE",
  s:"Source: the refund request form sheet. Requests with an unreadable amount are listed but left out of this total."},
