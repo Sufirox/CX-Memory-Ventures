@@ -66,6 +66,37 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .ktb{padding:10px 22px;font-size:13px;font-weight:600;color:var(--gray);border:none;background:0 0;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-2px}
 .ktb.active{color:var(--teal);border-bottom-color:var(--teal)}
 .kg{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:16px}
+/* home: needs attention */
+.hm-na{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:12px}
+.hm-nai{background:var(--bg);border-radius:10px;padding:13px 15px;cursor:pointer;border:1px solid transparent;
+display:flex;align-items:flex-start;gap:11px;transition:border-color .15s,background .15s}
+.hm-nai:hover{border-color:#DDE3EB;background:#fff}
+.hm-nad{width:9px;height:9px;border-radius:50%;margin-top:5px;flex:0 0 9px}
+.hm-nan{font-size:20px;font-weight:800;line-height:1.1}
+.hm-nal{font-size:11.5px;font-weight:600;color:var(--slate);margin-top:2px}
+.hm-nas{font-size:10.5px;color:var(--gray);margin-top:3px;line-height:1.45}
+.hm-naq{font-size:10px;color:var(--teal);font-weight:700;margin-top:5px;opacity:0;transition:opacity .15s}
+.hm-nai:hover .hm-naq{opacity:1}
+.hm-clear{display:flex;align-items:center;gap:10px;background:#F2FAF4;border-radius:10px;padding:13px 16px;
+font-size:12.5px;color:#2D6A2D;font-weight:600;margin-bottom:12px}
+/* home: department score strip */
+.hm-dss{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.hm-dsn{font-size:40px;font-weight:800;line-height:1;letter-spacing:-1px}
+.hm-dsg{flex:1;min-width:300px;display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.hm-dcell{text-align:center}
+.hm-dcl{font-size:9px;font-weight:700;color:var(--gray);letter-spacing:.5px;text-transform:uppercase}
+.hm-dcv{font-size:17px;font-weight:800;margin-top:3px}
+.hm-dcb{height:4px;border-radius:2px;background:var(--border);margin-top:5px;overflow:hidden}
+.hm-dcb span{display:block;height:100%;border-radius:2px}
+.hm-dsm{font-size:11.5px;color:var(--gray);line-height:1.55;flex:0 0 215px}
+.hm-link{color:var(--teal);font-weight:700;cursor:pointer}
+/* home: today */
+.hm-td{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.hm-tdi{background:var(--bg);border-radius:9px;padding:11px 14px}
+.hm-tdi.task{background:var(--teal-mist)}
+.hm-tdr{font-size:9px;font-weight:700;color:var(--gray);letter-spacing:.5px;text-transform:uppercase}
+.hm-tdn{font-size:14px;font-weight:700;margin-top:3px}
+@media(max-width:700px){.hm-dsg{grid-template-columns:repeat(2,1fr)}}
 .sq{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
 .sq>.cd{margin:0!important}
 .mgrp{font-size:10.5px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;color:var(--slate);margin:18px 0 9px;display:flex;align-items:center;gap:10px}
@@ -350,10 +381,12 @@ height:auto;background:none;border-radius:0;overflow:visible;line-height:1.5}
 <div class="page-header"><div><h1>Team Overview</h1><p>CS team at a glance</p></div></div>
 <div id="sig-panel"></div>
 <div class="stats-row" id="home-stats"></div>
-<div class="gs"><div class="cd"><div class="ct">Weekly Schedule</div><div class="csb" id="home-sched-label"></div><div style="overflow-x:auto"><table class="st" id="home-sched-tbl"></table></div></div>
-<div class="cd"><div class="ct" id="pto-title"></div><div class="csb" id="pto-sub"></div><div id="pto-box"></div></div></div>
-<div class="g2"><div class="cd"><div class="ct">Commission Leaderboard</div><div class="csb">All-time cumulative earnings</div><div id="lb-home"></div></div>
-<div class="cd"><div class="ct">Revenue by Month</div><div class="csb">Total team revenue</div><div class="cw"><canvas id="ch-rev-home" height="200"></canvas></div></div></div>
+<div class="cd"><div class="ct">Needs attention</div><div class="csb" id="hm-na-sub"></div>
+  <div id="hm-na" style="margin-top:13px"></div></div>
+<div class="cd"><div class="ct">Department Score</div><div class="csb" id="hm-ds-sub"></div>
+  <div class="hm-dss" id="hm-ds" style="margin-top:14px"></div></div>
+<div class="cd"><div class="ct" id="hm-td-title">Today</div><div class="csb" id="hm-td-sub"></div>
+  <div class="hm-td" id="hm-td" style="margin-top:13px"></div></div>
 </div>
 
 <div id="page-sales" class="page">
@@ -426,7 +459,9 @@ height:auto;background:none;border-radius:0;overflow:visible;line-height:1.5}
   <div class="foldbody"><div class="kg" id="dept-cards"></div></div>
 </div>
 <div class="cd"><div class="ct">Online Rating &amp; Public Perception</div><div class="csb">External reviews</div><div id="dept-rat"></div></div></div>
-<div id="kv-inf" style="display:none"><div class="g2"><div class="cd"><div class="ct">Infraction Log</div><div class="csb">All records</div><div style="max-height:500px;overflow-y:auto"><table class="tb" id="inf-tbl"></table></div></div>
+<div id="kv-inf" style="display:none">
+<div class="cd" style="margin-bottom:16px"><div class="ct" id="pto-title"></div><div class="csb" id="pto-sub"></div><div id="pto-box"></div></div>
+<div class="g2"><div class="cd"><div class="ct">Infraction Log</div><div class="csb">All records</div><div style="max-height:500px;overflow-y:auto"><table class="tb" id="inf-tbl"></table></div></div>
 <div class="cd"><div class="ct">PTO History</div><div class="csb">All entries</div><div style="max-height:500px;overflow-y:auto"><table class="tb" id="pto-tbl"></table></div></div></div>
 <div class="cd" style="margin-top:20px"><div class="ct">Infractions by Agent</div><div class="csb">Total accumulated</div><div class="cw"><canvas id="ch-inf" height="190"></canvas></div></div></div>
 </div>
@@ -709,7 +744,28 @@ const URLS={
   refAmznMV:"https://docs.google.com/spreadsheets/d/e/2PACX-1vQwLb81pzWhS71hVYhmYoYRF60vDYZ3pU7wddBdY9gC_qcMNQVxjIkRq4wtafAubcgRRyq1FYMPCKrR/pub?gid=417767780&single=true&output=csv",
 };
 const AC={"Manuel Acosta":"#B8721A","Angel Jimenez":"#2AACB8","Vanessa Duran":"#E8967A","Luisa Tona":"#3B6CE7","Ivan Soto":"#6C5CE7","Khamal Tehfeh":"#999","Fatima Soto":"#2D8A2D"};
-const INACTIVE=["Khamal Tehfeh","Vanessa Duran","Ivan Soto"];
+// ═══════════════ TEAM ROSTER ═══════════════
+// The one place to add, remove or retire someone. Everything else on the
+// dashboard reads from here: the Active Agents count, who is excluded from
+// the scorecard, who counts toward Time Utilization and the department average.
+//   role   "agent" or "supervisor"  (supervisors are never scored)
+//   active false keeps their history visible but drops them from headcounts
+// To add a joiner: one line here, plus their KPI tab gid in URLS above.
+const ROSTER=[
+  {name:"Angel Jimenez", role:"agent",      active:true },
+  {name:"Fatima Soto",   role:"agent",      active:true },
+  {name:"Manuel Acosta", role:"agent",      active:true },
+  {name:"Luisa Tona",    role:"supervisor", active:true },
+  {name:"Ivan Soto",     role:"agent",      active:false},
+  {name:"Vanessa Duran", role:"agent",      active:false},
+  {name:"Khamal Tehfeh", role:"agent",      active:false}
+];
+const R_ACTIVE=ROSTER.filter(p=>p.active);
+const R_AGENTS=R_ACTIVE.filter(p=>p.role==="agent").map(p=>p.name);   // scored
+const R_SUPS=R_ACTIVE.filter(p=>p.role==="supervisor").map(p=>p.name);
+const R_TEAM=R_ACTIVE.map(p=>p.name);                                  // everyone working
+const INACTIVE=ROSTER.filter(p=>!p.active).map(p=>p.name);
+const SUPERVISORS=ROSTER.filter(p=>p.role==="supervisor").map(p=>p.name);
 
 // Number parser - handles $1,076.38 and 78.40% and plain numbers
 function pn(s){if(!s)return 0;let c=String(s).replace(/\$/g,"").replace(/,/g,"").replace(/%/g,"").replace(/"/g,"").trim();if(c==="-"||c===""||c==="N/A")return 0;const v=parseFloat(c);return isNaN(v)?0:v;}
@@ -887,7 +943,7 @@ async function loadAll(){
   // ═══ PARSE COMMISSION OVERVIEW ═══
   // Rows 2-7 = agents, row 8 = totals. Col 0=name, 1=total, 2-6=tiers, 7=ALC, 8=KIT, 9=orders
   for(let i=2;i<=7;i++){const r=commOv[i];if(!r||!r[0])continue;
-    const n=r[0].trim();D.agents.push({name:n,total:pn(r[1]),off:INACTIVE.includes(n),sup:n==="Luisa Tona",
+    const n=r[0].trim();D.agents.push({name:n,total:pn(r[1]),off:INACTIVE.includes(n),sup:SUPERVISORS.includes(n),
       tiers:{t0:pn(r[2]),t25:pn(r[3]),t30:pn(r[4]),t35:pn(r[5]),t40:pn(r[6])},
       alc:pn(r[7]),kit:pn(r[8]),orders:pn(r[9])});
   }
@@ -1420,60 +1476,188 @@ function renderPTO(){
 
 function renderHome(){
   initGlossary();
+
+  // ── Stats bar ──────────────────────────────────────────────────────────
   const lr=D.revData.length?D.revData[D.revData.length-1]:null;
   const tRev=lr?(lr.AJ+lr.LT+lr.IS+lr.VD+lr.FS):0;
   const tOrd=lr?(lr.AJo+lr.LTo+lr.ISo+lr.VDo+lr.FSo):0;
-  const act=D.agents.filter(a=>!a.off&&!a.sup).length;
-  document.getElementById("home-stats").innerHTML=`<div class="sc"><div class="sl">Latest Month Revenue</div><div class="sv">${fmt(tRev)}</div><div class="ss">${lr?.m||""} — ${Math.round(tOrd)} orders</div></div><div class="sc"><div class="sl">Team Commissions</div><div class="sv">${fmt(D.teamTotal||0)}</div><div class="ss">All-time total</div></div><div class="sc"><div class="sl">Active Agents</div><div class="sv">${act} + 1</div><div class="ss">${act} Agents + Supervisor (Luisa)</div></div><div class="sc"><div class="sl">Time Utilization</div><div class="sv">${D.weeklyDept.pct||"—"}</div><div class="ss">Week of ${D.weeklyDept.week||""}</div></div>`;
+  // Flag the revenue card when the sheet has not been filled for the month
+  // before this one. Showing a stale total as if it were current is worse
+  // than showing nothing.
+  let revStale=false;
+  if(lr){const m=String(lr.m).match(/^(\d{1,2})\D+\d{1,2}\D+(\d{4})/)||String(lr.m).match(/^(\d{1,2})\/(\d{4})/);
+    if(m){const now=rfToday();const months=(now.getFullYear()-+m[m.length-1])*12+(now.getMonth()+1-+m[1]);
+      revStale=months>1;}}
 
-  renderLB("lb-home");
+  const nAg=R_AGENTS.length,nSup=R_SUPS.length;
+  const agWord=nAg===1?"Agent":"Agents";
+  const supWord=nSup?` + ${nSup===1?"Supervisor":"Supervisors"} (${R_SUPS.map(n=>n.split(" ")[0]).join(", ")})`:"";
 
-  // ═══ PTO ACCRUAL ═══
-  // 15 days a year, earned per scheduled week rather than per day actually worked,
-  // so PTO and holidays still accrue and a full year reaches exactly 15.
-  // Pro rated from the agent's first active week. Resets every 1 January with no
-  // carryover in either direction.
-  renderPTO();
+  // Time Utilization, latest week, straight from the agent KPI tabs rather than
+  // the CE Weekly Report tab, which lags a week and uses a fixed Available Time.
+  const tu=(()=>{
+    const fa=Object.values(D.kpi)[0];if(!fa)return null;
+    const wk=fa.dates[fa.dates.length-1];
+    const vals=[];
+    R_TEAM.forEach(n=>{const k=D.kpi[n];if(!k)return;
+      const i=k.dates.indexOf(wk);if(i<0)return;
+      const v=k.kpis["Time Usage"]?.v[i];
+      if(v!==null&&v!==undefined&&!isNaN(v)&&v>0)vals.push(v);});
+    if(!vals.length)return null;
+    return {pct:vals.reduce((a,b)=>a+b,0)/vals.length,n:vals.length,week:wk};
+  })();
 
-  // Schedule
-  if(D.schedule.length>2){
-    document.getElementById("home-sched-label").textContent=D.schedule[0]?.[1]||"";
-    const dy=new Date().getDay(),tc=dy===0||dy===6?5:dy-1,days=D.schedule[1]||[];
-    // Weekend person in charge = first person listed in weekend column (row 2, col 6)
-    const wkndLead=(D.schedule[2]&&D.schedule[2][6])?D.schedule[2][6].trim():"";
-    let h="<thead><tr><th style='text-align:left'>Role</th>";
-    for(let j=1;j<=6;j++)h+=`<th class="${j-1===tc?'ty':''}">${days[j]||""}</th>`;
-    h+="</tr></thead><tbody>";
-    for(let i=2;i<=7;i++){const r=D.schedule[i];if(!r||(!r[0]&&!r[6]))continue;
-      const role=r[0]||"";
-      h+=`<tr><td>${role?`<span class="rd" style="background:${role.includes("Chat")?"#6C5CE7":role.includes("Hybrid")?"var(--coral)":"var(--teal)"}"></span>${role}`:""}</td>`;
-      for(let j=1;j<=6;j++){
-        const cell=(r[j]||"").trim();
-        const isWkndHighlight=j===6&&cell&&cell===wkndLead;
-        h+=`<td class="${j-1===tc?'ty':''}" ${isWkndHighlight?'style="background:var(--teal-mist);font-weight:700;color:var(--teal)"':''}>${cell}</td>`;
-      }
-      h+="</tr>";}
-    h+="</tbody>";document.getElementById("home-sched-tbl").innerHTML=h;
+  document.getElementById("home-stats").innerHTML=
+   `<div class="sc"><div class="sl">Latest Month Revenue</div>
+      <div class="sv"${revStale?' style="color:#C4CEDA"':''}>${lr&&tRev?fmt(tRev):"—"}</div>
+      <div class="ss">${lr?(revStale?`Last filled ${lr.m} · nothing entered since`:`${lr.m} · ${Math.round(tOrd)} orders`):"no revenue rows"}</div></div>
+    <div class="sc"><div class="sl">Team Commissions</div><div class="sv">${fmt(D.teamTotal||0)}</div>
+      <div class="ss">All-time total</div></div>
+    <div class="sc"><div class="sl">Active Agents</div><div class="sv">${nAg}${nSup?" + "+nSup:""}</div>
+      <div class="ss">${nAg} ${agWord}${supWord}</div></div>
+    <div class="sc"><div class="sl">${tipLabel("Time Utilization")}</div>
+      <div class="sv">${tu?tu.pct.toFixed(1)+"%":"—"}</div>
+      <div class="ss">${tu?`Week of ${tu.week} · ${tu.n} on the team`:"no KPI data"}</div></div>`;
+
+  renderNeedsAttention();
+  renderHomeScore();
+  renderToday();
+}
+
+// ── Needs attention ───────────────────────────────────────────────────────
+// Only counts that someone has to act on. Each tile opens the page that owns it.
+function renderNeedsAttention(){
+  const box=document.getElementById("hm-na");if(!box)return;
+  const RED="#D4604A",AMBER="#B8721A",GREEN="#2D8A2D";
+  const d3=s=>{const m=String(s||"").match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);return m?new Date(+m[3],+m[1]-1,+m[2]):null;};
+  const today=rfToday();
+  const items=[];
+
+  // 1. Refunds submitted but not paid out
+  const unh=(D.pending||[]).filter(x=>!x.handled);
+  const amt=unh.reduce((s,x)=>s+(x.amount||0),0);
+  const dates=unh.map(x=>d3(x.date)).filter(Boolean).sort((a,b)=>a-b);
+  const age=dates.length?Math.round((today-dates[0])/864e5):null;
+  items.push({n:unh.length,l:"Refunds pending",
+    s:unh.length?`${fmt(amt)} owed · oldest raised ${dates[0].getMonth()+1}/${dates[0].getDate()}, ${age} day${age===1?"":"s"} ago`
+                :"Everything submitted has been paid out",
+    c:unh.length?RED:GREEN,page:"refunds",q:"Open General Refunds"});
+
+  // 2. Chargeback cases still awaiting a response
+  const cb=D.chargebacks||[];
+  const open=cb.filter(x=>/^open$/i.test(String(x.status||"").trim()));
+  const openAmt=open.reduce((s,x)=>s+(x.amount||0),0);
+  const won=cb.filter(x=>/^reversed$/i.test(String(x.status||"").trim())).length;
+  items.push({n:open.length,l:"Chargebacks open",
+    s:open.length?`${fmt(openAmt)} at stake · ${won} reversed so far this year`:"No case awaiting a response",
+    c:open.length?AMBER:GREEN,page:"cb",q:"Open Chargebacks"});
+
+  // 3. SLA breaches in the latest scored week, active agents only
+  const fa=Object.values(D.kpi)[0];
+  if(fa){
+    const wk=fa.dates[fa.dates.length-1];
+    const per=[];
+    R_AGENTS.forEach(n=>{const k=D.kpi[n];if(!k)return;
+      const i=k.dates.indexOf(wk);if(i<0)return;
+      const v=k.kpis["SLA Breaches"]?.v[i];
+      if(v!==null&&v!==undefined&&!isNaN(v))per.push([n,v]);});
+    const tot=per.reduce((s,x)=>s+x[1],0);
+    per.sort((a,b)=>b[1]-a[1]);
+    items.push({n:tot,l:"SLA breaches this week",
+      s:per.length?per.map(x=>x[0].split(" ")[0]+" "+Math.round(x[1])).join(" · "):`week of ${wk}`,
+      c:tot>20?RED:tot>0?AMBER:GREEN,page:"kpi",q:"Open Agent KPIs"});
   }
 
-  // Revenue chart
-  if(D.revData.length){
-    new Chart(document.getElementById("ch-rev-home"),{type:"bar",data:{labels:D.revData.map(r=>r.m),datasets:[{data:D.revData.map(r=>r.AJ+r.LT+r.IS+r.VD+r.FS),backgroundColor:"#2AACB8",borderRadius:6,barPercentage:.55}]},options:{...cb,plugins:{...cb.plugins,tooltip:{...cb.plugins.tooltip,callbacks:{label:c=>fmt(c.parsed.y)}}},scales:{...cb.scales,y:{...cb.scales.y,ticks:{...cb.scales.y.ticks,callback:v=>fk(v)}}}}});
+  // 4. Infraction points logged this quarter
+  const q=Math.floor(today.getMonth()/3),qs=new Date(today.getFullYear(),q*3,1);
+  const pts=R_AGENTS.reduce((s,n)=>s+scInfractions(n),0);
+  items.push({n:pts%1?pts.toFixed(1):pts,l:`Infraction points, Q${q+1}`,
+    s:pts?"Logged this quarter":`Nothing logged since ${qs.getMonth()+1}/${qs.getDate()}`,
+    c:pts>0?AMBER:GREEN,page:"kpi",q:"Open Infractions & PTO"});
+
+  const bad=items.filter(x=>x.c!==GREEN).length;
+  const sub=document.getElementById("hm-na-sub");
+  if(sub)sub.textContent=bad?`${bad} of ${items.length} need action right now`:"Everything clear";
+  box.innerHTML=(bad?"":`<div class="hm-clear">&#10003; Nothing is waiting. Queues are empty and no points logged this quarter.</div>`)+
+    `<div class="hm-na">`+items.map(x=>
+      `<div class="hm-nai" data-go="${x.page}"><span class="hm-nad" style="background:${x.c}"></span>
+       <div><div class="hm-nan" style="color:${x.c}">${x.n}</div><div class="hm-nal">${x.l}</div>
+       <div class="hm-nas">${x.s}</div><div class="hm-naq">${x.q} &rarr;</div></div></div>`).join("")+`</div>`;
+  box.querySelectorAll("[data-go]").forEach(el=>el.addEventListener("click",()=>goPage(el.dataset.go)));
+}
+
+// ── Department score strip ────────────────────────────────────────────────
+function renderHomeScore(){
+  const box=document.getElementById("hm-ds"),sub=document.getElementById("hm-ds-sub");
+  if(!box)return;
+  const fa=Object.values(D.kpi)[0];
+  if(!fa){box.innerHTML="";if(sub)sub.textContent="waiting on KPI data";return;}
+  const wk=fa.dates[fa.dates.length-1];
+  computeScores(wk);
+  if(!SC.dept){box.innerHTML=`<div style="color:var(--gray);font-size:12.5px">Not enough history to score this week.</div>`;
+    if(sub)sub.textContent="";return;}
+  const ns=Object.keys(SC.agents);
+  if(sub)sub.textContent=`Week of ${wk} · ${SC.dept.weeks}-week average · ${ns.length} scored agent${ns.length===1?"":"s"}, supervisors excluded`;
+  const same=ns.length>1&&ns.every(n=>SC.agents[n].weakest===SC.dept.weakest);
+  box.innerHTML=`
+    <div><div class="hm-dsn" style="color:${scCol(SC.dept.composite)}">${SC.dept.composite}</div>
+      <div class="dss" style="font-size:10px;color:var(--gray);margin-top:3px">out of 100</div></div>
+    <div class="hm-dsg">${Object.keys(SC.dept.cats).map(c=>{const v=SC.dept.cats[c];
+      return `<div class="hm-dcell"><div class="hm-dcl">${tipLabel(c)}</div>
+        <div class="hm-dcv" style="color:${scCol(v)}">${v}</div>
+        <div class="hm-dcb"><span style="width:${Math.min(100,v)}%;background:${scCol(v)}"></span></div></div>`;}).join("")}</div>
+    <div class="hm-dsm">Weakest area is <b>${SC.dept.weakest}</b> at ${SC.dept.weakScore}.
+      ${same?"Every scored agent is weakest in the same place, which points at process or volume rather than at any individual.":""}
+      <br><span class="hm-link" data-go="kpi">Open Agent KPIs &rarr;</span></div>`;
+  box.querySelectorAll("[data-go]").forEach(el=>el.addEventListener("click",()=>goPage(el.dataset.go)));
+}
+
+// ── Today only ────────────────────────────────────────────────────────────
+// Column 1..5 are Monday to Friday, column 6 is the weekend.
+function renderToday(){
+  const box=document.getElementById("hm-td");if(!box)return;
+  const t=document.getElementById("hm-td-title"),sub=document.getElementById("hm-td-sub");
+  const S=D.schedule||[];
+  const now=rfToday(),dy=now.getDay();
+  const DAYS=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const col=(dy===0||dy===6)?6:dy;
+  if(t)t.textContent=`Today, ${DAYS[dy]} ${now.getMonth()+1}/${now.getDate()}`;
+  if(S.length<3){box.innerHTML=`<div style="color:var(--gray);font-size:12.5px">Schedule sheet not loaded.</div>`;
+    if(sub)sub.textContent="";return;}
+  if(sub)sub.textContent=`${(S[0]&&S[0][1])||""}${(dy===0||dy===6)?" · weekend column":""} · from the schedule sheet`;
+  const out=[];
+  for(let i=2;i<S.length&&i<=8;i++){
+    const r=S[i];if(!r)continue;
+    const raw=String(r[0]||"").trim();const cell=String(r[col]||"").trim();
+    if(!cell)continue;
+    // The sheet uses a long sentence as the label of the daily task row.
+    const role=raw.length>22||!raw?"Daily task":raw.replace(/\s+$/,"");
+    out.push([role,cell,raw.length>22||/outbound/i.test(raw)]);
   }
+  box.innerHTML=out.length?out.map(([r,n,task])=>
+    `<div class="hm-tdi${task?" task":""}"><div class="hm-tdr">${r}</div><div class="hm-tdn">${n}</div></div>`).join("")
+    :`<div style="color:var(--gray);font-size:12.5px">Nothing assigned for today in the sheet.</div>`;
 }
 
 // ═══ NAV ═══
-document.querySelectorAll(".nav-btn[data-page]").forEach(b=>{b.addEventListener("click",()=>{
-  document.querySelectorAll(".nav-btn").forEach(x=>x.classList.remove("active"));b.classList.add("active");
-  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-  document.getElementById("page-"+b.dataset.page).classList.add("active");
-  if(b.dataset.page==="sales"&&!window._s)buildSales();
-  if(b.dataset.page==="kpi"&&!window._k)buildKPI();
-  if(b.dataset.page==="schedule"&&!window._sc)buildSched();
-  if(b.dataset.page==="ops"&&!window._o)buildOps();
-  if(b.dataset.page==="refunds"&&!window._rf)buildRefunds();
-  if(b.dataset.page==="cb"&&!window._cb)buildCB();
-})});
+// One entry point, so the home page tiles can jump to a page exactly the way
+// the sidebar does.
+function goPage(p){
+  const btn=document.querySelector(`.nav-btn[data-page="${p}"]`);
+  document.querySelectorAll(".nav-btn").forEach(x=>x.classList.remove("active"));
+  if(btn)btn.classList.add("active");
+  document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+  const pg=document.getElementById("page-"+p);if(pg)pg.classList.add("active");
+  if(p==="sales"&&!window._s)buildSales();
+  if(p==="kpi"&&!window._k)buildKPI();
+  if(p==="schedule"&&!window._sc)buildSched();
+  if(p==="ops"&&!window._o)buildOps();
+  if(p==="refunds"&&!window._rf)buildRefunds();
+  if(p==="cb"&&!window._cb)buildCB();
+  const m=document.querySelector(".main");if(m)m.scrollTop=0;
+}
+document.querySelectorAll(".nav-btn[data-page]").forEach(b=>{
+  b.addEventListener("click",()=>goPage(b.dataset.page));});
 
 // ═══ SALES ═══
 let chComm,chRevAg,chAov,chTier;
@@ -1606,7 +1790,8 @@ function buildKPI(){window._k=1;
     document.getElementById("kv-dept").style.display=v==="dept"?"block":"none";
     document.getElementById("kv-inf").style.display=v==="inf"?"block":"none";
     document.getElementById("kpi-ctrls").style.display=v==="agent"?"flex":"none";
-    if(v==="dept")renderDept();if(v==="inf"&&!window._inf)buildInf();})});
+    if(v==="dept")renderDept();
+    if(v==="inf"){renderPTO();if(!window._inf)buildInf();}})});
   document.getElementById("kpi-ag").addEventListener("change",renderAg);
   document.getElementById("kpi-wk").addEventListener("change",renderAg);
   document.querySelectorAll("#page-kpi .foldhd").forEach(hd=>
@@ -1863,6 +2048,10 @@ const GLOSSARY={
  f:"value = KPI sheet 'Time Usage'\nscore = (value - 70) / (95 - 70) x 100",s:"100 at 95%. 0 at 70%. Above 105% reads as Exceeds."},
 "Infraction points":{d:"Points logged against the agent this quarter.",
  f:"value = sum of infraction points this quarter\nscore = (6 - value) / 6 x 100",s:"100 at zero points. 0 at 6 points."},
+"Time Utilization":{d:"Share of scheduled hours the team actually spent on work, for the most recent week with KPI data. Read straight from each person's own KPI tab, so it moves the same week the tabs do.",
+ f:"Time Utilization = mean of Time Usage across the\n                   active roster, latest week\n\nEveryone in ROSTER with active:true is counted,\nsupervisors included. A week with no value for\nsomeone (not yet joined, no activity) is skipped\nrather than counted as zero.",
+ s:"This is not the same number as the CE Weekly Report tab, which lags one week and divides by a fixed Available Time figure. When the two disagree, this one is the newer of the two."},
+
 "Available Time":{d:"Hours the team was scheduled to be available, after PTO and holidays.",
  f:"Available = 7.42 x staffed agents x 5\n          - 7.42 x PTO days\n          - 7.42 x holidays x staffed agents"},
 "Time Spent":{d:"Hours actually logged, taken straight from the CE Weekly Report."},
@@ -1914,7 +2103,7 @@ function initGlossary(){
 
 // ═══════════════ AGENT SCORECARD ═══════════════
 const SC={agents:{},dept:null};
-const SUPERVISORS=["Luisa Tona"];
+// SUPERVISORS, INACTIVE and the active roster are derived from ROSTER at the top of this file.
 const SC_HIST=13;            // weeks averaged for the scorecard
 const SC_MIN_WEEKS=4;        // a new joiner needs this much history before scoring
 const scCol=s=>s>=85?"#2D8A2D":s>=70?"#2AACB8":s>=50?"#B8721A":"#D4604A";
