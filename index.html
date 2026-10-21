@@ -367,7 +367,7 @@ background:rgba(255,255,255,.09);border-radius:6px;padding:8px 10px;margin-top:8
 <div id="page-kpi" class="page">
 <div class="page-header"><div><h1>Agent KPIs</h1><p>Weekly performance</p></div>
 <div style="display:flex;gap:10px;flex-wrap:wrap;display:none" id="kpi-ctrls">
-<select class="sel" id="kpi-ag"><option>Angel Jimenez</option><option>Fatima Soto</option><option>Luisa Tona</option><option>Ivan Soto</option><option>Vanessa Duran</option></select>
+<select class="sel" id="kpi-ag"><option>Angel Jimenez</option><option>Fatima Soto</option><option>Luisa Tona</option><option>Manuel Acosta</option><option>Ivan Soto</option><option>Vanessa Duran</option></select>
 <select class="sel" id="kpi-wk"></select></div></div>
 <div class="kt"><button class="ktb active" data-v="dept">Department</button><button class="ktb" data-v="agent">Agent View</button><button class="ktb" data-v="inf">Infractions & PTO</button></div>
 <div id="kv-agent" style="display:none"><div class="kg" id="kpi-cards"></div>
@@ -662,6 +662,7 @@ const URLS={
   kpiIvan:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=382540791&single=true&output=csv",
   kpiFatima:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1501473843&single=true&output=csv",
   kpiLuisa:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1521800009&single=true&output=csv",
+  kpiManuel:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=302600419&single=true&output=csv",
   kpiVanessa:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1407071428&single=true&output=csv",
   schedule:"https://docs.google.com/spreadsheets/d/e/2PACX-1vQINTKfEREAnt10bxY_UG9I5GbSANCx6Doq-BGG23MzD1wR2IDfrRc84UEIZlhkYcLuov70Ug2_Pf1x/pub?output=csv",
   issues:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTWF963vZC_H_A9nrbVL8Flpuwp5Te3aeOo1TxaLAs0pRU-E5GgqSOgW4MO9vGCkML4A4Q_XT37hePv/pub?gid=89929469&single=true&output=csv",
@@ -672,7 +673,7 @@ const URLS={
   refAmznSupplyKick:"https://docs.google.com/spreadsheets/d/e/2PACX-1vQwLb81pzWhS71hVYhmYoYRF60vDYZ3pU7wddBdY9gC_qcMNQVxjIkRq4wtafAubcgRRyq1FYMPCKrR/pub?gid=358662783&single=true&output=csv",
   refAmznMV:"https://docs.google.com/spreadsheets/d/e/2PACX-1vQwLb81pzWhS71hVYhmYoYRF60vDYZ3pU7wddBdY9gC_qcMNQVxjIkRq4wtafAubcgRRyq1FYMPCKrR/pub?gid=417767780&single=true&output=csv",
 };
-const AC={"Angel Jimenez":"#2AACB8","Vanessa Duran":"#E8967A","Luisa Tona":"#3B6CE7","Ivan Soto":"#6C5CE7","Khamal Tehfeh":"#999","Fatima Soto":"#2D8A2D"};
+const AC={"Manuel Acosta":"#B8721A","Angel Jimenez":"#2AACB8","Vanessa Duran":"#E8967A","Luisa Tona":"#3B6CE7","Ivan Soto":"#6C5CE7","Khamal Tehfeh":"#999","Fatima Soto":"#2D8A2D"};
 const INACTIVE=["Khamal Tehfeh","Vanessa Duran","Ivan Soto"];
 
 // Number parser - handles $1,076.38 and 78.40% and plain numbers
@@ -725,15 +726,15 @@ const D={agents:[],monthlyComm:[],revData:[],salesLog:[],weeklyDept:{},weeklyRaw
 window.D=D;
 
 async function loadAll(){
-  const names=["commOverview","salesOverview","salesLog","weekly","generalData","kpiAngel","kpiIvan","kpiFatima","kpiLuisa","kpiVanessa","schedule","issues","frontData","dialpadData","cbScanCafe","aiSignals","frontDaily","pendingRefunds"];
-  const urls=[URLS.commOverview,URLS.salesOverview,URLS.salesLog,URLS.weekly,URLS.generalData,URLS.kpiAngel,URLS.kpiIvan,URLS.kpiFatima,URLS.kpiLuisa,URLS.kpiVanessa,URLS.schedule,URLS.issues,URLS.frontData,URLS.dialpadData,URLS.cbScanCafe,URLS.aiSignals,URLS.frontDaily,URLS.pendingRefunds];
+  const names=["commOverview","salesOverview","salesLog","weekly","generalData","kpiAngel","kpiIvan","kpiFatima","kpiLuisa","kpiManuel","kpiVanessa","schedule","issues","frontData","dialpadData","cbScanCafe","aiSignals","frontDaily","pendingRefunds"];
+  const urls=[URLS.commOverview,URLS.salesOverview,URLS.salesLog,URLS.weekly,URLS.generalData,URLS.kpiAngel,URLS.kpiIvan,URLS.kpiFatima,URLS.kpiLuisa,URLS.kpiManuel,URLS.kpiVanessa,URLS.schedule,URLS.issues,URLS.frontData,URLS.dialpadData,URLS.cbScanCafe,URLS.aiSignals,URLS.frontDaily,URLS.pendingRefunds];
   const bar=document.getElementById("load-fill");
   const results=[];
   for(let i=0;i<urls.length;i++){
     results.push(await fetchCSV(urls[i],names[i]));
     if(bar)bar.style.width=((i+1)/urls.length*100)+"%";
   }
-  const [commOv,salesOv,salesLg,weekly,genData,kA,kI,kF,kL,kV,sched,issues,frontData,dialpadData,cbSC,aiSig,fDaily,pendRef]=results;
+  const [commOv,salesOv,salesLg,weekly,genData,kA,kI,kF,kL,kM,kV,sched,issues,frontData,dialpadData,cbSC,aiSig,fDaily,pendRef]=results;
 
   // ═══ PARSE PENDING REFUND REQUESTS ═══
   // A=Handled TRUE/FALSE, C=date of request, D=company, E=team member,
@@ -890,7 +891,7 @@ async function loadAll(){
   }
 
   // ═══ PARSE KPI AGENT SHEETS ═══
-  const kpiSheets={"Angel Jimenez":kA,"Ivan Soto":kI,"Fatima Soto":kF,"Luisa Tona":kL,"Vanessa Duran":kV};
+  const kpiSheets={"Angel Jimenez":kA,"Ivan Soto":kI,"Fatima Soto":kF,"Luisa Tona":kL,"Manuel Acosta":kM,"Vanessa Duran":kV};
   // Row mapping: {csvRow: [name, target, platform]}
   const KR={5:["Days Worked",5,"General"],7:["Hours/Week",38.35,"General"],
     9:["Assigned Conversations",null,"Front"],10:["Messages Sent (excl. replies)",null,"Front"],
@@ -1676,6 +1677,7 @@ function initGlossary(){
 const SC={agents:{},dept:null};
 const SUPERVISORS=["Luisa Tona"];
 const SC_HIST=13;            // weeks averaged for the scorecard
+const SC_MIN_WEEKS=4;        // a new joiner needs this much history before scoring
 const scCol=s=>s>=85?"#2D8A2D":s>=70?"#2AACB8":s>=50?"#B8721A":"#D4604A";
 
 function scBand(v,good,floor,lower,ceil,soft){
@@ -1718,9 +1720,14 @@ function computeScores(weekLabel){
 
   const roster=Object.keys(D.kpi).filter(n=>SUPERVISORS.indexOf(n)<0&&INACTIVE.indexOf(n)<0);
 
+  SC.newcomers=[];
   roster.forEach(n=>{
     const k=D.kpi[n];if(!k)return;
     const idx=[];for(let i=0;i<k.dates.length;i++)if(inWindow(k.dates[i]))idx.push(i);
+    // Weeks with real activity. Hours/Week is a template constant and is not evidence of work.
+    const activeWeeks=idx.filter(i=>["Assigned Conversations","Replies Sent","Calls Answered"]
+      .some(m=>{const v=k.kpis[m]?.v[i];return v!==null&&v!==undefined&&!isNaN(v)&&v>0;})).length;
+    if(activeWeeks<SC_MIN_WEEKS){SC.newcomers.push({name:n,weeks:activeWeeks});return;}
     const kv=(metric)=>scMean(idx.map(i=>k.kpis[metric]?.v[i]).filter(v=>v!==null&&v!==undefined&&!isNaN(v)));
     const days=kv("Days Worked")||5;
     const fr=(field)=>scMean(wlabels.map(w=>D.frontAgent?.[n]?.[w]?.[field]).filter(v=>v!==null&&v!==undefined&&!isNaN(v)));
@@ -1821,11 +1828,13 @@ function renderScorecard(weekLabel){
   const sub=document.getElementById("sc-sub");
   if(!SC.dept){
     head.innerHTML=`<div class="sc-none">Not enough data to score this week. The scorecard needs Front and Dialpad history for at least one non-supervisor agent.</div>`;
-    cl.innerHTML="";rg.innerHTML="";if(sub)sub.textContent="";
+    cl.innerHTML="";rg.innerHTML="";
+    if(sub)sub.textContent=(SC.newcomers||[]).length?`${SC.newcomers.length} agent${SC.newcomers.length===1?"":"s"} too new to score`:"";
     return;
   }
   const ns=Object.keys(SC.agents);
-  if(sub)sub.textContent=`${ns.length} scored agent${ns.length===1?"":"s"} · ${SC.dept.weeks}-week average to ${weekLabel} · supervisors excluded`;
+  if(sub)sub.textContent=`${ns.length} scored agent${ns.length===1?"":"s"} · ${SC.dept.weeks}-week average to ${weekLabel} · supervisors excluded`+
+    ((SC.newcomers||[]).length?` · ${SC.newcomers.length} too new to score`:"");
   head.innerHTML=`<div class="sc-big">
     <div><div class="sc-num" style="color:${scCol(SC.dept.composite)}">${SC.dept.composite}</div>
       <div class="sc-sub">out of 100</div></div>
@@ -1837,13 +1846,22 @@ function renderScorecard(weekLabel){
   cl.innerHTML=Object.keys(SC.dept.cats).map(c=>`<div class="sc-dcell"><div class="dl">${tipLabel(c)}</div>
     <div class="dv" style="color:${scCol(SC.dept.cats[c])}">${SC.dept.cats[c]}</div>
     <div class="ds">${ns.map(n=>n.split(" ")[0]+" "+SC.agents[n].cats[c].capped).join(" · ")}</div></div>`).join("");
+  const newCards=(SC.newcomers||[]).map(x=>`<div class="sc-card" style="opacity:.72">
+    <h3>${x.name}</h3>
+    <div style="height:108px;display:flex;align-items:center;justify-content:center">
+      <div style="width:84px;height:84px;border-radius:50%;border:9px solid var(--border);
+        display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--gray)">new</div></div>
+    <div class="sc-weak">${x.weeks} week${x.weeks===1?"":"s"} of data, needs ${SC_MIN_WEEKS}</div>
+    <div style="font-size:11px;color:var(--gray);line-height:1.5;margin-top:9px;text-align:left">
+      Not scored yet and left out of the department average. A score on this little history would
+      say more about the sample than the person.</div></div>`).join("");
   rg.innerHTML=ns.map(n=>{const a=SC.agents[n];
     return `<div class="sc-card"><h3>${n}</h3>${scRing(a.composite)}
       <div class="sc-weak">weakest: ${a.weakest} (${a.weakScore})</div>
       <div class="sc-bars">${Object.keys(a.cats).map(c=>{const v=a.cats[c];
         return `<div class="sc-rb"><span class="lb">${tipLabel(c,n)}</span>
           <span class="tr"><span class="fl" style="width:${Math.min(100,v.capped)}%;background:${scCol(v.capped)}"></span></span>
-          <span class="vn" style="color:${scCol(v.capped)}">${v.score>100?v.score+"+":v.score}</span></div>`;}).join("")}</div></div>`;}).join("");
+          <span class="vn" style="color:${scCol(v.capped)}">${v.score>100?v.score+"+":v.score}</span></div>`;}).join("")}</div></div>`;}).join("")+newCards;
 }
 
 
@@ -1852,10 +1870,17 @@ function renderDept(){
   const agNames=Object.keys(D.kpi);
   const HRS_PER_DAY=7.42;
   const ROSTER_FALLBACK=["Angel Jimenez","Fatima Soto","Luisa Tona"];
-  // Staffed headcount for this week = agents with real hours logged that week.
-  // Falls back to the current roster if Hours/Week is empty across the board.
+  // Staffed headcount for this week = agents who actually did work that week.
+  // Hours/Week is a template constant on every agent tab and reads 38.35 even for
+  // weeks before an agent joined, so it cannot be used to detect who was present.
+  const activeAt=(an)=>{
+    const k=D.kpi[an]?.kpis;if(!k)return 0;
+    const probe=["Assigned Conversations","Replies Sent","Calls Answered"];
+    for(const m of probe){const v=k[m]?.v[wi];if(v!==null&&v!==undefined&&!isNaN(v)&&v>0)return 1;}
+    return 0;
+  };
   const hoursAt=(an)=>{const v=D.kpi[an]?.kpis["Hours/Week"]?.v[wi];return(v===null||v===undefined||isNaN(v))?0:v;};
-  let wkAgents=agNames.filter(an=>hoursAt(an)>0);
+  let wkAgents=agNames.filter(an=>activeAt(an)>0);
   if(!wkAgents.length)wkAgents=ROSTER_FALLBACK.filter(a=>agNames.includes(a));
   const headcount=wkAgents.length||ROSTER_FALLBACK.length;
   const firstAg=Object.values(D.kpi)[0];
