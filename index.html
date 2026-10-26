@@ -97,6 +97,24 @@ font-size:12.5px;color:#2D6A2D;font-weight:600;margin-bottom:12px}
 .hm-tdr{font-size:9px;font-weight:700;color:var(--gray);letter-spacing:.5px;text-transform:uppercase}
 .hm-tdn{font-size:14px;font-weight:700;margin-top:3px}
 @media(max-width:700px){.hm-dsg{grid-template-columns:repeat(2,1fr)}}
+/* interdepartmental requests */
+.gl2{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:16px}
+.rq-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.rq-row .n{font-size:12px;font-weight:600;width:142px;flex:0 0 142px}
+.rq-row .t{flex:1;display:block;height:9px;background:var(--bg);border-radius:5px;overflow:hidden}
+.rq-row .f{display:block;height:100%;border-radius:5px}
+.rq-row .v{font-size:12.5px;font-weight:800;width:34px;text-align:right}
+.rq-warn{background:#FFF8E8;border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:11px 14px;
+font-size:11.5px;color:#7A5410;line-height:1.6;margin-top:12px}
+.rq-warn b{display:block;margin-bottom:2px}
+.rq-tag{display:inline-block;font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:20px;white-space:nowrap}
+.rq-Urgent{background:#FDECE7;color:#D4604A}.rq-High{background:#FDF3E3;color:#B8721A}
+.rq-Medium{background:#EAF7F8;color:#2AACB8}.rq-Low{background:#F1F4F7;color:#8A9BAE}
+.rq-Unset{background:#F1F4F7;color:#8A9BAE}
+#rq-tbl tr.flag td{background:#FDF4F1}
+#rq-tbl td.ord{font-family:ui-monospace,Menlo,monospace;font-size:11px}
+.dsc.hot{background:#FDF1EE}
+@media(max-width:880px){.gl2{grid-template-columns:1fr}}
 .sq{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
 .sq>.cd{margin:0!important}
 .mgrp{font-size:10.5px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;color:var(--slate);margin:18px 0 9px;display:flex;align-items:center;gap:10px}
@@ -477,6 +495,7 @@ height:auto;background:none;border-radius:0;overflow:visible;line-height:1.5}
 <div class="ops-subnav">
   <button class="ops-sub active" data-osub="issues">Issues Tracker</button>
   <button class="ops-sub" data-osub="front">Front Daily Records</button>
+  <button class="ops-sub" data-osub="req">Interdept Requests</button>
 </div>
 <div id="ops-view-issues">
 <div class="page-header">
@@ -553,6 +572,39 @@ height:auto;background:none;border-radius:0;overflow:visible;line-height:1.5}
   <div class="csb" id="fd-log-sub">Newest first</div>
   <div class="tw" style="max-height:460px"><table class="tb" id="fd-tbl"></table></div>
 </div>
+</div>
+
+<div id="ops-view-req" style="display:none">
+<div class="page-header"><div><h1>Daily Operations</h1><p>Interdepartmental requests</p></div></div>
+<div class="cd"><div class="ct">Open interdepartmental requests</div>
+  <div class="csb" id="rq-sub"></div>
+  <div class="kg" id="rq-tiles" style="margin-top:13px"></div></div>
+<div class="gl2">
+  <div class="cd"><div class="ct">Raised and closed per week</div>
+    <div class="csb" id="rq-wk-sub">By created date</div>
+    <div class="cw"><canvas id="ch-rq" height="200"></canvas></div></div>
+  <div class="cd"><div class="ct">Status</div><div class="csb" id="rq-st-sub"></div>
+    <div id="rq-status" style="margin-top:13px"></div>
+    <div class="csb" id="rq-st-note" style="margin-top:10px"></div></div>
+</div>
+<div class="g2">
+  <div class="cd"><div class="ct">Age of what is open</div><div class="csb">Days since the request was raised</div>
+    <div id="rq-age" style="margin-top:13px"></div></div>
+  <div class="cd"><div class="ct">Open by owner</div><div class="csb">One assignee per request</div>
+    <div id="rq-owner" style="margin-top:13px"></div>
+    <div class="csb" id="rq-owner-note" style="margin-top:10px"></div></div>
+</div>
+<div class="g2">
+  <div class="cd"><div class="ct">Open by request type</div>
+    <div class="csb">Multi-tagged, so a request counts in each of its types</div>
+    <div id="rq-types" style="margin-top:13px"></div></div>
+  <div class="cd"><div class="ct">Open by priority</div><div class="csb">As set when the request was raised</div>
+    <div id="rq-pri" style="margin-top:13px"></div>
+    <div class="rq-warn" id="rq-pri-note"></div></div>
+</div>
+<div class="cd"><div class="ct">Oldest open requests</div>
+  <div class="csb">Shaded where the request is Urgent or High and over 30 days old</div>
+  <div class="tw" style="max-height:480px"><table class="tb" id="rq-tbl"></table></div></div>
 </div>
 </div>
 
@@ -717,6 +769,7 @@ height:auto;background:none;border-radius:0;overflow:visible;line-height:1.5}
 <script>
 const VER="v1.1 — Apr 2026";
 const URLS={
+  interdept:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=728843407&single=true&output=csv",
   pendingRefunds:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTWF963vZC_H_A9nrbVL8Flpuwp5Te3aeOo1TxaLAs0pRU-E5GgqSOgW4MO9vGCkML4A4Q_XT37hePv/pub?gid=1756284187&single=true&output=csv",
   frontDaily:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTWF963vZC_H_A9nrbVL8Flpuwp5Te3aeOo1TxaLAs0pRU-E5GgqSOgW4MO9vGCkML4A4Q_XT37hePv/pub?gid=269820540&single=true&output=csv",
   aiSignals:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1225470280&single=true&output=csv",
@@ -760,6 +813,23 @@ const ROSTER=[
   {name:"Vanessa Duran", role:"agent",      active:false},
   {name:"Khamal Tehfeh", role:"agent",      active:false}
 ];
+// The requests tracker exports whoever was added from Slack as a raw member ID
+// and everyone else as an email. One line per person keeps both readable.
+const REQ_WHO={
+  "U072GTEC11D":"Luisa Tona",
+  "angel@memoryventures.com":"Angel Jimenez",
+  "fatima@memoryventures.com":"Fatima Soto",
+  "manuel@memoryventures.com":"Manuel Acosta",
+  "gonzalo@memoryventures.com":"Gonzalo Anza",
+  "divij@9sqc18.com":"Divij",
+  "suman@9sqc18.com":"Suman",
+  "mwilder@memoryventures.com":"Mark Wilder",
+  "dev@equillia.com":"DEV Team",
+  "ops@memoryventures.com":"Ops"
+};
+// Who sits outside CS, so the page can show what is ours to clear.
+const REQ_EXTERNAL=["Divij","Suman","DEV Team","Ops"];
+
 const R_ACTIVE=ROSTER.filter(p=>p.active);
 const R_AGENTS=R_ACTIVE.filter(p=>p.role==="agent").map(p=>p.name);   // scored
 const R_SUPS=R_ACTIVE.filter(p=>p.role==="supervisor").map(p=>p.name);
@@ -813,19 +883,65 @@ async function fetchCSV(url,name){
   return [];
 }
 
-const D={agents:[],monthlyComm:[],revData:[],salesLog:[],weeklyDept:{},weeklyRaw:[],kpi:{},infractions:[],ptoLog:[],issues:[],schedule:[],front:{},frontAgent:{},dialpadAgent:{},chargebacks:[],frontDaily:[],pending:[],signals:[],signalWeek:"",signalStamp:"",headline:"",failed:[]};
+const D={agents:[],monthlyComm:[],revData:[],salesLog:[],weeklyDept:{},weeklyRaw:[],kpi:{},infractions:[],ptoLog:[],issues:[],schedule:[],front:{},frontAgent:{},dialpadAgent:{},chargebacks:[],frontDaily:[],pending:[],interdept:[],signals:[],signalWeek:"",signalStamp:"",headline:"",failed:[]};
 window.D=D;
 
 async function loadAll(){
-  const names=["commOverview","salesOverview","salesLog","weekly","generalData","kpiAngel","kpiIvan","kpiFatima","kpiLuisa","kpiManuel","kpiVanessa","schedule","issues","frontData","dialpadData","cbScanCafe","aiSignals","frontDaily","pendingRefunds"];
-  const urls=[URLS.commOverview,URLS.salesOverview,URLS.salesLog,URLS.weekly,URLS.generalData,URLS.kpiAngel,URLS.kpiIvan,URLS.kpiFatima,URLS.kpiLuisa,URLS.kpiManuel,URLS.kpiVanessa,URLS.schedule,URLS.issues,URLS.frontData,URLS.dialpadData,URLS.cbScanCafe,URLS.aiSignals,URLS.frontDaily,URLS.pendingRefunds];
+  const names=["commOverview","salesOverview","salesLog","weekly","generalData","kpiAngel","kpiIvan","kpiFatima","kpiLuisa","kpiManuel","kpiVanessa","schedule","issues","frontData","dialpadData","cbScanCafe","aiSignals","frontDaily","pendingRefunds","interdept"];
+  const urls=[URLS.commOverview,URLS.salesOverview,URLS.salesLog,URLS.weekly,URLS.generalData,URLS.kpiAngel,URLS.kpiIvan,URLS.kpiFatima,URLS.kpiLuisa,URLS.kpiManuel,URLS.kpiVanessa,URLS.schedule,URLS.issues,URLS.frontData,URLS.dialpadData,URLS.cbScanCafe,URLS.aiSignals,URLS.frontDaily,URLS.pendingRefunds,URLS.interdept];
   const bar=document.getElementById("load-fill");
   const results=[];
   for(let i=0;i<urls.length;i++){
     results.push(await fetchCSV(urls[i],names[i]));
     if(bar)bar.style.width=((i+1)/urls.length*100)+"%";
   }
-  const [commOv,salesOv,salesLg,weekly,genData,kA,kI,kF,kL,kM,kV,sched,issues,frontData,dialpadData,cbSC,aiSig,fDaily,pendRef]=results;
+  const [commOv,salesOv,salesLg,weekly,genData,kA,kI,kF,kL,kM,kV,sched,issues,frontData,dialpadData,cbSC,aiSig,fDaily,pendRef,interReq]=results;
+
+  // ═══ PARSE INTERDEPARTMENTAL REQUESTS ═══
+  // Scanning requests tracker. Columns by header name rather than position,
+  // because the tab carries two columns both called Assignee and only the
+  // second is populated. Column H (Completed) reads FALSE on every row even
+  // for finished work, so Status is the only reliable signal and H is ignored.
+  {
+    const hdr=(interReq[0]||[]).map(x=>String(x||"").trim().toLowerCase());
+    const col=(name,which)=>{let n=0;for(let i=0;i<hdr.length;i++){if(hdr[i]===name){n++;if(n===(which||1))return i;}}return -1;};
+    const cOrder=col("order id"),cPri=col("priority"),cStat=col("status"),cReq=col("request"),
+          cDesc=col("description"),cCreated=col("created time"),cTicket=col("ticket id");
+    // Two "assignee" columns; prefer whichever actually carries values.
+    const a1=col("assignee",1),a2=col("assignee",2);
+    let cAsg=a2>=0?a2:a1;
+    if(a1>=0&&a2>=0){
+      const fill=(ci)=>interReq.slice(1).filter(r=>r&&String(r[ci]||"").trim()).length;
+      cAsg=fill(a2)>=fill(a1)?a2:a1;
+    }
+    const parseStamp=(s)=>{
+      const m=String(s||"").match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+      if(!m)return null;
+      let y=+m[3];if(y<100)y+=2000;
+      const d=new Date(y,+m[1]-1,+m[2]);
+      return isNaN(d.getTime())?null:d;
+    };
+    const who=(s)=>{const v=String(s||"").trim();if(!v)return "(unassigned)";
+      return REQ_WHO[v]||v.split("@")[0]||v;};
+    for(let i=1;i<interReq.length;i++){
+      const r=interReq[i];
+      if(!r||!r.length)continue;
+      const status=String(r[cStat]||"").trim();
+      const order=String(r[cOrder]||"").trim();
+      if(!status&&!order)continue;
+      D.interdept.push({
+        order:order,
+        priority:String(r[cPri]||"").trim()||"Unset",
+        status:status||"(blank)",
+        types:String(r[cReq]||"").split(",").map(x=>x.trim()).filter(Boolean),
+        desc:String(r[cDesc]||"").trim(),
+        owner:who(r[cAsg]),
+        ticket:cTicket>=0?String(r[cTicket]||"").trim():"",
+        created:parseStamp(r[cCreated]),
+        done:status==="Done"
+      });
+    }
+  }
 
   // ═══ PARSE PENDING REFUND REQUESTS ═══
   // A=Handled TRUE/FALSE, C=date of request, D=company, E=team member,
@@ -2048,6 +2164,14 @@ const GLOSSARY={
  f:"value = KPI sheet 'Time Usage'\nscore = (value - 70) / (95 - 70) x 100",s:"100 at 95%. 0 at 70%. Above 105% reads as Exceeds."},
 "Infraction points":{d:"Points logged against the agent this quarter.",
  f:"value = sum of infraction points this quarter\nscore = (6 - value) / 6 x 100",s:"100 at zero points. 0 at 6 points."},
+"Open requests":{d:"Interdepartmental scanning requests that have not been closed. Raised between CS and the other departments, and tracked outside Front.",
+ f:"open = every row whose Status is not \"Done\"\n\nStatuses counted as open:\n  For CS to update CX\n  In progress\n  Not started\n  Backlogged",
+ s:"The tracker also has a Completed column, but it reads FALSE on every row including finished work, so Status is the only reliable signal and Completed is ignored."},
+
+"Aged and important":{d:"Open requests that are both high stakes and stale. The single number worth acting on, because a count on its own says nothing about urgency and an age on its own says nothing about stakes.",
+ f:"aged and important =\n  count of open requests where\n    Priority is Urgent or High\n  AND\n    days since Created time > 14",
+ s:"Age is measured from when the request was raised, not from the last update, so a request that is being actively discussed but never resolved still ages."},
+
 "Time Utilization":{d:"Share of scheduled hours the team actually spent on work, for the most recent week with KPI data. Read straight from each person's own KPI tab, so it moves the same week the tabs do.",
  f:"Time Utilization = mean of Time Usage across the\n                   active roster, latest week\n\nEveryone in ROSTER with active:true is counted,\nsupervisors included. A week with no value for\nsomeone (not yet joined, no activity) is skipped\nrather than counted as zero.",
  s:"This is not the same number as the CE Weekly Report tab, which lags one week and divides by a fixed Available Time figure. When the two disagree, this one is the newer of the two."},
@@ -2488,15 +2612,144 @@ function opsApplyPreset(preset,fromEl,toEl){
   fromEl.value=rfISO(f);toEl.value=rfISO(t);
 }
 
+// ═══════════════ INTERDEPARTMENTAL REQUESTS ═══════════════
+// Scanning requests raised between CS and the other departments.
+// "Done" is the only closed status; everything else counts as open.
+let chRq=null;
+const RQ_PRI=["Urgent","High","Medium","Low","Unset"];
+const RQ_PCOL={Urgent:"#D4604A",High:"#B8721A",Medium:"#2AACB8",Low:"#8A9BAE",Unset:"#8A9BAE"};
+const RQ_SCOL={"Done":"#2D8A2D","For CS to update CX":"#6C5CE7","In progress":"#2AACB8",
+  "Not started":"#B8721A","Backlogged":"#D4604A"};
+const RQ_AGE=[["0 to 3",0,3,"#2D8A2D"],["4 to 7",4,7,"#2D8A2D"],["8 to 14",8,14,"#2AACB8"],
+  ["15 to 30",15,30,"#B8721A"],["over 30",31,1e9,"#D4604A"]];
+
+function rqBar(label,v,mx,color,width){
+  return `<div class="rq-row"><span class="n"${width?` style="width:${width}px;flex:0 0 ${width}px"`:""}>${label}</span>`+
+    `<span class="t"><span class="f" style="width:${mx?Math.max(1,v/mx*100):0}%;background:${color}"></span></span>`+
+    `<span class="v" style="color:${color}">${v}</span></div>`;
+}
+function rqTile(l,v,s,color,hot){
+  return `<div class="dsc${hot?" hot":""}"><div class="dsl">${l}</div>`+
+    `<div class="dsv"${color?` style="color:${color}"`:""}>${v}</div><div class="dss">${s}</div></div>`;
+}
+
+function buildReq(){
+  const all=D.interdept||[];
+  const wrap=document.getElementById("rq-tiles");if(!wrap)return;
+  if(!all.length){
+    wrap.innerHTML=`<div style="grid-column:1/-1;background:var(--bg);border-radius:10px;padding:24px;
+      text-align:center;color:var(--gray);font-size:13px">The requests tab did not load, so nothing can be shown here.</div>`;
+    return;
+  }
+  const today=rfToday();
+  const ageOf=r=>r.created?Math.round((today-r.created)/864e5):null;
+  const open=all.filter(r=>!r.done), done=all.length-open.length;
+
+  // ── tiles
+  const pri={};open.forEach(r=>{pri[r.priority]=(pri[r.priority]||0)+1;});
+  const urgent=(pri.Urgent||0)+(pri.High||0);
+  const hot=open.filter(r=>(r.priority==="Urgent"||r.priority==="High")&&(ageOf(r)||0)>14).length;
+  const aged=open.map(r=>({r,a:ageOf(r)})).filter(x=>x.a!==null).sort((a,b)=>b.a-a.a);
+  const oldest=aged[0];
+
+  // weeks, Sunday start, by created date
+  const wk={};
+  all.forEach(r=>{
+    if(!r.created)return;
+    const s=new Date(r.created);s.setDate(s.getDate()-s.getDay());
+    const k=(s.getMonth()+1)+"/"+s.getDate();
+    if(!wk[k])wk[k]={k,d:s,n:0,done:0};
+    wk[k].n++;if(r.done)wk[k].done++;
+  });
+  const wks=Object.values(wk).sort((a,b)=>a.d-b.d).slice(-10);
+  const lastFull=wks.length>1?wks[wks.length-2]:wks[wks.length-1];
+
+  wrap.innerHTML=
+    rqTile(tipLabel("Open requests"),open.length,`${Math.round(open.length/all.length*100)}% of everything logged`,"var(--amber)")+
+    rqTile("Urgent or High",urgent,`${open.length?Math.round(urgent/open.length*100):0}% of what is open`,"var(--coral-dark)")+
+    rqTile(tipLabel("Aged and important"),hot,"Urgent or High, over 14 days","var(--coral-dark)",true)+
+    rqTile("Oldest open",oldest?oldest.a+" days":"—",oldest?`${oldest.r.order||"no order id"} · ${oldest.r.owner}`:"","var(--coral-dark)")+
+    rqTile("Raised last week",lastFull?lastFull.n:"—",lastFull?`${lastFull.done} of them already closed`:"")+
+    rqTile("Closed",done,`${Math.round(done/all.length*100)}% closure rate`,"var(--green)");
+  {const s=document.getElementById("rq-sub");
+   if(s)s.textContent=`${all.length} logged · ${done} closed · ${open.length} open right now`;}
+
+  // ── status
+  const st={};all.forEach(r=>{st[r.status]=(st[r.status]||0)+1;});
+  const stArr=Object.entries(st).sort((a,b)=>b[1]-a[1]);
+  const stMax=stArr[0]?stArr[0][1]:1;
+  document.getElementById("rq-status").innerHTML=
+    stArr.map(([k,v])=>rqBar(k,v,stMax,RQ_SCOL[k]||"#8A9BAE",128)).join("");
+  {const s=document.getElementById("rq-st-sub");if(s)s.textContent=`All ${all.length} requests`;}
+  {const cs=st["For CS to update CX"]||0;const n=document.getElementById("rq-st-note");
+   if(n)n.innerHTML=cs?`<b>For CS to update CX</b> at ${cs} is work finished on the other side, waiting on us to tell the customer.`:"";}
+
+  // ── age
+  const ageCount=RQ_AGE.map(b=>[b[0],aged.filter(x=>x.a>=b[1]&&x.a<=b[2]).length,b[3]]);
+  const ageMax=Math.max(...ageCount.map(x=>x[1]),1);
+  document.getElementById("rq-age").innerHTML=
+    ageCount.map(x=>rqBar(x[0]+" days",x[1],ageMax,x[2],96)).join("");
+
+  // ── owner
+  const ow={};open.forEach(r=>{ow[r.owner]=(ow[r.owner]||0)+1;});
+  const owArr=Object.entries(ow).sort((a,b)=>b[1]-a[1]);
+  const owMax=owArr[0]?owArr[0][1]:1;
+  document.getElementById("rq-owner").innerHTML=
+    owArr.map(([k,v])=>rqBar(k,v,owMax,REQ_EXTERNAL.indexOf(k)>=0?"#6C5CE7":"#2AACB8",96)).join("");
+  {const ext=owArr.filter(x=>REQ_EXTERNAL.indexOf(x[0])>=0).reduce((s,x)=>s+x[1],0);
+   const n=document.getElementById("rq-owner-note");
+   if(n)n.innerHTML=`Purple is the other side, teal is ours. <b>${ext}</b> of ${open.length} sit outside CS.`;}
+
+  // ── types
+  const ty={};open.forEach(r=>r.types.forEach(t=>{ty[t]=(ty[t]||0)+1;}));
+  const tyArr=Object.entries(ty).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const tyMax=tyArr[0]?tyArr[0][1]:1;
+  document.getElementById("rq-types").innerHTML=
+    tyArr.map(([k,v])=>rqBar(k,v,tyMax,"#2AACB8")).join("");
+
+  // ── priority
+  const priMax=Math.max(...RQ_PRI.map(k=>pri[k]||0),1);
+  document.getElementById("rq-pri").innerHTML=
+    RQ_PRI.filter(k=>pri[k]).map(k=>rqBar(k,pri[k],priMax,RQ_PCOL[k],96)).join("");
+  {const n=document.getElementById("rq-pri-note");
+   if(n)n.innerHTML=hot?`<b>${hot} requests are Urgent or High and older than two weeks.</b> `+
+     `That is ${Math.round(hot/open.length*100)}% of everything open.`:
+     `<b>Nothing Urgent or High has been open longer than two weeks.</b>`;}
+
+  // ── oldest table
+  const rows=aged.slice(0,15);
+  document.getElementById("rq-tbl").innerHTML=
+    `<thead><tr><th>Order</th><th>Type</th><th>Status</th><th>Owner</th><th>Priority</th><th>Age</th></tr></thead><tbody>`+
+    rows.map(x=>{const r=x.r,flag=(r.priority==="Urgent"||r.priority==="High")&&x.a>30;
+      return `<tr class="${flag?"flag":""}"><td class="ord">${r.order||"—"}</td>`+
+        `<td>${r.types.join(", ")||"—"}</td><td>${r.status}</td><td>${r.owner}</td>`+
+        `<td><span class="rq-tag rq-${r.priority}">${r.priority}</span></td>`+
+        `<td style="font-weight:700;color:${x.a>30?"var(--coral-dark)":"var(--amber)"}">${x.a}d</td></tr>`;}).join("")+
+    `</tbody>`;
+
+  // ── chart
+  {const s=document.getElementById("rq-wk-sub");
+   if(s)s.textContent=`By created date, last ${wks.length} weeks · the current week is partial`;}
+  if(chRq)chRq.destroy();
+  chRq=new Chart(document.getElementById("ch-rq"),{type:"bar",data:{labels:wks.map(w=>w.k),datasets:[
+    {label:"Raised",data:wks.map(w=>w.n),backgroundColor:"#2AACB8",borderRadius:4,barPercentage:.45},
+    {label:"Of those, closed",data:wks.map(w=>w.done),backgroundColor:"#2D8A2D",borderRadius:4,barPercentage:.45}
+  ]},options:{...cb,plugins:{...cb.plugins,legend:lgd}}});
+
+  initGlossary();
+}
+
 function buildOps(){window._o=1;
   document.querySelectorAll("#page-ops [data-osub]").forEach(b=>{
     b.addEventListener("click",()=>{
       document.querySelectorAll("#page-ops [data-osub]").forEach(x=>x.classList.remove("active"));
       b.classList.add("active");
-      const front=b.dataset.osub==="front";
-      document.getElementById("ops-view-issues").style.display=front?"none":"";
-      document.getElementById("ops-view-front").style.display=front?"":"none";
-      if(front)buildFrontDaily();
+      const v=b.dataset.osub;
+      document.getElementById("ops-view-issues").style.display=v==="issues"?"":"none";
+      document.getElementById("ops-view-front").style.display=v==="front"?"":"none";
+      document.getElementById("ops-view-req").style.display=v==="req"?"":"none";
+      if(v==="front")buildFrontDaily();
+      if(v==="req")buildReq();
     });
   });
 
