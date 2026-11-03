@@ -636,6 +636,11 @@ height:auto;background:none;border-radius:0;overflow:visible;line-height:1.5}
   <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
     <div><div class="ct">Backlog status</div><div class="csb" id="bk-sub"></div></div></div>
   <div class="bl" id="bk-strip" style="margin-top:14px"></div></div>
+<div class="cd"><div class="ct">Workload received against resolution</div>
+  <div class="csb" id="wr-sub">Weekly, from Front Data</div>
+  <div class="cw" style="height:250px"><canvas id="ch-wr" height="250"></canvas></div>
+  <div class="kg" id="wr-tiles"></div>
+  <div class="rq-warn" id="wr-note"></div></div>
 <div class="cd"><div class="ct">How the backlog is moving</div>
   <div class="csb">Level on top, change since the previous reading underneath. Red bars are readings where it grew.</div>
   <div class="cw"><canvas id="ch-bk1" height="230"></canvas></div>
@@ -912,9 +917,6 @@ function parseCSV(text){
 }
 
 async function fetchCSV(url,name){
-  const el=document.getElementById("load-status");
-  const bar=document.getElementById("load-fill");
-  if(el)el.textContent="Loading "+name+"...";
 
   async function tryFetch(u){const r=await fetch(u,{redirect:'follow',cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const t=await r.text();if(t.includes('<!DOCTYPE'))throw new Error('HTML response');return parseCSV(t);}
 
@@ -942,12 +944,21 @@ window.D=D;
 async function loadAll(){
   const names=["commOverview","salesOverview","salesLog","weekly","generalData","kpiAngel","kpiIvan","kpiFatima","kpiLuisa","kpiManuel","kpiVanessa","schedule","issues","frontData","dialpadData","cbScanCafe","aiSignals","frontDaily","pendingRefunds","interdept","backlog"];
   const urls=[URLS.commOverview,URLS.salesOverview,URLS.salesLog,URLS.weekly,URLS.generalData,URLS.kpiAngel,URLS.kpiIvan,URLS.kpiFatima,URLS.kpiLuisa,URLS.kpiManuel,URLS.kpiVanessa,URLS.schedule,URLS.issues,URLS.frontData,URLS.dialpadData,URLS.cbScanCafe,URLS.aiSignals,URLS.frontDaily,URLS.pendingRefunds,URLS.interdept,URLS.backlog];
-  const bar=document.getElementById("load-fill");
-  const results=[];
-  for(let i=0;i<urls.length;i++){
-    results.push(await fetchCSV(urls[i],names[i]));
-    if(bar)bar.style.width=((i+1)/urls.length*100)+"%";
-  }
+  // All 21 feeds are fetched at once rather than one after another. They sit on
+  // the same host, so the browser multiplexes them over one connection and the
+  // whole load costs about as long as the slowest single tab instead of the sum
+  // of all of them. The progress bar fills as each one lands, in whatever order
+  // they arrive.
+  const bar=document.getElementById("load-fill"),st=document.getElementById("load-status");
+  let done=0;
+  const tick=()=>{done++;
+    if(bar)bar.style.width=(done/urls.length*100)+"%";
+    if(st)st.textContent=`Loaded ${done} of ${urls.length} data sources...`;};
+  if(st)st.textContent=`Loading ${urls.length} data sources...`;
+  const t0=performance.now();
+  const results=await Promise.all(urls.map((u,i)=>
+    fetchCSV(u,names[i]).then(r=>{tick();return r;},e=>{tick();return [];})));
+  console.log(`\u23F1 all feeds in ${((performance.now()-t0)/1000).toFixed(1)}s`);
   const [commOv,salesOv,salesLg,weekly,genData,kA,kI,kF,kL,kM,kV,sched,issues,frontData,dialpadData,cbSC,aiSig,fDaily,pendRef,interReq,backlogRaw]=results;
 
   // ═══ PARSE BACKLOG DAILY ═══
@@ -2271,6 +2282,18 @@ const GLOSSARY={
  f:"value = KPI sheet 'Time Usage'\nscore = (value - 70) / (95 - 70) x 100",s:"100 at 95%. 0 at 70%. Above 105% reads as Exceeds."},
 "Infraction points":{d:"Points logged against the agent this quarter.",
  f:"value = sum of infraction points this quarter\nscore = (6 - value) / 6 x 100",s:"100 at zero points. 0 at 6 points."},
+"Conversations assigned":{d:"Conversations handed to a teammate during the week. The closest thing the Front export gives us to work received.",
+ f:"assigned = sum of Assigned Conversations\n           across every agent, for that week",
+ s:"Counted once per teammate, so a conversation passed between two people in the same week counts on both. It runs higher than the new-conversations figure entered by hand in the weekly report, which counts each conversation once."},
+
+"Conversations resolved":{d:"Conversations closed out during the week, from each agent's own Front figures.",
+ f:"resolved = sum of Resolved Conversations\n           across every agent, for that week",
+ s:"This one is directly comparable with the weekly report, within a few percent."},
+
+"Resolution rate":{d:"Share of the week's assigned work that was resolved in the same week. Below 100% the remainder carries into the following week and the backlog grows.",
+ f:"resolution rate = resolved / assigned\n\nnot resolved = assigned - resolved",
+ s:"Measured against assigned rather than against new conversations, so it reads lower than the figure in the weekly report. The trend is the useful part, not the level."},
+
 "Open backlog":{d:"Conversations still open across every Front inbox, read from the live dashboard at the same point each day by the supervisor.",
  f:"open backlog = the Open figure on the Front\n               live dashboard, Total row\n\nchange = this reading minus the previous one\n\nThe previous reading is whatever was last\nentered, so a Monday is compared with the\nFriday before it rather than a missing Sunday.",
  s:"This is a snapshot, not a flow. It cannot tell you how many arrived and how many were closed, only where the level stood each morning. The filter used is recorded with each reading, because changing it moves the number without anything changing in the queue."},
@@ -2727,6 +2750,80 @@ function opsApplyPreset(preset,fromEl,toEl){
   fromEl.value=rfISO(f);toEl.value=rfISO(t);
 }
 
+// ═══════════════ WORKLOAD RECEIVED AGAINST RESOLUTION ═══════════════
+// Weekly inflow and outflow of conversations, from the Front Data tab the
+// dashboard already reads. "Assigned" is per teammate, so a conversation
+// handed between two people in the same week counts on both. It is therefore
+// higher than the "new conversations" figure recorded by hand in the weekly
+// report, and the resolution rate here is measured against that larger
+// denominator. See the note under the chart.
+let chWr=null;
+function renderWorkloadResolution(){
+  const box=document.getElementById("ch-wr");if(!box)return;
+  const agg={};
+  for(const n in D.frontAgent){
+    for(const w in D.frontAgent[n]){
+      const f=D.frontAgent[n][w];
+      if(!agg[w])agg[w]={asg:0,res:0};
+      // Assigned is not parsed into frontAgent, so take it from the KPI tabs
+      // where it exists per agent per week, and resolution from Front Data.
+      agg[w].res+=f.resolved||0;
+    }
+  }
+  for(const n in D.kpi){
+    const k=D.kpi[n];
+    k.dates.forEach((w,i)=>{
+      const v=k.kpis["Assigned Conversations"]?.v[i];
+      if(v===null||v===undefined||isNaN(v))return;
+      if(!agg[w])agg[w]={asg:0,res:0};
+      agg[w].asg+=v;
+    });
+  }
+  const toD=(w)=>{const m=String(w).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    return m?new Date(+m[3],+m[1]-1,+m[2]):null;};
+  const weeks=Object.keys(agg).filter(w=>toD(w)&&agg[w].asg>0)
+    .sort((a,b)=>toD(a)-toD(b)).slice(-13);
+  if(!weeks.length)return;
+  const asg=weeks.map(w=>Math.round(agg[w].asg));
+  const res=weeks.map(w=>Math.round(agg[w].res));
+  const rate=weeks.map((w,i)=>asg[i]?+(res[i]/asg[i]*100).toFixed(1):null);
+  const i=weeks.length-1,p=i>0?i-1:0;
+  const dlt=(c,pv,lowerBetter)=>{if(pv===null||pv===undefined||!pv)return "";
+    const d=(c-pv)/pv*100;const good=lowerBetter?d<0:d>0;
+    return `<span class="${good?'bk-dn':'bk-up'}">${d>0?'+':''}${d.toFixed(0)}%</span> on prior week`;};
+  const net=asg[i]-res[i];
+  document.getElementById("wr-tiles").innerHTML=
+    `<div class="dsc"><div class="dsl">${tipLabel("Conversations assigned")}</div>
+      <div class="dsv">${asg[i]}</div><div class="dss">${dlt(asg[i],asg[p],false)}</div></div>
+     <div class="dsc"><div class="dsl">${tipLabel("Conversations resolved")}</div>
+      <div class="dsv" style="color:var(--green)">${res[i]}</div><div class="dss">${dlt(res[i],res[p],false)}</div></div>
+     <div class="dsc"><div class="dsl">${tipLabel("Resolution rate")}</div>
+      <div class="dsv" style="color:${rate[i]>=45?"var(--green)":rate[i]>=35?"var(--teal)":"var(--amber)"}">${rate[i]}%</div>
+      <div class="dss">${dlt(rate[i],rate[p],false)}</div></div>
+     <div class="dsc${net>0?" hot":""}"><div class="dsl">Not resolved</div>
+      <div class="dsv" style="color:${net>0?"var(--coral-dark)":"var(--green)"}">${net>0?"+":""}${net}</div>
+      <div class="dss">carried into the following week</div></div>`;
+  {const s=document.getElementById("wr-sub");
+   if(s)s.textContent=`Last ${weeks.length} weeks to ${weeks[i]} · Front's Sunday to Saturday week`;}
+  {const n=document.getElementById("wr-note");
+   if(n)n.innerHTML=`<b>What the denominator is.</b> Assigned counts a conversation once per teammate it is
+     assigned to, so one conversation passed between two people in a week counts twice. It is therefore
+     larger than the "new conversations" figure typed into the weekly report, and this resolution rate is
+     measured against the larger number. The resolved figure is directly comparable.
+     Once the daily backlog feed has a few weeks behind it, true inflow can be derived instead
+     (resolved, plus however much the backlog grew), and this panel can switch to that.`;}
+  if(chWr)chWr.destroy();
+  chWr=new Chart(box,{type:"bar",data:{labels:weeks,datasets:[
+    {label:"Assigned",data:asg,backgroundColor:"#2AACB8",borderRadius:4,barPercentage:.42,order:2},
+    {label:"Resolved",data:res,backgroundColor:"#3B6CE7",borderRadius:4,barPercentage:.42,order:2},
+    {label:"Resolution rate",data:rate,type:"line",borderColor:"#D4604A",borderWidth:2,
+     pointRadius:3,tension:.3,yAxisID:"y1",order:1}
+  ]},options:{...cb,plugins:{...cb.plugins,legend:lgd},scales:{x:cb.scales.x,
+    y:{position:"left",grid:{color:"#EEF2F7"},ticks:{font:{family:"DM Sans",size:10},color:"#8A9BAE"}},
+    y1:{position:"right",grid:{display:false},min:0,
+      ticks:{font:{family:"DM Sans",size:10},color:"#D4604A",callback:v=>v+"%"}}}}});
+}
+
 // ═══════════════ BACKLOG (daily, supervisor fed) ═══════════════
 // The feed is a long table: one row per day per scope. Everything here reads
 // the Total rows for level and movement, and the Inbox / Teammate rows for
@@ -2795,6 +2892,7 @@ function renderBacklogStrip(){
 }
 
 function buildBacklog(){
+  renderWorkloadResolution();   // flow, independent of the daily backlog feed
   const T=bkTotals();
   const strip=document.getElementById("bk-strip");
   if(!strip)return;
