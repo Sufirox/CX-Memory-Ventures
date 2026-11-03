@@ -97,6 +97,41 @@ font-size:12.5px;color:#2D6A2D;font-weight:600;margin-bottom:12px}
 .hm-tdr{font-size:9px;font-weight:700;color:var(--gray);letter-spacing:.5px;text-transform:uppercase}
 .hm-tdn{font-size:14px;font-weight:700;margin-top:3px}
 @media(max-width:700px){.hm-dsg{grid-template-columns:repeat(2,1fr)}}
+/* shared date range picker */
+.rp-trigger{display:inline-flex;align-items:center;gap:8px;border:1px solid #DDE3EB;background:#fff;
+color:var(--text);font-family:inherit;font-size:11.5px;font-weight:600;padding:6px 12px;border-radius:7px;
+cursor:pointer;transition:border-color .15s}
+.rp-trigger:hover,.rp-trigger.on{border-color:var(--teal)}
+.rp-trigger .cal{font-size:12px;line-height:1}
+.rp-trigger .ph{color:var(--gray);font-weight:500}
+.rp-trigger .arr{color:var(--gray);font-weight:500}
+.rp-pop{position:fixed;z-index:400;background:#fff;border:1px solid var(--border);border-radius:12px;
+box-shadow:0 10px 34px rgba(13,33,55,.16);padding:14px 16px 12px;display:none}
+.rp-pop.on{display:block}
+.rp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.rp-nav{border:1px solid #DDE3EB;background:#fff;color:var(--slate);width:26px;height:26px;border-radius:6px;
+cursor:pointer;font-size:13px;line-height:1;font-family:inherit}
+.rp-nav:hover{border-color:var(--teal);color:var(--teal)}
+.rp-months{display:flex;gap:22px}
+.rp-m{width:210px}
+.rp-mt{text-align:center;font-size:12.5px;font-weight:800;margin-bottom:8px}
+.rp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px}
+.rp-dow{font-size:9px;font-weight:700;color:var(--gray);text-transform:uppercase;text-align:center;padding-bottom:4px}
+.rp-d{font-size:11.5px;text-align:center;padding:5px 0;cursor:pointer;color:var(--slate);
+border-radius:0;user-select:none;position:relative}
+.rp-d.pad{color:#D7DEE6;cursor:default}
+.rp-d.out{color:#C9D2DC;cursor:default}
+.rp-d:not(.pad):not(.out):hover{background:var(--teal-mist)}
+.rp-d.in{background:#E6F6F8;border-radius:0}
+.rp-d.edge{background:var(--teal);color:#fff;font-weight:800;border-radius:6px}
+.rp-d.today:not(.edge){font-weight:800;color:var(--teal)}
+.rp-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:11px;
+padding-top:10px;border-top:1px solid var(--border)}
+.rp-hint{font-size:10.5px;color:var(--gray)}
+.rp-done{border:0;background:var(--navy);color:#fff;font-family:inherit;font-size:11px;font-weight:700;
+padding:6px 14px;border-radius:7px;cursor:pointer}
+.rp-done[disabled]{opacity:.35;cursor:default}
+@media(max-width:620px){.rp-months{flex-direction:column;gap:14px}}
 /* interdepartmental requests */
 .gl2{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:16px}
 .bl{display:flex;align-items:stretch;flex-wrap:wrap}
@@ -631,35 +666,51 @@ height:auto;background:none;border-radius:0;overflow:visible;line-height:1.5}
 </div>
 
 <div id="ops-view-backlog" style="display:none">
-<div class="page-header"><div><h1>Daily Operations</h1><p>Backlog and inbox workload</p></div></div>
+<div class="page-header">
+  <div><h1>Daily Operations</h1><p id="bk-range-sub">Backlog and inbox workload</p></div>
+  <div class="rf-range">
+    <label>From</label><input type="date" id="bk-from">
+    <label>To</label><input type="date" id="bk-to">
+    <div class="rf-preset">
+      <button class="dr-btn" data-bkr="7d">Last 7d</button>
+      <button class="dr-btn active" data-bkr="30d">Last 30d</button>
+      <button class="dr-btn" data-bkr="90d">Last 90d</button>
+      <button class="dr-btn" data-bkr="all">All</button>
+    </div>
+  </div>
+</div>
 <div class="cd" id="bk-card" style="border-left:3px solid var(--amber)">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
     <div><div class="ct">Backlog status</div><div class="csb" id="bk-sub"></div></div></div>
   <div class="bl" id="bk-strip" style="margin-top:14px"></div></div>
-<div class="cd"><div class="ct">Workload received against resolution</div>
-  <div class="csb" id="wr-sub">Weekly, from Front Data</div>
-  <div class="cw" style="height:250px"><canvas id="ch-wr" height="250"></canvas></div>
-  <div class="kg" id="wr-tiles"></div>
-  <div class="rq-warn" id="wr-note"></div></div>
 <div class="cd"><div class="ct">How the backlog is moving</div>
   <div class="csb">Level on top, change since the previous reading underneath. Red bars are readings where it grew.</div>
-  <div class="cw"><canvas id="ch-bk1" height="230"></canvas></div>
-  <div class="cw" style="height:150px"><canvas id="ch-bk2" height="150"></canvas></div>
+  <div class="cw" style="height:170px"><canvas id="ch-bk1" height="170"></canvas></div>
+  <div class="cw" style="height:96px"><canvas id="ch-bk2" height="96"></canvas></div>
   <div class="kg" id="bk-deltas"></div></div>
+<div class="gl2">
+  <div class="cd"><div class="ct">Cleared during the day against arrived overnight</div>
+    <div class="csb" id="bk-flow-sub">From the open and close readings of the same feed</div>
+    <div class="cw" style="height:165px"><canvas id="ch-bk4" height="165"></canvas></div>
+    <div class="kg" id="bk-flow-tiles"></div></div>
+  <div class="cd"><div class="ct">Unassigned over time</div>
+    <div class="csb">The share of the backlog that belongs to nobody</div>
+    <div class="cw" style="height:150px"><canvas id="ch-bk3" height="150"></canvas></div>
+    <div class="csb" id="bk-un-note" style="margin-top:8px"></div></div>
+</div>
+<div class="cd"><div class="ct">Workload received against resolution</div>
+  <div class="csb" id="wr-sub">Weekly, from Front Data</div>
+  <div class="cw" style="height:175px"><canvas id="ch-wr" height="175"></canvas></div>
+  <div class="kg" id="wr-tiles"></div>
+  <div class="rq-warn" id="wr-note"></div></div>
 <div class="cd"><div class="ct">Workload by inbox</div>
   <div class="csb">Share of the open backlog, how much of it belongs to nobody, and which way each one is moving</div>
   <div class="tw"><table class="tb" id="bk-inbox"></table></div>
   <div class="rq-warn" id="bk-inbox-note"></div></div>
-<div class="g2">
-  <div class="cd"><div class="ct">Assigned against unassigned</div>
-    <div class="csb">Who is carrying the backlog, and how much nobody is</div>
-    <div id="bk-team" style="margin-top:13px"></div>
-    <div class="rq-warn" id="bk-team-note"></div></div>
-  <div class="cd"><div class="ct">Unassigned over time</div>
-    <div class="csb">The share of the backlog that belongs to nobody</div>
-    <div class="cw" style="height:200px"><canvas id="ch-bk3" height="200"></canvas></div>
-    <div class="csb" id="bk-un-note" style="margin-top:8px"></div></div>
-</div>
+<div class="cd"><div class="ct">Assigned against unassigned</div>
+  <div class="csb">Who is carrying the backlog, and how much nobody is</div>
+  <div id="bk-team" style="margin-top:13px"></div>
+  <div class="rq-warn" id="bk-team-note"></div></div>
 <div class="cd"><div class="ct">Daily log</div><div class="csb">The Total rows, exactly as entered</div>
   <div class="tw" style="max-height:420px"><table class="tb" id="bk-log"></table></div></div>
 </div>
@@ -1298,6 +1349,7 @@ async function loadAll(){
   }
   renderSignals();
   renderHome();
+  initRangePickers();   // one calendar for every range control
 }
 
 // ═══ LEADERBOARD ═══
@@ -2224,6 +2276,188 @@ function renderAg(){
   initGlossary();
 }
 
+// ═══════════════ SHARED DATE RANGE PICKER ═══════════════
+// One calendar for every range control on the dashboard. It drives the two
+// native date inputs that were already there rather than replacing them, so
+// every existing handler keeps working untouched: the picker writes both
+// values and fires one change event on the "to" input, which is what each
+// page already listens for.
+// Opens on the current month every time, with the month before it alongside,
+// so the common case needs no paging. Click a start day then an end day; the
+// range fills in as you move the mouse.
+const RP={pop:null,from:null,to:null,start:null,end:null,hover:null,view:null,btn:null};
+const RP_DOW=["Mo","Tu","We","Th","Fr","Sa","Su"];
+const RP_MON=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const rpISO=(d)=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const rpParse=(v)=>{const m=String(v||"").match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?new Date(+m[1],+m[2]-1,+m[3]):null;};
+const rpFmt=(d)=>String(d.getMonth()+1).padStart(2,"0")+"/"+String(d.getDate()).padStart(2,"0")+"/"+d.getFullYear();
+const rpSame=(a,b)=>a&&b&&a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();
+
+function rpLabel(btn,fromEl,toEl){
+  const a=rpParse(fromEl.value),b=rpParse(toEl.value);
+  btn.innerHTML=`<span class="cal">&#128197;</span>`+
+    (a||b
+      ? `<span>${a?rpFmt(a):"start"}</span><span class="arr">&rarr;</span><span>${b?rpFmt(b):"today"}</span>`
+      : `<span class="ph">All dates</span>`);
+}
+
+function rpBuildPop(){
+  if(RP.pop)return RP.pop;
+  const el=document.createElement("div");
+  el.className="rp-pop";
+  el.innerHTML=`<div class="rp-head"><button class="rp-nav" data-rpn="-1">&#8249;</button>
+      <div style="flex:1"></div><button class="rp-nav" data-rpn="1">&#8250;</button></div>
+    <div class="rp-months" id="rp-months"></div>
+    <div class="rp-foot"><span class="rp-hint" id="rp-hint"></span>
+      <button class="rp-done" id="rp-done">Apply</button></div>`;
+  document.body.appendChild(el);
+  RP.pop=el;
+  el.addEventListener("click",(ev)=>{
+    const nav=ev.target.closest("[data-rpn]");
+    if(nav){RP.view.setMonth(RP.view.getMonth()+(+nav.dataset.rpn));rpDraw();return;}
+    const day=ev.target.closest(".rp-d[data-rpd]");
+    if(day){
+      const d=rpParse(day.dataset.rpd);
+      if(!RP.start||RP.end){RP.start=d;RP.end=null;}
+      else if(d<RP.start){RP.start=d;}
+      else {RP.end=d;}
+      RP.hover=null;rpPaint();
+      if(RP.start&&RP.end)rpCommit(true);
+      return;
+    }
+    if(ev.target.id==="rp-done"){rpCommit(true);}
+  });
+  el.addEventListener("mouseover",(ev)=>{
+    const day=ev.target.closest(".rp-d[data-rpd]");
+    if(day&&RP.start&&!RP.end){RP.hover=rpParse(day.dataset.rpd);rpPaint();}
+  });
+  document.addEventListener("click",(ev)=>{
+    if(!RP.pop.classList.contains("on"))return;
+    if(RP.pop.contains(ev.target))return;
+    if(RP.btn&&RP.btn.contains(ev.target))return;
+    rpClose();
+  });
+  document.addEventListener("keydown",(ev)=>{if(ev.key==="Escape")rpClose();});
+  window.addEventListener("resize",()=>{if(RP.pop.classList.contains("on"))rpPosition();});
+  return el;
+}
+
+function rpMonthHTML(base){
+  const y=base.getFullYear(),m=base.getMonth();
+  const first=new Date(y,m,1);
+  const lead=(first.getDay()+6)%7;           // Monday first
+  const days=new Date(y,m+1,0).getDate();
+  const today=rfToday();
+  let cells="";
+  for(let i=0;i<lead;i++)cells+=`<div class="rp-d pad"></div>`;
+  for(let d=1;d<=days;d++){
+    const dt=new Date(y,m,d);
+    cells+=`<div class="rp-d${rpSame(dt,today)?" today":""}" data-rpd="${rpISO(dt)}">${d}</div>`;
+  }
+  return `<div class="rp-m"><div class="rp-mt">${RP_MON[m]} ${y}</div>
+    <div class="rp-grid">${RP_DOW.map(x=>`<div class="rp-dow">${x}</div>`).join("")}${cells}</div></div>`;
+}
+
+// Rebuild the two month grids. Only on open, paging, or a click.
+function rpDraw(){
+  const left=new Date(RP.view.getFullYear(),RP.view.getMonth(),1);
+  const right=new Date(RP.view.getFullYear(),RP.view.getMonth()+1,1);
+  document.getElementById("rp-months").innerHTML=rpMonthHTML(left)+rpMonthHTML(right);
+  rpPaint();
+}
+// Repaint the selection on the existing cells. Hover uses this rather than
+// rpDraw, because replacing the nodes under the cursor would cancel the click
+// the person is in the middle of making.
+function rpPaint(){
+  const lo=RP.start,hi=RP.end||RP.hover;
+  const a=lo&&hi?(lo<hi?lo:hi):lo, b=lo&&hi?(lo<hi?hi:lo):null;
+  document.querySelectorAll(".rp-pop .rp-d[data-rpd]").forEach(el=>{
+    const dt=rpParse(el.dataset.rpd);
+    el.classList.toggle("in",!!(a&&b&&dt>a&&dt<b));
+    el.classList.toggle("edge",rpSame(dt,a)||rpSame(dt,b));
+  });
+  const hint=document.getElementById("rp-hint"),done=document.getElementById("rp-done");
+  if(hint)hint.textContent=!RP.start?"Pick the first day"
+    :!RP.end?`${rpFmt(RP.start)} — now pick the last day`
+    :`${rpFmt(RP.start)} to ${rpFmt(RP.end)}`;
+  if(done)done.disabled=!(RP.start&&RP.end);
+}
+
+function rpPosition(){
+  const r=RP.btn.getBoundingClientRect(),p=RP.pop;
+  p.style.visibility="hidden";p.classList.add("on");
+  const w=p.offsetWidth,hh=p.offsetHeight;
+  let x=Math.min(r.left,window.innerWidth-w-12);
+  if(x<12)x=12;
+  let y=r.bottom+6;
+  if(y+hh>window.innerHeight-10)y=Math.max(10,r.top-hh-6);
+  p.style.left=x+"px";p.style.top=y+"px";
+  p.style.visibility="";
+}
+
+function rpCommit(close){
+  if(!(RP.start&&RP.end))return;
+  RP.from.value=rpISO(RP.start);
+  RP.to.value=rpISO(RP.end);
+  rpLabel(RP.btn,RP.from,RP.to);
+  // One event, on the input every page already listens to.
+  RP.to.dispatchEvent(new Event("change",{bubbles:true}));
+  if(close)rpClose();
+}
+
+function rpClose(){
+  if(RP.pop)RP.pop.classList.remove("on");
+  if(RP.btn)RP.btn.classList.remove("on");
+}
+
+function rpOpen(btn,fromEl,toEl){
+  rpBuildPop();
+  if(RP.btn===btn&&RP.pop.classList.contains("on")){rpClose();return;}
+  RP.btn=btn;RP.from=fromEl;RP.to=toEl;
+  RP.start=rpParse(fromEl.value);RP.end=rpParse(toEl.value);RP.hover=null;
+  // Always open on this month, with the month before it alongside.
+  const t=rfToday();
+  RP.view=new Date(t.getFullYear(),t.getMonth()-1,1);
+  rpDraw();
+  rpPosition();
+  btn.classList.add("on");
+}
+
+// Every attached pair, so a preset button can refresh the labels.
+const RP_PAIRS=[];
+function rpRefreshAll(){RP_PAIRS.forEach(x=>rpLabel(x.btn,x.f,x.t));}
+
+// Replace a pair of native date inputs with the shared picker.
+function attachRangePicker(fromId,toId){
+  const f=document.getElementById(fromId),t=document.getElementById(toId);
+  if(!f||!t||f.dataset.rp)return;
+  f.dataset.rp="1";
+  const btn=document.createElement("button");
+  btn.className="rp-trigger";btn.type="button";
+  const lf=(f.previousElementSibling&&f.previousElementSibling.tagName==="LABEL")?f.previousElementSibling:null;
+  const lt=(t.previousElementSibling&&t.previousElementSibling.tagName==="LABEL")?t.previousElementSibling:null;
+  [lf,f,lt,t].forEach(el=>{if(el)el.style.display="none";});
+  (f.parentNode).insertBefore(btn,lf||f);
+  rpLabel(btn,f,t);
+  btn.addEventListener("click",(e)=>{e.stopPropagation();rpOpen(btn,f,t);});
+  // Preset buttons write straight to the inputs, so keep the label in step.
+  [f,t].forEach(el=>el.addEventListener("change",()=>rpLabel(btn,f,t)));
+  RP_PAIRS.push({btn,f,t});
+  return btn;
+}
+
+// Every range control on the dashboard, wired once the page is up.
+function initRangePickers(){
+  [["ops-from","ops-to"],["fd-from","fd-to"],["bk-from","bk-to"],
+   ["rf-from","rf-to"],["rf-d-from","rf-d-to"],["cb-from","cb-to"],
+   ["date-from","date-to"]].forEach(([a,b])=>attachRangePicker(a,b));
+  // Presets set input values in code, which fires no change event, so the
+  // labels are refreshed after any preset click rather than by listening.
+  document.addEventListener("click",(ev)=>{
+    if(ev.target.closest(".dr-btn"))setTimeout(rpRefreshAll,0);
+  });
+}
+
 // ═══════════════ GLOSSARY (dashboard-wide tooltips) ═══════════════
 // One place to edit every definition. Any element with class "tip" and a
 // data-g matching a key here gets a hover card with the formula.
@@ -2293,6 +2527,14 @@ const GLOSSARY={
 "Resolution rate":{d:"Share of the week's assigned work that was resolved in the same week. Below 100% the remainder carries into the following week and the backlog grows.",
  f:"resolution rate = resolved / assigned\n\nnot resolved = assigned - resolved",
  s:"Measured against assigned rather than against new conversations, so it reads lower than the figure in the weekly report. The trend is the useful part, not the level."},
+
+"Cleared in a day":{d:"How far the backlog fell between the start-of-day and end-of-day readings. What the team actually got through while they were working.",
+ f:"cleared = Open reading - Close reading,\n          same day\n\nOnly days with both readings count. A day\nwith one reading is skipped rather than\ntreated as zero.",
+ s:"Both figures come from the same feed on the same filter, so unlike the assigned-conversations proxy these two sides are directly comparable."},
+
+"Arrived overnight":{d:"How much the backlog grew between one day's close and the next day's open, when nobody was working it.",
+ f:"arrived = next Open reading\n          - previous Close reading\n\nAcross a weekend this spans the whole\ngap, so a Monday figure covers three\nnights rather than one.",
+ s:"Cleared minus arrived is the real daily progress. If arrived is the larger of the two over a week, the backlog grows no matter how much the team closes."},
 
 "Open backlog":{d:"Conversations still open across every Front inbox, read from the live dashboard at the same point each day by the supervisor.",
  f:"open backlog = the Open figure on the Front\n               live dashboard, Total row\n\nchange = this reading minus the previous one\n\nThe previous reading is whatever was last\nentered, so a Monday is compared with the\nFriday before it rather than a missing Sunday.",
@@ -2782,7 +3024,7 @@ function renderWorkloadResolution(){
   const toD=(w)=>{const m=String(w).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
     return m?new Date(+m[3],+m[1]-1,+m[2]):null;};
   const weeks=Object.keys(agg).filter(w=>toD(w)&&agg[w].asg>0)
-    .sort((a,b)=>toD(a)-toD(b)).slice(-13);
+    .sort((a,b)=>toD(a)-toD(b)).slice(-10);
   if(!weeks.length)return;
   const asg=weeks.map(w=>Math.round(agg[w].asg));
   const res=weeks.map(w=>Math.round(agg[w].res));
@@ -2804,7 +3046,7 @@ function renderWorkloadResolution(){
       <div class="dsv" style="color:${net>0?"var(--coral-dark)":"var(--green)"}">${net>0?"+":""}${net}</div>
       <div class="dss">carried into the following week</div></div>`;
   {const s=document.getElementById("wr-sub");
-   if(s)s.textContent=`Last ${weeks.length} weeks to ${weeks[i]} · Front's Sunday to Saturday week`;}
+   if(s)s.textContent=`Last ${weeks.length} weeks to ${weeks[i]} · full bar is everything assigned, green is the part resolved`;}
   {const n=document.getElementById("wr-note");
    if(n)n.innerHTML=`<b>What the denominator is.</b> Assigned counts a conversation once per teammate it is
      assigned to, so one conversation passed between two people in a week counts twice. It is therefore
@@ -2812,16 +3054,32 @@ function renderWorkloadResolution(){
      measured against the larger number. The resolved figure is directly comparable.
      Once the daily backlog feed has a few weeks behind it, true inflow can be derived instead
      (resolved, plus however much the backlog grew), and this panel can switch to that.`;}
+  // One bar per week rather than two side by side: the pale bar is everything
+  // assigned, the solid bar inside it is what was resolved. The eye reads the
+  // filled proportion directly, which is the question being asked, and the
+  // rate line no longer competes with a second set of bars.
   if(chWr)chWr.destroy();
-  chWr=new Chart(box,{type:"bar",data:{labels:weeks,datasets:[
-    {label:"Assigned",data:asg,backgroundColor:"#2AACB8",borderRadius:4,barPercentage:.42,order:2},
-    {label:"Resolved",data:res,backgroundColor:"#3B6CE7",borderRadius:4,barPercentage:.42,order:2},
+  const short=weeks.map(w=>w.replace(/\/\d{4}$/,""));
+  const left=asg.map((v,i)=>Math.max(0,v-res[i]));
+  chWr=new Chart(box,{type:"bar",data:{labels:short,datasets:[
+    {label:"Resolved",data:res,backgroundColor:"#2D8A2D",
+     borderRadius:{topLeft:0,topRight:0,bottomLeft:3,bottomRight:3},
+     barPercentage:.62,categoryPercentage:.82,order:1,stack:"w"},
+    {label:"Still open at week end",data:left,backgroundColor:"rgba(42,172,184,.26)",
+     borderColor:"rgba(42,172,184,.5)",borderWidth:1,
+     borderRadius:{topLeft:3,topRight:3,bottomLeft:0,bottomRight:0},
+     barPercentage:.62,categoryPercentage:.82,order:2,stack:"w"},
     {label:"Resolution rate",data:rate,type:"line",borderColor:"#D4604A",borderWidth:2,
-     pointRadius:3,tension:.3,yAxisID:"y1",order:1}
-  ]},options:{...cb,plugins:{...cb.plugins,legend:lgd},scales:{x:cb.scales.x,
-    y:{position:"left",grid:{color:"#EEF2F7"},ticks:{font:{family:"DM Sans",size:10},color:"#8A9BAE"}},
-    y1:{position:"right",grid:{display:false},min:0,
-      ticks:{font:{family:"DM Sans",size:10},color:"#D4604A",callback:v=>v+"%"}}}}});
+     pointRadius:2.5,pointBackgroundColor:"#D4604A",tension:.3,yAxisID:"y1",order:3}
+  ]},options:{...cb,
+    plugins:{...cb.plugins,legend:lgd,
+      tooltip:{...cb.plugins.tooltip,callbacks:{
+        label:c=>c.dataset.label+": "+c.parsed.y+(c.dataset.label==="Resolution rate"?"%":"")}}},
+    scales:{x:{...cb.scales.x,stacked:true},
+      y:{position:"left",stacked:true,beginAtZero:true,grid:{color:"#EEF2F7"},
+         ticks:{font:{family:"DM Sans",size:10},color:"#8A9BAE"}},
+      y1:{position:"right",grid:{display:false},min:0,max:100,
+         ticks:{font:{family:"DM Sans",size:10},color:"#D4604A",stepSize:25,callback:v=>v+"%"}}}}});
 }
 
 // ═══════════════ BACKLOG (daily, supervisor fed) ═══════════════
@@ -2830,7 +3088,44 @@ function renderWorkloadResolution(){
 // the splits. Change is always measured against the previous reading and
 // names its date, so gaps for weekends need no special handling.
 let chBk1=null,chBk2=null,chBk3=null;
-const bkTotals=()=>(D.backlog||[]).filter(r=>r.scope==="Total");
+// Readings inside the date range chosen on the page. Everything on the
+// Backlog tab reads through here, so one control moves the whole page.
+const BK={from:null,to:null};
+function bkInRange(r){
+  if(BK.from&&r.d<BK.from)return false;
+  if(BK.to&&r.d>BK.to)return false;
+  return true;
+}
+const bkRows=()=>(D.backlog||[]).filter(bkInRange);
+const bkTotals=()=>bkRows().filter(r=>r.scope==="Total");
+// The newest reading overall, regardless of range, for the status strip.
+const bkLatestAll=()=>{
+  const t=(D.backlog||[]).filter(r=>r.scope==="Total");
+  return t.length?t[t.length-1]:null;
+};
+function bkSetRange(preset){
+  const all=(D.backlog||[]).filter(r=>r.scope==="Total");
+  if(!all.length)return;
+  const last=all[all.length-1].d, first=all[0].d;
+  let from=first;
+  if(preset==="7d"){from=new Date(last);from.setDate(from.getDate()-6);}
+  else if(preset==="30d"){from=new Date(last);from.setDate(from.getDate()-29);}
+  else if(preset==="90d"){from=new Date(last);from.setDate(from.getDate()-89);}
+  if(from<first)from=first;
+  BK.from=from;BK.to=new Date(last);BK.to.setHours(23,59,59,999);
+  const f=document.getElementById("bk-from"),t=document.getElementById("bk-to");
+  const iso=(d)=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  if(f)f.value=iso(BK.from);
+  if(t)t.value=iso(last);
+}
+function bkReadInputs(){
+  const f=document.getElementById("bk-from"),t=document.getElementById("bk-to");
+  const pd=(v)=>{const m=String(v||"").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return m?new Date(+m[1],+m[2]-1,+m[3]):null;};
+  BK.from=pd(f&&f.value);
+  BK.to=pd(t&&t.value);
+  if(BK.to)BK.to.setHours(23,59,59,999);
+}
 const bkDelta=(v)=>`<span class="${v>0?'bk-up':v<0?'bk-dn':'bk-fl'}">${v>0?'+':''}${v}</span>`;
 const bkPill=(v)=>`<span class="bpill ${v>0?'bgup':v<0?'bgdn':'bgfl'}">${v>0?'+':''}${v}</span>`;
 const bkShort=(s)=>String(s).replace(/\/(\d{4})$/,"");
@@ -2844,8 +3139,9 @@ function bkSpark(vals,color){
 }
 // The strip, rendered into whichever container is asked for.
 function bkStripHTML(){
-  const T=bkTotals();
-  if(!T.length)return null;
+  const ALL=(D.backlog||[]).filter(r=>r.scope==="Total");
+  if(!ALL.length)return null;
+  const T=ALL;
   const last=T[T.length-1],prev=T.length>1?T[T.length-2]:null;
   const d1=prev?last.open-prev.open:null;
   const u1=(prev&&last.unassigned!==null&&prev.unassigned!==null)?last.unassigned-prev.unassigned:null;
@@ -2868,7 +3164,8 @@ function bkStripHTML(){
     <div class="bls">${unPct!==null?unPct+"% of open":"not recorded"}${u1!==null?" · "+bkPill(u1):""}</div></div>
   <div class="blc"><div class="bll">Waiting</div>
     <div class="blv sm">${last.waiting!==null?last.waiting:"—"}</div>
-    <div class="bls">${last.waiting===null?"not recorded":last.waiting===0?"none recorded":"&nbsp;"}</div></div>
+    <div class="bls">${last.waiting===null?"not recorded":last.waiting===0?"none recorded":
+      ((prev&&prev.waiting!==null)?bkPill(last.waiting-prev.waiting)+" since "+bkShort(prev.dateStr):"&nbsp;")}</div></div>
   <div class="blc"><div class="bll">Oldest</div>
     <div class="blv sm" style="color:var(--coral-dark)">${oldest!==null?Math.round(oldest)+"d":"—"}</div>
     <div class="bls">${oldest===null?"not recorded":oldWho||"whole backlog"}</div></div>
@@ -2891,8 +3188,76 @@ function renderBacklogStrip(){
   initGlossary();
 }
 
+// Intraday flow, derived from the feed itself rather than from Front Data.
+// Open and Close on the same day bracket the working day, and Close to the
+// next Open brackets the night. Both sides are the same measure on the same
+// filter, so unlike the assigned-conversations proxy they are directly
+// comparable: cleared is what the team got through, arrived is what came in
+// while nobody was working.
+function renderBacklogFlow(){
+  const box=document.getElementById("ch-bk4");if(!box)return;
+  const T=bkTotals();
+  const byDay={};
+  T.forEach(r=>{const k=r.dateStr;byDay[k]=byDay[k]||{d:r.d,open:null,close:null};
+    if(r.part==="Close")byDay[k].close=r.open;else byDay[k].open=r.open;});
+  const days=Object.keys(byDay).map(k=>({k,...byDay[k]})).sort((a,b)=>a.d-b.d);
+  const pts=[];
+  for(let i=0;i<days.length;i++){
+    const day=days[i];
+    const cleared=(day.open!==null&&day.close!==null)?day.open-day.close:null;
+    // Overnight: the previous day that has a close, against this day's open.
+    let arrived=null;
+    if(day.open!==null){
+      for(let j=i-1;j>=0;j--){if(days[j].close!==null){arrived=day.open-days[j].close;break;}}
+    }
+    pts.push({k:day.k.replace(/\/\d{4}$/,""),cleared,arrived});
+  }
+  const show=pts.slice(-20);
+  const cl=show.map(p=>p.cleared===null?null:p.cleared);
+  const ar=show.map(p=>p.arrived===null?null:p.arrived);
+  const got=cl.filter(v=>v!==null),came=ar.filter(v=>v!==null);
+  const avg=a=>a.length?Math.round(a.reduce((s,x)=>s+x,0)/a.length):null;
+  const down=got.filter(v=>v>0).length;
+  const tiles=document.getElementById("bk-flow-tiles");
+  if(tiles)tiles.innerHTML=
+    `<div class="dsc"><div class="dsl">${tipLabel("Cleared in a day")}</div>
+      <div class="dsv" style="color:var(--green)">${avg(got)!==null?avg(got):"—"}</div>
+      <div class="dss">average over ${got.length} full day${got.length===1?"":"s"}</div></div>
+     <div class="dsc"><div class="dsl">${tipLabel("Arrived overnight")}</div>
+      <div class="dsv" style="color:var(--coral-dark)">${avg(came)!==null?(avg(came)>0?"+":"")+avg(came):"—"}</div>
+      <div class="dss">average between close and next open</div></div>
+     <div class="dsc"><div class="dsl">Days it fell</div>
+      <div class="dsv">${down} of ${got.length}</div>
+      <div class="dss">backlog lower at close than at open</div></div>`;
+  {const s=document.getElementById("bk-flow-sub");
+   if(s)s.textContent=`Open against close, last ${show.length} day${show.length===1?"":"s"} in range`;}
+  if(window._chBk4)window._chBk4.destroy();
+  window._chBk4=new Chart(box,{type:"bar",data:{labels:show.map(p=>p.k),datasets:[
+    {label:"Cleared during the day",data:cl.map(v=>v===null?null:-v),
+     backgroundColor:"#2D8A2D",borderRadius:3,barPercentage:.6,stack:"f"},
+    {label:"Arrived overnight",data:ar,backgroundColor:"#D4604A",borderRadius:3,barPercentage:.6,stack:"f"}
+  ]},options:{...cb,plugins:{...cb.plugins,legend:lgd,
+    tooltip:{...cb.plugins.tooltip,callbacks:{label:c=>c.dataset.label+": "+Math.abs(c.parsed.y)}}},
+   scales:{x:{...cb.scales.x,stacked:true},
+           y:{...cb.scales.y,stacked:true,ticks:{...cb.scales.y.ticks,callback:v=>Math.abs(v)}}}}});
+}
+
 function buildBacklog(){
-  renderWorkloadResolution();   // flow, independent of the daily backlog feed
+  // First run: default the range to the last 30 days of readings.
+  if(!window._bkInit){
+    window._bkInit=1;
+    bkSetRange("30d");
+    ["bk-from","bk-to"].forEach(id=>{const el=document.getElementById(id);
+      if(el)el.addEventListener("change",()=>{
+        document.querySelectorAll("#ops-view-backlog [data-bkr]").forEach(x=>x.classList.remove("active"));
+        bkReadInputs();buildBacklog();});});
+    document.querySelectorAll("#ops-view-backlog [data-bkr]").forEach(btn=>
+      btn.addEventListener("click",()=>{
+        document.querySelectorAll("#ops-view-backlog [data-bkr]").forEach(x=>x.classList.remove("active"));
+        btn.classList.add("active");bkSetRange(btn.dataset.bkr);buildBacklog();}));
+  }
+  renderWorkloadResolution();   // weekly flow, independent of the daily feed
+  renderBacklogFlow();          // intraday flow, from this feed
   const T=bkTotals();
   const strip=document.getElementById("bk-strip");
   if(!strip)return;
@@ -2905,9 +3270,14 @@ function buildBacklog(){
   {const s=document.getElementById("bk-sub");
    if(s)s.textContent=`${last.dateStr}, ${last.part==="Close"?"end":"start"} of day`+
      (last.filter?` · filter: ${last.filter}`:"");}
+  {const s=document.getElementById("bk-range-sub");
+   if(s)s.textContent=T.length
+     ? `Backlog and inbox workload · ${T[0].dateStr} to ${T[T.length-1].dateStr} · ${T.length} readings`
+     : "Backlog and inbox workload · no readings in this range";}
 
   // ── movement
-  const L=T.map(r=>bkShort(r.dateStr));
+  // Two readings a day, so the label says which one.
+  const L=T.map(r=>bkShort(r.dateStr)+(r.part==="Close"?" pm":" am"));
   const openS=T.map(r=>r.open), unS=T.map(r=>r.unassigned);
   const deltas=openS.map((v,i)=>i?v-openS[i-1]:0);
   const grew=deltas.slice(1).filter(v=>v>0).length;
