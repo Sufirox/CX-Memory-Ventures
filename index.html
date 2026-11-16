@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-:root{--teal:#2AACB8;--teal-mist:#F0FAFB;--coral:#E8967A;--coral-dark:#D4604A;--navy:#0D2137;--slate:#3D5066;--gray:#8A9BAE;--bg:#F4F6F9;--card:#fff;--border:#EEF2F7;--text:#1A2B3C;--green:#2D8A2D}
+:root{--teal:#2AACB8;--teal-mist:#F0FAFB;--coral:#E8967A;--coral-dark:#D4604A;--navy:#0D2137;--slate:#3D5066;--gray:#8A9BAE;--bg:#F4F6F9;--card:#fff;--border:#EEF2F7;--text:#1A2B3C;--green:#2D8A2D;--amber:#E0A800}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;overflow:hidden}
 
@@ -71,6 +71,36 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .kt{display:flex;gap:0;margin-bottom:22px;border-bottom:2px solid var(--border)}
 .ktb{padding:10px 22px;font-size:13px;font-weight:600;color:var(--gray);border:none;background:0 0;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-2px}
 .ktb.active{color:var(--teal);border-bottom-color:var(--teal)}
+/* ── Agent skills ── */
+.sk-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.sk-tbl th,.sk-tbl td{padding:7px 9px;border-bottom:1px solid var(--border);text-align:center;white-space:nowrap}
+.sk-tbl th{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray);font-weight:700;background:var(--bg)}
+.sk-tbl th:first-child,.sk-tbl td:first-child{text-align:left;position:sticky;left:0;background:var(--card);z-index:1}
+.sk-tbl th:first-child{background:var(--bg)}
+.sk-tbl tr:hover td{background:var(--teal-mist)}
+.sk-tbl tr:hover td:first-child{background:var(--teal-mist)}
+.sk-ar{font-weight:600;color:var(--text)}
+.sk-pl{color:var(--gray);font-size:11px;margin-left:5px}
+.sk-grp td{background:var(--bg)!important;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--gray);font-weight:700;padding:5px 9px}
+.sk-c{display:inline-flex;gap:2px;align-items:center}
+.sk-d{display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--border)}
+.sk-l0{background:#E8EDF3}.sk-l1{background:#F3C9BC}.sk-l2{background:#EDA98F}
+.sk-l3{background:#8FD0D6}.sk-l4{background:#4FBCC5}.sk-l5{background:#2AACB8}
+.sk-na{color:#C4CFDB;font-size:11px}
+.sk-leg{display:flex;gap:11px;flex-wrap:wrap;font-size:10px;color:var(--gray);align-items:center}
+.sk-leg span{display:flex;gap:4px;align-items:center}
+.sk-row{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px}
+.sk-row:last-child{border-bottom:none}
+.sk-row .nm{flex:1;color:var(--text)}
+.sk-row .bar{width:92px;height:7px;background:var(--bg);border-radius:4px;overflow:hidden;flex-shrink:0}
+.sk-row .bar i{display:block;height:100%;border-radius:4px}
+.sk-row .vn{width:52px;text-align:right;font-weight:700;font-size:12px;flex-shrink:0}
+.sk-tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700}
+.sk-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.sk-cd{border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.sk-cd .t{font-size:12px;font-weight:600;color:var(--text)}
+.sk-cd .p{font-size:10px;color:var(--gray);margin-bottom:7px}
+.sk-empty{padding:26px 14px;text-align:center;color:var(--gray);font-size:12px;line-height:1.6}
 .kg{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:16px}
 /* home: needs attention */
 .hm-na{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:12px}
@@ -321,6 +351,22 @@ height:auto;background:none;border-radius:0;overflow:visible;line-height:1.5}
 .sc-rb .fl{display:block;height:100%;border-radius:4px}
 .sc-rb .vn{font-size:11px;font-weight:800;width:34px;text-align:right}
 .sc-weak{font-size:10.5px;color:var(--gray);margin-top:7px}
+/* ── New hire preview card ── */
+.nc-card{border:1px dashed #D8E0EA}
+.nc-ramp{margin:2px 0 13px}
+.nc-rl{display:flex;justify-content:space-between;font-size:9.5px;font-weight:700;letter-spacing:.4px;
+  text-transform:uppercase;color:var(--gray);margin-bottom:5px}
+.nc-rb{height:5px;background:var(--bg);border-radius:3px;overflow:hidden}
+.nc-rb i{display:block;height:100%;border-radius:3px}
+.nc-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);
+  border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.nc-cell{background:var(--card);padding:9px 6px}
+.nc-v{font-size:19px;font-weight:800;color:var(--text);line-height:1.1}
+.nc-u{font-size:11px;font-weight:600;color:var(--gray);margin-left:1px}
+.nc-l{font-size:9.5px;color:var(--gray);margin-top:3px;text-transform:uppercase;letter-spacing:.4px}
+.nc-note{font-size:10.5px;color:var(--gray);line-height:1.5;margin-top:10px;text-align:left}
+.nc-wait{border:1px dashed var(--border);border-radius:8px;padding:20px 10px;font-size:11px;
+  color:var(--gray);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
 .sc-none{font-size:12px;color:var(--gray);padding:14px 0;line-height:1.6}
 /* ── Collapsible section ── */
 .fold{background:var(--card);border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.05);margin-bottom:22px;overflow:hidden}
@@ -501,9 +547,9 @@ height:auto;background:none;border-radius:0;overflow:visible;line-height:1.5}
 <div id="page-kpi" class="page">
 <div class="page-header"><div><h1>Agent KPIs</h1><p>Weekly performance</p></div>
 <div style="display:flex;gap:10px;flex-wrap:wrap;display:none" id="kpi-ctrls">
-<select class="sel" id="kpi-ag"><option>Angel Jimenez</option><option>Fatima Soto</option><option>Luisa Tona</option><option>Manuel Acosta</option><option>Ivan Soto</option><option>Vanessa Duran</option></select>
+<select class="sel" id="kpi-ag"></select>
 <select class="sel" id="kpi-wk"></select></div></div>
-<div class="kt"><button class="ktb active" data-v="dept">Department</button><button class="ktb" data-v="agent">Agent View</button><button class="ktb" data-v="inf">Infractions & PTO</button></div>
+<div class="kt"><button class="ktb active" data-v="dept">Department</button><button class="ktb" data-v="agent">Agent View</button><button class="ktb" data-v="skills">Skills</button><button class="ktb" data-v="inf">Infractions & PTO</button></div>
 <div id="kv-agent" style="display:none">
 <div class="cd" id="ag-hero" style="margin-bottom:16px;display:none">
   <div class="ct" id="ag-hero-title"></div><div class="csb" id="ag-hero-sub"></div>
@@ -540,6 +586,34 @@ height:auto;background:none;border-radius:0;overflow:visible;line-height:1.5}
   <div class="foldbody"><div class="kg" id="dept-cards"></div></div>
 </div>
 <div class="cd"><div class="ct">Online Rating &amp; Public Perception</div><div class="csb">External reviews</div><div id="dept-rat"></div></div></div>
+<div id="kv-skills" style="display:none">
+<div class="stats-row" id="sk-stats"></div>
+<div class="cd" style="margin-bottom:16px">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:12px">
+    <div><div class="ct" style="margin-bottom:2px">Skills Matrix</div>
+      <div class="csb" style="margin-bottom:0">Who can work what. Maintained by Gonzalo &amp; Luisa on each agent's KPI tab (column C, 1&ndash;5).</div></div>
+    <div class="sk-leg">
+      <span><i class="sk-d sk-l0"></i>not rated</span><span><i class="sk-d sk-l1"></i>1 learning</span>
+      <span><i class="sk-d sk-l2"></i>2</span><span><i class="sk-d sk-l3"></i>3 solo</span>
+      <span><i class="sk-d sk-l4"></i>4</span><span><i class="sk-d sk-l5"></i>5 can teach</span>
+    </div>
+  </div>
+  <div style="overflow-x:auto"><table class="sk-tbl" id="sk-matrix"></table></div>
+  <div class="csb" style="margin:10px 0 0">Level 3 is the bar for working a platform unsupervised. Anything below 3 needs a second pair of eyes.</div>
+</div>
+<div class="g2">
+<div class="cd"><div class="ct">Coverage Risk</div><div class="csb">Platforms with too few people at level 3 or better</div><div id="sk-risk"></div></div>
+<div class="cd"><div class="ct">Depth by Person</div><div class="csb">How many of the platforms each person can work solo</div><div id="sk-depth"></div></div>
+</div>
+<div class="cd" style="margin-top:16px">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:12px">
+    <div><div class="ct" style="margin-bottom:2px">Individual Card</div>
+      <div class="csb" style="margin-bottom:0" id="sk-card-sub"></div></div>
+    <select class="sel" id="sk-who"></select>
+  </div>
+  <div id="sk-card"></div>
+</div>
+</div>
 <div id="kv-inf" style="display:none">
 <div class="cd" style="margin-bottom:16px"><div class="ct" id="pto-title"></div><div class="csb" id="pto-sub"></div><div id="pto-box"></div></div>
 <div class="g2"><div class="cd"><div class="ct">Infraction Log</div><div class="csb">All records</div><div style="max-height:500px;overflow-y:auto"><table class="tb" id="inf-tbl"></table></div></div>
@@ -902,12 +976,6 @@ const URLS={
   dialpadData:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=888035573&single=true&output=csv",
   weekly:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1909086011&single=true&output=csv",
   generalData:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1380055448&single=true&output=csv",
-  kpiAngel:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1581893103&single=true&output=csv",
-  kpiIvan:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=382540791&single=true&output=csv",
-  kpiFatima:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1501473843&single=true&output=csv",
-  kpiLuisa:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1521800009&single=true&output=csv",
-  kpiManuel:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=302600419&single=true&output=csv",
-  kpiVanessa:"https://docs.google.com/spreadsheets/d/e/2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn/pub?gid=1407071428&single=true&output=csv",
   schedule:"https://docs.google.com/spreadsheets/d/e/2PACX-1vQINTKfEREAnt10bxY_UG9I5GbSANCx6Doq-BGG23MzD1wR2IDfrRc84UEIZlhkYcLuov70Ug2_Pf1x/pub?output=csv",
   issues:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTWF963vZC_H_A9nrbVL8Flpuwp5Te3aeOo1TxaLAs0pRU-E5GgqSOgW4MO9vGCkML4A4Q_XT37hePv/pub?gid=89929469&single=true&output=csv",
   refScanCafe:"https://docs.google.com/spreadsheets/d/e/2PACX-1vQwLb81pzWhS71hVYhmYoYRF60vDYZ3pU7wddBdY9gC_qcMNQVxjIkRq4wtafAubcgRRyq1FYMPCKrR/pub?gid=1482789841&single=true&output=csv",
@@ -917,7 +985,7 @@ const URLS={
   refAmznSupplyKick:"https://docs.google.com/spreadsheets/d/e/2PACX-1vQwLb81pzWhS71hVYhmYoYRF60vDYZ3pU7wddBdY9gC_qcMNQVxjIkRq4wtafAubcgRRyq1FYMPCKrR/pub?gid=358662783&single=true&output=csv",
   refAmznMV:"https://docs.google.com/spreadsheets/d/e/2PACX-1vQwLb81pzWhS71hVYhmYoYRF60vDYZ3pU7wddBdY9gC_qcMNQVxjIkRq4wtafAubcgRRyq1FYMPCKrR/pub?gid=417767780&single=true&output=csv",
 };
-const AC={"Manuel Acosta":"#B8721A","Angel Jimenez":"#2AACB8","Vanessa Duran":"#E8967A","Luisa Tona":"#3B6CE7","Ivan Soto":"#6C5CE7","Khamal Tehfeh":"#999","Fatima Soto":"#2D8A2D"};
+const AC={};   // filled from ROSTER below
 // ═══════════════ TEAM ROSTER ═══════════════
 // The one place to add, remove or retire someone. Everything else on the
 // dashboard reads from here: the Active Agents count, who is excluded from
@@ -925,14 +993,20 @@ const AC={"Manuel Acosta":"#B8721A","Angel Jimenez":"#2AACB8","Vanessa Duran":"#
 //   role   "agent" or "supervisor"  (supervisors are never scored)
 //   active false keeps their history visible but drops them from headcounts
 // To add a joiner: one line here, plus their KPI tab gid in URLS above.
+//   gid    the person's KPI tab id in the CS KPI spreadsheet. Leave "" and the
+//          person still appears everywhere a name is listed, with an empty
+//          KPI tab, so a joiner can be added before their tab exists.
+//   color  used for their ring, bars and chart series.
 const ROSTER=[
-  {name:"Angel Jimenez", role:"agent",      active:true },
-  {name:"Fatima Soto",   role:"agent",      active:true },
-  {name:"Manuel Acosta", role:"agent",      active:true },
-  {name:"Luisa Tona",    role:"supervisor", active:true },
-  {name:"Ivan Soto",     role:"agent",      active:false},
-  {name:"Vanessa Duran", role:"agent",      active:false},
-  {name:"Khamal Tehfeh", role:"agent",      active:false}
+  {name:"Angel Jimenez",   role:"agent",      active:true,  gid:"1581893103", color:"#2AACB8"},
+  {name:"Fatima Soto",     role:"agent",      active:true,  gid:"1501473843", color:"#2D8A2D"},
+  {name:"Manuel Acosta",   role:"agent",      active:true,  gid:"302600419",  color:"#B8721A"},
+  {name:"Breanna McLeary", role:"agent",      active:true,  gid:"119889188",  color:"#C2559E"},
+  {name:"Dan Palacios",    role:"agent",      active:true,  gid:"920318158",  color:"#E0A800"},
+  {name:"Luisa Tona",      role:"supervisor", active:true,  gid:"1521800009", color:"#3B6CE7"},
+  {name:"Ivan Soto",       role:"agent",      active:false, gid:"382540791",  color:"#6C5CE7"},
+  {name:"Vanessa Duran",   role:"agent",      active:false, gid:"1407071428", color:"#E8967A"},
+  {name:"Khamal Tehfeh",   role:"agent",      active:false, gid:"",           color:"#999999"}
 ];
 // The requests tracker exports whoever was added from Slack as a raw member ID
 // and everyone else as an email. One line per person keeps both readable.
@@ -956,6 +1030,11 @@ const R_AGENTS=R_ACTIVE.filter(p=>p.role==="agent").map(p=>p.name);   // scored
 const R_SUPS=R_ACTIVE.filter(p=>p.role==="supervisor").map(p=>p.name);
 const R_TEAM=R_ACTIVE.map(p=>p.name);                                  // everyone working
 const INACTIVE=ROSTER.filter(p=>!p.active).map(p=>p.name);
+// Colours and KPI feeds both come off the roster, so a joiner is one line.
+ROSTER.forEach(p=>{AC[p.name]=p.color||"#8A9BAE";});
+const KPI_DOC="2PACX-1vR5zaJ2xszOaHH-nFUXiZ-NcETHcxmuj2IM9ZSxzfCvnSmyhC5wpkGa3kDImEybKFw4lwPRjfC_aTcn";
+const KPI_FEEDS=ROSTER.filter(p=>p.gid).map(p=>({name:p.name,
+  url:`https://docs.google.com/spreadsheets/d/e/${KPI_DOC}/pub?gid=${p.gid}&single=true&output=csv`}));
 const SUPERVISORS=ROSTER.filter(p=>p.role==="supervisor").map(p=>p.name);
 
 // Number parser - handles $1,076.38 and 78.40% and plain numbers
@@ -1001,12 +1080,15 @@ async function fetchCSV(url,name){
   return [];
 }
 
-const D={agents:[],monthlyComm:[],revData:[],salesLog:[],weeklyDept:{},weeklyRaw:[],kpi:{},infractions:[],ptoLog:[],issues:[],schedule:[],front:{},frontAgent:{},dialpadAgent:{},chargebacks:[],frontDaily:[],pending:[],interdept:[],backlog:[],weekWork:[],signals:[],signalWeek:"",signalStamp:"",headline:"",failed:[]};
+const D={agents:[],monthlyComm:[],revData:[],salesLog:[],weeklyDept:{},weeklyRaw:[],kpi:{},infractions:[],ptoLog:[],issues:[],schedule:[],front:{},frontAgent:{},dialpadAgent:{},chargebacks:[],frontDaily:[],pending:[],interdept:[],backlog:[],weekWork:[],skills:{},skillRows:[],signals:[],signalWeek:"",signalStamp:"",headline:"",failed:[]};
 window.D=D;
 
 async function loadAll(){
-  const names=["commOverview","salesOverview","salesLog","weekly","generalData","kpiAngel","kpiIvan","kpiFatima","kpiLuisa","kpiManuel","kpiVanessa","schedule","issues","frontData","dialpadData","cbScanCafe","aiSignals","frontDaily","pendingRefunds","interdept","backlog","weeklyWorkload"];
-  const urls=[URLS.commOverview,URLS.salesOverview,URLS.salesLog,URLS.weekly,URLS.generalData,URLS.kpiAngel,URLS.kpiIvan,URLS.kpiFatima,URLS.kpiLuisa,URLS.kpiManuel,URLS.kpiVanessa,URLS.schedule,URLS.issues,URLS.frontData,URLS.dialpadData,URLS.cbScanCafe,URLS.aiSignals,URLS.frontDaily,URLS.pendingRefunds,URLS.interdept,URLS.backlog,URLS.weeklyWorkload];
+  // The per-person KPI tabs are no longer listed by hand: they come off
+  // ROSTER, so adding a joiner needs one roster line and nothing here.
+  const base=["commOverview","salesOverview","salesLog","weekly","generalData","schedule","issues","frontData","dialpadData","cbScanCafe","aiSignals","frontDaily","pendingRefunds","interdept","backlog","weeklyWorkload"];
+  const names=base.concat(KPI_FEEDS.map(f=>"kpi::"+f.name));
+  const urls=base.map(n=>URLS[n]).concat(KPI_FEEDS.map(f=>f.url));
   // All 21 feeds are fetched at once rather than one after another. They sit on
   // the same host, so the browser multiplexes them over one connection and the
   // whole load costs about as long as the slowest single tab instead of the sum
@@ -1022,7 +1104,10 @@ async function loadAll(){
   const results=await Promise.all(urls.map((u,i)=>
     fetchCSV(u,names[i]).then(r=>{tick();return r;},e=>{tick();return [];})));
   console.log(`\u23F1 all feeds in ${((performance.now()-t0)/1000).toFixed(1)}s`);
-  const [commOv,salesOv,salesLg,weekly,genData,kA,kI,kF,kL,kM,kV,sched,issues,frontData,dialpadData,cbSC,aiSig,fDaily,pendRef,interReq,backlogRaw,weekWorkRaw]=results;
+  const [commOv,salesOv,salesLg,weekly,genData,sched,issues,frontData,dialpadData,cbSC,aiSig,fDaily,pendRef,interReq,backlogRaw,weekWorkRaw]=results;
+  // Name -> parsed rows, for whoever on the roster has a KPI tab.
+  const KPI_ROWS={};
+  KPI_FEEDS.forEach((f,i)=>{KPI_ROWS[f.name]=results[base.length+i]||[];});
 
   // ═══ PARSE WEEKLY WORKLOAD (received against resolved) ═══
   // Read from the weekly report tab that is still maintained by hand, because
@@ -1310,7 +1395,7 @@ async function loadAll(){
   }
 
   // ═══ PARSE KPI AGENT SHEETS ═══
-  const kpiSheets={"Angel Jimenez":kA,"Ivan Soto":kI,"Fatima Soto":kF,"Luisa Tona":kL,"Manuel Acosta":kM,"Vanessa Duran":kV};
+  const kpiSheets=KPI_ROWS;
   // Row mapping: {csvRow: [name, target, platform]}
   const KR={5:["Days Worked",5,"General"],7:["Hours/Week",38.35,"General"],
     9:["Assigned Conversations",null,"Front"],10:["Messages Sent (excl. replies)",null,"Front"],
@@ -1325,7 +1410,7 @@ async function loadAll(){
     if(!rows||rows.length<10)continue;
     // Verify the data matches the expected agent
     const sheetAgent=(rows[1]&&rows[1][1])?rows[1][1].trim():"";
-    if(sheetAgent&&sheetAgent!==name){console.warn("⚠️ KPI mismatch: expected "+name+" but sheet says "+sheetAgent);}
+    if(sheetAgent&&sheetAgent.toLowerCase()!==name.toLowerCase()){console.warn("⚠️ KPI mismatch: expected "+name+" but sheet says "+sheetAgent);}
     const dates=[];const hdr=rows[4]||[];
     for(let j=4;j<hdr.length;j++){if(hdr[j])dates.push(hdr[j]);}
     const kpis={};
@@ -1345,6 +1430,38 @@ async function loadAll(){
     for(let ri=76;ri<=80;ri++){const r=rows[ri];if(r&&r[0]){inf[r[0].trim()]=[pn(r[1]),pn(r[2])];}}
     // Agent info from row 1
     D.kpi[name]={dates,kpis,inf,commission:pn(rows[1]?.[2]),pto:pn(rows[1]?.[3])};
+
+    // ═══ SKILLS BLOCK ═══
+    // Lives below the KPI grid on each agent tab. Found by its "Area /
+    // Platform" header rather than a fixed row number, so the block can be
+    // moved or grown without touching this parser.
+    //   A = Area   B = Platform   C = Level 1-5   D = Note (optional)
+    // A blank level means not rated yet, which is not the same as a 0.
+    {
+      let hr=-1;
+      for(let i=60;i<rows.length;i++){
+        const a=String((rows[i]||[])[0]||"").trim().toLowerCase();
+        const b=String((rows[i]||[])[1]||"").trim().toLowerCase();
+        if(a==="area"&&b==="platform"){hr=i;break;}
+      }
+      if(hr>=0){
+        const list=[];
+        for(let i=hr+1;i<rows.length;i++){
+          const r=rows[i]||[];
+          const area=String(r[0]||"").trim(),plat=String(r[1]||"").trim();
+          if(!area&&!plat)break;
+          if(!area)continue;
+          const lv=pn(r[2]);
+          list.push({area:area,plat:plat,key:area+" · "+plat,
+            level:(lv===null||lv===undefined||isNaN(lv))?null:Math.max(0,Math.min(5,lv)),
+            note:String(r[3]||"").trim()});
+        }
+        if(list.length){
+          D.skills[name]=list;
+          list.forEach(s=>{if(D.skillRows.indexOf(s.key)<0)D.skillRows.push(s.key);});
+        }
+      }
+    }
   }
 
   // ═══ PARSE GENERAL DATA (infractions + PTO) ═══
@@ -2127,6 +2244,19 @@ function buildSales(){window._s=1;
 // ═══ KPI ═══
 let ckf,ckd;
 function buildKPI(){window._k=1;
+  // Agent picker comes off the roster: active people first in roster order,
+  // then anyone retired, so history stays reachable without cluttering the top.
+  {
+    const sel=document.getElementById("kpi-ag");
+    if(sel&&!sel.options.length){
+      const add=(n,lab)=>{const o=document.createElement("option");o.value=n;o.textContent=lab||n;sel.appendChild(o);};
+      ROSTER.filter(p=>p.active).forEach(p=>add(p.name,
+        p.role==="supervisor"?p.name+" (supervisor)":p.name));
+      ROSTER.filter(p=>!p.active).forEach(p=>add(p.name,p.name+" (past)"));
+      // Anyone with a KPI tab who somehow is not on the roster still shows up.
+      Object.keys(D.kpi).forEach(n=>{if(![...sel.options].some(o=>o.value===n))add(n);});
+    }
+  }
   const firstAg=Object.values(D.kpi)[0];
   if(firstAg){const ws=document.getElementById("kpi-wk");firstAg.dates.forEach((d,i)=>{const o=document.createElement("option");o.value=i;o.textContent=d;if(i===firstAg.dates.length-1)o.selected=true;ws.appendChild(o);});}
   // Dept week selector - same dates
@@ -2136,8 +2266,10 @@ function buildKPI(){window._k=1;
     const v=t.dataset.v;document.getElementById("kv-agent").style.display=v==="agent"?"block":"none";
     document.getElementById("kv-dept").style.display=v==="dept"?"block":"none";
     document.getElementById("kv-inf").style.display=v==="inf"?"block":"none";
+    document.getElementById("kv-skills").style.display=v==="skills"?"block":"none";
     document.getElementById("kpi-ctrls").style.display=v==="agent"?"flex":"none";
     if(v==="dept")renderDept();
+    if(v==="skills")renderSkills();
     if(v==="inf"){renderPTO();if(!window._inf)buildInf();}})});
   document.getElementById("kpi-ag").addEventListener("change",renderAg);
   document.getElementById("kpi-wk").addEventListener("change",renderAg);
@@ -2191,6 +2323,7 @@ function openAgent(name){
   document.getElementById("kv-agent").style.display="block";
   document.getElementById("kv-dept").style.display="none";
   document.getElementById("kv-inf").style.display="none";
+  {const s=document.getElementById("kv-skills");if(s)s.style.display="none";}
   document.getElementById("kpi-ctrls").style.display="flex";
   renderAg();
   const m=document.querySelector(".main");if(m)m.scrollTop=0;
@@ -2232,6 +2365,149 @@ function renderAgentScore(agent,weekLabel){
     `<br><span style="color:var(--gray)">Hover a category for its formula.</span>`;
 }
 
+// ═══ AGENT SKILLS ═══
+// Level 3 is the line: at or above it a person works that platform on their
+// own, below it they need a second pair of eyes. Two people at 3+ is the
+// minimum cover for a platform — one is a single point of failure.
+const SK_SOLO=3, SK_COVER=2;
+const SK_LVL=["not rated","learning","assisted","solo","strong","can teach"];
+
+function skPeople(){
+  const order=R_AGENTS.concat(R_SUPS);
+  return order.filter(n=>D.skills[n]&&D.skills[n].length);
+}
+function skGet(person,key){
+  const list=D.skills[person];if(!list)return null;
+  const hit=list.find(s=>s.key===key);
+  return hit?hit.level:null;
+}
+function skDots(lv){
+  if(lv===null||lv===undefined)return `<span class="sk-na">&mdash;</span>`;
+  const n=Math.round(lv);
+  let h=`<span class="sk-c" title="${n} &middot; ${SK_LVL[n]||""}">`;
+  for(let i=1;i<=5;i++)h+=`<i class="sk-d ${i<=n?"sk-l"+n:"sk-l0"}"></i>`;
+  return h+"</span>";
+}
+
+function renderSkills(){
+  const people=skPeople(), keys=D.skillRows.slice();
+  const matrix=document.getElementById("sk-matrix"),
+        stats=document.getElementById("sk-stats"),
+        risk=document.getElementById("sk-risk"),
+        depth=document.getElementById("sk-depth"),
+        who=document.getElementById("sk-who");
+  if(!matrix)return;
+
+  if(!people.length||!keys.length){
+    stats.innerHTML="";
+    matrix.innerHTML=`<tr><td><div class="sk-empty">
+      No skills block found yet.<br>
+      Add <b>Area</b> / <b>Platform</b> in columns A and B of each agent's KPI tab (row 87),
+      then the 1&ndash;5 level in column C.<br>
+      The page picks it up from that header, wherever the block sits.</div></td></tr>`;
+    risk.innerHTML="";depth.innerHTML="";
+    document.getElementById("sk-card").innerHTML="";
+    document.getElementById("sk-card-sub").textContent="";
+    return;
+  }
+
+  // ── Matrix ──
+  let head=`<tr><th>Platform</th>${people.map(p=>`<th>${p.split(" ")[0]}</th>`).join("")}<th>Cover</th></tr>`;
+  let body="",lastArea="";
+  keys.forEach(k=>{
+    const area=k.split(" · ")[0],plat=k.split(" · ")[1]||"";
+    if(area!==lastArea){
+      body+=`<tr class="sk-grp"><td colspan="${people.length+2}">${area}</td></tr>`;
+      lastArea=area;
+    }
+    const lvls=people.map(p=>skGet(p,k));
+    const solo=lvls.filter(v=>v!==null&&v>=SK_SOLO).length;
+    const col=solo===0?"var(--coral-dark)":solo<SK_COVER?"var(--coral)":"var(--green)";
+    body+=`<tr><td><span class="sk-pl" style="margin:0">${plat}</span></td>`+
+      lvls.map(v=>`<td>${skDots(v)}</td>`).join("")+
+      `<td><span class="sk-tag" style="background:${col}1F;color:${col}">${solo}</span></td></tr>`;
+  });
+  matrix.innerHTML=head+body;
+
+  // ── Headline numbers ──
+  const cells=people.length*keys.length;
+  let rated=0;
+  people.forEach(p=>keys.forEach(k=>{if(skGet(p,k)!==null)rated++;}));
+  const coverage=keys.map(k=>people.filter(p=>{const v=skGet(p,k);return v!==null&&v>=SK_SOLO;}).length);
+  const single=coverage.filter(c=>c===1).length, none=coverage.filter(c=>c===0).length;
+  const avgDepth=people.length?keys.map((k,i)=>coverage[i]).reduce((a,b)=>a+b,0)/keys.length:0;
+  stats.innerHTML=
+    `<div class="sc"><div class="sl">Platforms Tracked</div><div class="sv">${keys.length}</div><div class="ss">across ${people.length} people</div></div>`+
+    `<div class="sc" style="border-left-color:${rated===cells?"var(--green)":"var(--amber,#E0A800)"}"><div class="sl">Rated</div><div class="sv">${Math.round(rated/cells*100)}%</div><div class="ss">${rated} of ${cells} cells filled</div></div>`+
+    `<div class="sc" style="border-left-color:${none?"var(--coral-dark)":"var(--green)"}"><div class="sl">No Cover</div><div class="sv" style="color:${none?"var(--coral-dark)":"var(--green)"}">${none}</div><div class="ss">nobody at level ${SK_SOLO}+</div></div>`+
+    `<div class="sc" style="border-left-color:${single?"var(--coral)":"var(--green)"}"><div class="sl">Single Point</div><div class="sv" style="color:${single?"var(--coral-dark)":"var(--green)"}">${single}</div><div class="ss">only one person can work it</div></div>`+
+    `<div class="sc"><div class="sl">Avg. Cover</div><div class="sv">${avgDepth.toFixed(1)}</div><div class="ss">people per platform at ${SK_SOLO}+</div></div>`;
+
+  // ── Coverage risk ──
+  const rows=keys.map((k,i)=>({k:k,n:coverage[i]})).filter(x=>x.n<SK_COVER)
+    .sort((a,b)=>a.n-b.n||a.k.localeCompare(b.k));
+  risk.innerHTML=rows.length?rows.map(x=>{
+    const col=x.n===0?"var(--coral-dark)":"var(--coral)";
+    const can=people.filter(p=>{const v=skGet(p,x.k);return v!==null&&v>=SK_SOLO;}).map(p=>p.split(" ")[0]);
+    const next=people.map(p=>({p:p,v:skGet(p,x.k)})).filter(o=>o.v!==null&&o.v<SK_SOLO)
+      .sort((a,b)=>b.v-a.v)[0];
+    return `<div class="sk-row">
+      <span class="nm"><b>${x.k.split(" · ")[1]||x.k}</b><span class="sk-pl">${x.k.split(" · ")[0]}</span></span>
+      <span style="font-size:11px;color:var(--gray);flex:0 0 150px;text-align:right">${
+        x.n===0?(next?`closest: ${next.p.split(" ")[0]} at ${next.v}`:"nobody rated"):`only ${can[0]}`}</span>
+      <span class="vn" style="color:${col}">${x.n}</span></div>`;
+  }).join(""):`<div class="sk-empty">Every platform has at least ${SK_COVER} people who can work it alone.</div>`;
+
+  // ── Depth by person ──
+  const dep=people.map(p=>{
+    const lv=keys.map(k=>skGet(p,k));
+    const solo=lv.filter(v=>v!==null&&v>=SK_SOLO).length;
+    const teach=lv.filter(v=>v!==null&&v>=5).length;
+    const unrated=lv.filter(v=>v===null).length;
+    return {p:p,solo:solo,teach:teach,unrated:unrated};
+  }).sort((a,b)=>b.solo-a.solo);
+  depth.innerHTML=dep.map(d=>{
+    const pct=keys.length?d.solo/keys.length*100:0;
+    const col=AC[d.p]||"var(--teal)";
+    return `<div class="sk-row">
+      <span class="nm">${d.p}${R_SUPS.indexOf(d.p)>=0?`<span class="sk-pl">supervisor</span>`:""}</span>
+      <span style="font-size:10px;color:var(--gray);flex:0 0 96px;text-align:right">${
+        d.teach?`${d.teach} at teach level`:(d.unrated?`${d.unrated} not rated`:"")}</span>
+      <span class="bar"><i style="width:${pct}%;background:${col}"></i></span>
+      <span class="vn" style="color:${col}">${d.solo}/${keys.length}</span></div>`;
+  }).join("");
+
+  // ── Individual card ──
+  if(!who.options.length){
+    people.forEach(p=>{const o=document.createElement("option");o.textContent=p;who.appendChild(o);});
+    who.addEventListener("change",renderSkillCard);
+  }
+  renderSkillCard();
+}
+
+function renderSkillCard(){
+  const who=document.getElementById("sk-who"),box=document.getElementById("sk-card"),
+        sub=document.getElementById("sk-card-sub");
+  if(!who||!box)return;
+  const p=who.value,list=D.skills[p]||[];
+  if(!list.length){box.innerHTML=`<div class="sk-empty">No skills recorded for ${p}.</div>`;return;}
+  const solo=list.filter(s=>s.level!==null&&s.level>=SK_SOLO).length;
+  const grow=list.filter(s=>s.level!==null&&s.level>0&&s.level<SK_SOLO)
+    .sort((a,b)=>b.level-a.level);
+  sub.textContent=`${solo} of ${list.length} platforms at level ${SK_SOLO} or better`+
+    (grow.length?` · ${grow.length} in progress`:"");
+  box.innerHTML=`<div class="sk-cards">`+list.map(s=>{
+    const lv=s.level,col=lv===null?"var(--gray)":lv>=5?"var(--teal)":lv>=SK_SOLO?"#4FBCC5":lv>=2?"var(--coral)":"var(--coral-dark)";
+    return `<div class="sk-cd" style="border-left:3px solid ${lv===null?"var(--border)":col}">
+      <div class="t">${s.plat||s.area}</div>
+      <div class="p">${s.plat?s.area:""}${s.note?` &middot; ${s.note}`:""}</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        ${skDots(lv)}
+        <span style="font-size:11px;font-weight:600;color:${col}">${lv===null?"not rated":SK_LVL[Math.round(lv)]}</span>
+      </div></div>`;
+  }).join("")+`</div>`;
+}
+
 // Which of the 16 metrics sit under each scoring category.
 const AG_GROUPS={
   Responsiveness:["First Reply Time (hrs)","SLA Breaches","Satisfaction %"],
@@ -2250,7 +2526,12 @@ function renderAg(){
   renderAgentPTO(ag);
   const d=D.kpi[ag];
   if(!d){
-    document.getElementById("kpi-cards").innerHTML=`<div style="background:var(--bg);border-radius:10px;padding:24px;text-align:center;color:var(--gray);font-size:13px">No KPI data loaded for <b>${ag}</b>. Their sheet tab did not load, so nothing can be shown for this agent.</div>`;
+    const onRoster=ROSTER.find(p=>p.name===ag);
+    document.getElementById("kpi-cards").innerHTML=`<div style="background:var(--bg);border-radius:10px;padding:24px;text-align:center;color:var(--gray);font-size:13px">`+
+      (onRoster&&!onRoster.gid
+        ? `<b>${ag}</b> is on the roster but has no KPI tab yet.<br>Add their tab id to <code>ROSTER</code> and their numbers appear here on the next load.`
+        : `No KPI data loaded for <b>${ag}</b>. Their sheet tab did not load, so nothing can be shown for this agent.`)+
+      `</div>`;
     return;
   }
   const km=["Assigned Conversations","Total Messages","Messages Sent (excl. replies)","Replies Sent","First Reply Time (hrs)","Handle Time (min)","SLA Breaches","Satisfaction %","Calls Answered","Calls Placed","Missed Calls","Dialpad Time (hrs)","Days Worked","Time Usage","General Efficiency","Interactions / Day"];
@@ -2724,7 +3005,34 @@ function computeScores(weekLabel){
     // Weeks with real activity. Hours/Week is a template constant and is not evidence of work.
     const activeWeeks=idx.filter(i=>["Assigned Conversations","Replies Sent","Calls Answered"]
       .some(m=>{const v=k.kpis[m]?.v[i];return v!==null&&v!==undefined&&!isNaN(v)&&v>0;})).length;
-    if(activeWeeks<SC_MIN_WEEKS){SC.newcomers.push({name:n,weeks:activeWeeks});return;}
+    if(activeWeeks<SC_MIN_WEEKS){
+      // Too little history to score, but not too little to look at. Pull a
+      // small preview off the weeks they HAVE worked so the card says
+      // something about the person instead of sitting blank until week four.
+      const act=idx.filter(i=>["Assigned Conversations","Replies Sent","Calls Answered"]
+        .some(m=>{const v=k.kpis[m]?.v[i];return v!==null&&v!==undefined&&!isNaN(v)&&v>0;}));
+      const avg=(metric,rows)=>scMean((rows||act).map(i=>k.kpis[metric]?.v[i])
+        .filter(v=>v!==null&&v!==undefined&&!isNaN(v)));
+      // Latest worked week against the one before it, so a ramp is visible.
+      const last=act.length?act[act.length-1]:null, prev=act.length>1?act[act.length-2]:null;
+      const delta=(metric)=>{
+        if(last===null||prev===null)return null;
+        const a=k.kpis[metric]?.v[last], b=k.kpis[metric]?.v[prev];
+        if([a,b].some(v=>v===null||v===undefined||isNaN(v))||!b)return null;
+        return (a-b)/b*100;
+      };
+      SC.newcomers.push({name:n,weeks:activeWeeks,
+        lastWeek:(last!==null?k.dates[last]:""),
+        prev:{
+          convos:avg("Assigned Conversations"),
+          replies:avg("Replies Sent"),
+          calls:avg("Calls Answered"),
+          frt:avg("First Reply Time (hrs)"),
+          days:avg("Days Worked"),
+          trend:delta("Replies Sent")
+        }});
+      return;
+    }
     const kv=(metric)=>scMean(idx.map(i=>k.kpis[metric]?.v[i]).filter(v=>v!==null&&v!==undefined&&!isNaN(v)));
     const days=kv("Days Worked")||5;
     const fr=(field)=>scMean(wlabels.map(w=>D.frontAgent?.[n]?.[w]?.[field]).filter(v=>v!==null&&v!==undefined&&!isNaN(v)));
@@ -2843,15 +3151,42 @@ function renderScorecard(weekLabel){
   cl.innerHTML=Object.keys(SC.dept.cats).map(c=>`<div class="sc-dcell"><div class="dl">${tipLabel(c)}</div>
     <div class="dv" style="color:${scCol(SC.dept.cats[c])}">${SC.dept.cats[c]}</div>
     <div class="ds">${ns.map(n=>n.split(" ")[0]+" "+SC.agents[n].cats[c].capped).join(" · ")}</div></div>`).join("");
-  const newCards=(SC.newcomers||[]).map(x=>`<div class="sc-card sc-click" data-agent="${x.name}" style="opacity:.72" title="Open ${x.name}'s KPIs">
-    <h3>${x.name}</h3>
-    <div style="height:108px;display:flex;align-items:center;justify-content:center">
-      <div style="width:84px;height:84px;border-radius:50%;border:9px solid var(--border);
-        display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--gray)">new</div></div>
-    <div class="sc-weak">${x.weeks} week${x.weeks===1?"":"s"} of data, needs ${SC_MIN_WEEKS}</div>
-    <div style="font-size:11px;color:var(--gray);line-height:1.5;margin-top:9px;text-align:left">
-      Not scored yet and left out of the department average. A score on this little history would
-      say more about the sample than the person.</div></div>`).join("");
+  const newCards=(SC.newcomers||[]).map(x=>{
+    const p=x.prev||{};
+    const num=(v,d)=>(v===null||v===undefined||isNaN(v))?"&mdash;":(d?v.toFixed(d):Math.round(v));
+    const pct=Math.min(100,x.weeks/SC_MIN_WEEKS*100);
+    const col=AC[x.name]||"var(--teal)";
+    const t=p.trend;
+    const tHTML=(t===null||t===undefined||!isFinite(t))?"":
+      `<span style="font-size:10px;font-weight:700;color:${t>=0?"var(--green)":"var(--coral-dark)"}">
+        ${t>=0?"&#9650;":"&#9660;"}${Math.abs(Math.round(t))}%</span>`;
+    const cell=(label,val,extra)=>`<div class="nc-cell">
+      <div class="nc-v">${val}${extra||""}</div><div class="nc-l">${label}</div></div>`;
+    // Two different states. A joiner with weeks worked gets their numbers; a
+    // joiner whose tab exists but is still all zeros gets told so plainly,
+    // because four dashes in a grid reads like a bug rather than like "not yet".
+    const body=x.weeks>0
+      ? `<div class="nc-grid">
+          ${cell("conversations",num(p.convos))}
+          ${cell("replies / wk",num(p.replies),tHTML?" "+tHTML:"")}
+          ${cell("calls answered",num(p.calls))}
+          ${cell("first reply",num(p.frt,1),`<span class="nc-u">h</span>`)}
+        </div>
+        <div class="nc-note">Average over ${x.weeks} worked week${x.weeks===1?"":"s"}${x.lastWeek?`, latest ${x.lastWeek}`:""}.
+          No score yet and not in the department average: ${SC_MIN_WEEKS} weeks are needed before a
+          number says more about the person than about the sample.</div>`
+      : `<div class="nc-wait">waiting on first week of data</div>
+         <div class="nc-note">Their KPI tab is connected but every week still reads zero,
+           which means the Front and Dialpad exports are not returning rows for them yet.
+           Numbers appear here on the next load once they do.</div>`;
+    return `<div class="sc-card sc-click nc-card" data-agent="${x.name}" title="Open ${x.name}'s KPIs">
+      <h3>${x.name}</h3>
+      <div class="nc-ramp">
+        <div class="nc-rl"><span>week ${x.weeks} of ${SC_MIN_WEEKS}</span><span>${x.weeks>0?"ramping":"new"}</span></div>
+        <div class="nc-rb"><i style="width:${pct}%;background:${col}"></i></div>
+      </div>
+      ${body}
+      <div class="openhint">Open full KPIs &rarr;</div></div>`;}).join("");
   rg.innerHTML=ns.map(n=>{const a=SC.agents[n];
     return `<div class="sc-card sc-click" data-agent="${n}" title="Open ${n}'s KPIs"><h3>${n}</h3>${scRing(a.composite)}
       <div class="sc-weak">weakest: ${a.weakest} (${a.weakScore})</div>
