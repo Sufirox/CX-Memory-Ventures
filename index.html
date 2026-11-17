@@ -808,13 +808,18 @@ height:auto;background:none;border-radius:0;overflow:visible;line-height:1.5}
 <div class="bk-tiles" id="bk-strip"></div>
 
 <div class="bk3">
-  <div class="cd"><div class="ct">Open over time
-    <span class="i" data-tip="Two readings a day. The teal line is the pile at the start of the shift, the dashed green line is what was left at the end. The gap between them is a day's work. The green line breaks where no evening reading was taken, rather than drawing a line that was never measured.">i</span></div>
+  <div class="cd">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+      <div class="ct" id="bk-t1">Open over time
+        <span class="i" id="bk-t1-i" data-tip="Two readings a day. The teal line is the pile at the start of the shift, the dashed green line is what was left at the end. The gap between them is a day's work. The green line breaks where no evening reading was taken, rather than drawing a line that was never measured.">i</span></div>
+      <select class="sel" id="bk-who" style="font-size:11.5px;padding:4px 8px"></select>
+    </div>
     <div class="bka"><span class="bkb" style="color:var(--teal)" id="bk-now">&mdash;</span>
-      <span class="bku">open</span><span class="bku" id="bk-chg"></span></div>
+      <span class="bku" id="bk-now-u">open</span><span class="bku" id="bk-chg"></span>
+      <span class="bk-scope" id="bk-who-scope" style="display:none">all of Front, not these six inboxes</span></div>
     <div class="cw" style="height:118px"><canvas id="ch-bk1"></canvas></div>
-    <div class="bkl"><span><i class="swl" style="background:var(--teal)"></i>start of shift</span>
-      <span><i class="swl" style="background:var(--green)"></i>end of shift</span></div></div>
+    <div class="bkl" id="bk-leg1"></div>
+    <div class="rq-warn" id="bk-who-note" style="display:none"></div></div>
 
   <div class="cd"><div class="ct">Net change per day
     <span class="i" data-tip="This morning's pile against the previous morning's, divided by the days between, so a Monday is not three nights counted as one. Below the line the pile shrank, above it grew. Hover a bar for how much was cleared during that day.">i</span></div>
@@ -2410,9 +2415,18 @@ function renderAgentPTO(agent){
 }
 
 // Jump from a department ring to that agent's own page.
-function openAgent(name){
+// week is optional: pass a KPI week label ("10/18/2026") to land on that week
+// rather than on whatever was last selected.
+function openAgent(name,week){
   const sel=document.getElementById("kpi-ag");
   if(!sel)return;
+  if(week){
+    const w=document.getElementById("kpi-wk");
+    if(w){
+      const hit=[...w.options].find(o=>o.textContent.trim()===String(week).trim());
+      if(hit)w.value=hit.value;
+    }
+  }
   if(![...sel.options].some(o=>o.value===name)){
     const o=document.createElement("option");o.textContent=name;sel.appendChild(o);
   }
@@ -3902,6 +3916,89 @@ function bkCut(rows){
   return out.length>1?out:rows.slice(-2);
 }
 
+// Front seats that are always zero and only add noise to the picker.
+const BK_HIDE=["Michael Schoen"];
+let BK_WHO="";   // "" = whole backlog
+
+// One person's readings, keyed the same way as the totals so the chart code
+// does not care which it was handed.
+function bkPersonDays(name){
+  const tm=(D.backlog||[]).filter(r=>r.scope==="Teammate"&&r.name===name);
+  const by={};
+  tm.forEach(r=>{
+    const v=(r.assigned!==null&&r.assigned!==undefined)?r.assigned:r.open;
+    if(v===null||v===undefined)return;
+    const e=by[r.dateStr]||(by[r.dateStr]={k:r.dateStr,d:r.d,o:null,c:null});
+    if(r.part==="Close")e.c=v;else e.o=v;
+  });
+  return Object.values(by).sort((a,b)=>a.d-b.d);
+}
+// Front weeks run Sunday to Saturday, so a clicked day resolves to its Sunday.
+function bkWeekOf(d){
+  const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+  x.setDate(x.getDate()-x.getDay());
+  return (x.getMonth()+1)+"/"+x.getDate()+"/"+x.getFullYear();
+}
+
+function bkPerson(S){
+  const who=BK_WHO;
+  const rows=who?bkCut(bkPersonDays(who)):S;
+  const col=who?(AC[who]||"#8A9BAE"):"#2AACB8";
+  const endCol=who?col:"#2D8A2D";
+  if(!rows.length){BK_WHO="";return bkPerson(S);}
+
+  const t=document.getElementById("bk-t1");
+  // Title stays short: the picker beside it already names the person, and a
+  // longer title pushes the info icon onto its own line.
+  if(t)t.childNodes[0].nodeValue="Open over time ";
+  const ti=document.getElementById("bk-t1-i");
+  if(ti)ti.dataset.tip=who
+    ? "Front gives one assigned number per person and does not say which statuses it includes. It also counts that person across every inbox, not just these six, so this line and the whole-backlog line are not on the same basis."
+    : "Two readings a day. The teal line is the pile at the start of the shift, the dashed green line is what was left at the end. The green line breaks where no evening reading was taken, rather than drawing a line that was never measured.";
+  {const e=document.getElementById("bk-who-scope");if(e)e.style.display=who?"inline-block":"none";}
+  {const e=document.getElementById("bk-now-u");if(e)e.textContent=who?"assigned to them":"open";}
+
+  const last=rows[rows.length-1],first=rows[0];
+  const cur=last.c!==null?last.c:last.o, st=first.o!==null?first.o:first.c;
+  const nv=document.getElementById("bk-now");
+  nv.textContent=bkN0(cur);nv.style.color=col;
+  document.getElementById("bk-chg").innerHTML=(cur!==null&&st!==null)
+    ? `<span class="${cur<st?"bk-dn":"bk-up"}">${bkArrow(cur-st)} ${Math.abs(Math.round(cur-st))} over the range</span>`:"";
+  {const l=document.getElementById("bk-leg1");
+   if(l)l.innerHTML=`<span><i class="swl" style="background:${col}"></i>start of shift</span>`+
+     `<span><i class="swl" style="background:${endCol};opacity:${who?".55":"1"}"></i>end of shift</span>`+
+     (who?`<span style="color:var(--teal);font-weight:600">click a point for that week's KPIs</span>`:"");}
+  {const w=document.getElementById("bk-who-note");
+   if(w){
+     if(!who){w.style.display="none";}
+     else if(rows.length<4){w.style.display="";
+       w.innerHTML=`<b>Only ${rows.length} reading${rows.length===1?"":"s"} for ${who} in this range.</b> The line fills in as the twice daily snapshot runs.`;}
+     else{w.style.display="";
+       w.innerHTML=`<b>Different basis from the whole backlog line.</b> Front counts a person's assigned conversations across every inbox, so these never sum to the department total. Read it as direction for one person, not as their share.`;}
+   }}
+
+  bkMk("ch-bk1",{type:"line",data:{labels:rows.map(x=>bkShort(x.k)),datasets:[
+    {label:"Start of shift",data:rows.map(x=>x.o),borderColor:col,backgroundColor:col,
+     borderWidth:2,pointRadius:who?3:2,pointHoverRadius:6,tension:.25,spanGaps:true},
+    // spanGaps off on purpose: a day with no evening reading breaks the line
+    // rather than drawing one that was never measured.
+    {label:"End of shift",data:rows.map(x=>x.c),borderColor:endCol,backgroundColor:endCol,
+     borderWidth:2,pointRadius:who?3:2,pointHoverRadius:6,tension:.25,spanGaps:false,borderDash:[3,3]}]},
+   options:{maintainAspectRatio:false,interaction:{mode:"index",intersect:false},
+    onHover:(e,els)=>{e.native.target.style.cursor=(who&&els.length)?"pointer":"default";},
+    onClick:(e,els)=>{
+      if(!who||!els.length)return;
+      if(!D.kpi[who]){alert(who+" has no KPI tab to open.");return;}
+      goPage("kpi");
+      openAgent(who,bkWeekOf(rows[els[0].index].d));
+    },
+    plugins:{legend:{display:false},tooltip:{...bkTip,callbacks:{
+      label:c=>c.dataset.label+": "+(c.parsed.y==null?"not recorded":bkN0(c.parsed.y)),
+      afterBody:i=>who?["week of "+bkWeekOf(rows[i[0].dataIndex].d),
+        D.kpi[who]?"click to open their KPIs":"no KPI tab for this person"]:[]}}},
+    scales:{x:bkAx(),y:bkAx({beginAtZero:true})}}});
+}
+
 function buildBacklog(){
   if(!window._bkInit){
     window._bkInit=1;
@@ -3973,25 +4070,33 @@ function buildBacklog(){
     <div class="v" style="color:${t.c}">${t.v}</div>
     <div class="s">${t.s}</div></div>`).join("");
 
+  // ── Agent picker for the Open over time chart ──
+  {
+    const sel=document.getElementById("bk-who");
+    if(sel&&!sel.options.length){
+      const seats=[...new Set((D.backlog||[]).filter(r=>r.scope==="Teammate").map(r=>r.name))]
+        .filter(n=>n&&BK_HIDE.indexOf(n)<0);
+      const lc=n=>String(n).toLowerCase();
+      const onRoster=ROSTER.filter(p=>seats.some(s=>lc(s)===lc(p.name)))
+        .map(p=>seats.find(s=>lc(s)===lc(p.name)));
+      const rest=seats.filter(s=>onRoster.indexOf(s)<0).sort();
+      const grp=(label,list)=>list.length
+        ?`<optgroup label="${label}">`+list.map(n=>`<option>${n}</option>`).join("")+`</optgroup>`:"";
+      sel.innerHTML=`<option value="">Whole backlog</option>`+
+        grp("CX team",onRoster)+grp("Other Front seats",rest);
+      sel.addEventListener("change",()=>{BK_WHO=sel.value;bkPerson(bkCut(bkDays()));});
+    }
+  }
+
   {const s=document.getElementById("bk-range-sub");
    if(s)s.textContent=`${S.length} reading${S.length===1?"":"s"} · ${W.length} week${W.length===1?"":"s"} of Front data`+
      (BKR.days>90||!BKR.days?` · snapshots start ${ALL[0].k}, so longer ranges show everything there is`:"");}
 
-  // ── Open over time ──
-  document.getElementById("bk-now").textContent=bkN0(cur);
-  document.getElementById("bk-chg").innerHTML=
-    `<span class="${cur<first.o?"bk-dn":"bk-up"}">${bkArrow(cur-first.o)} ${Math.abs(Math.round(cur-first.o))} over the range</span>`;
-  bkMk("ch-bk1",{type:"line",data:{labels:S.map(x=>bkShort(x.k)),datasets:[
-    {label:"Start of shift",data:S.map(x=>x.o),borderColor:"#2AACB8",backgroundColor:"#2AACB8",
-     borderWidth:2,pointRadius:2,pointHoverRadius:5,tension:.25,spanGaps:true},
-    // spanGaps off on purpose: a day with no evening reading breaks the line
-    // rather than drawing one that was never measured.
-    {label:"End of shift",data:S.map(x=>x.c),borderColor:"#2D8A2D",backgroundColor:"#2D8A2D",
-     borderWidth:2,pointRadius:2,pointHoverRadius:5,tension:.25,spanGaps:false,borderDash:[3,3]}]},
-   options:{maintainAspectRatio:false,interaction:{mode:"index",intersect:false},
-    plugins:{legend:{display:false},tooltip:{...bkTip,callbacks:{
-      label:c=>c.dataset.label+": "+(c.parsed.y==null?"not recorded":bkN0(c.parsed.y)+" open")}}},
-    scales:{x:bkAx(),y:bkAx({beginAtZero:true})}}});
+  // ── Open over time, whole backlog or one person ──
+  // The dropdown drives this chart only. A person's line comes from the
+  // teammate rows, which Front measures across every inbox, so it is never
+  // put on the same axis as the six-inbox total or summed against it.
+  bkPerson(S);
 
   // ── Net change per day ──
   const avgNet=NET.length?NET.reduce((a,x)=>a+x.net,0)/NET.length:0;
@@ -4178,7 +4283,7 @@ function buildBacklog(){
     const pool=withAsg.length?withAsg:tmAll;
     const tmDates=[...new Set(pool.map(r=>r.dateStr))];
     const tmDay=tmDates.length?tmDates[tmDates.length-1]:null;
-    const tm=pool.filter(r=>r.dateStr===tmDay)
+    const tm=pool.filter(r=>r.dateStr===tmDay&&BK_HIDE.indexOf(r.name)<0)
       .map(r=>({name:r.name,v:(r.assigned!==null&&r.assigned!==undefined)?r.assigned:r.open}))
       .filter(r=>r.v!==null&&r.v!==undefined)
       .sort((a,b)=>b.v-a.v);
