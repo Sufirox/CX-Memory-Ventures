@@ -2628,7 +2628,8 @@ function renderAg(){
 // so the common case needs no paging. Click a start day then an end day; the
 // range fills in as you move the mouse.
 const RP={pop:null,from:null,to:null,start:null,end:null,hover:null,view:null,btn:null};
-const RP_DOW=["Mo","Tu","We","Th","Fr","Sa","Su"];
+// Weeks run Sunday to Saturday so a selected week reads as one unbroken row.
+const RP_DOW=["Su","Mo","Tu","We","Th","Fr","Sa"];
 const RP_MON=["January","February","March","April","May","June","July","August","September","October","November","December"];
 const rpISO=(d)=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 const rpParse=(v)=>{const m=String(v||"").match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?new Date(+m[1],+m[2]-1,+m[3]):null;};
@@ -2687,7 +2688,7 @@ function rpBuildPop(){
 function rpMonthHTML(base){
   const y=base.getFullYear(),m=base.getMonth();
   const first=new Date(y,m,1);
-  const lead=(first.getDay()+6)%7;           // Monday first
+  const lead=first.getDay();                 // Sunday first
   const days=new Date(y,m+1,0).getDate();
   const today=rfToday();
   let cells="";
@@ -4159,8 +4160,9 @@ const SC_REALMS={
 // The three free-text spellings of the same event.
 // Inside the Subscription realm, "not aware" always means the customer did not
 // realise they had subscribed, so the bare phrase is safe to match.
-const SC_ACCIDENT=[/not aware/i,/subs?crib\w*\s+by\s+accident/i,/accidental\s+subscription/i,
-  /did(n'?t| not)\s+(remember|know)/i,/without\s+(his|her|their)\s+knowledge/i];
+const SC_ACCIDENT=[/not aware/i,/\bunaware\b/i,/subs?crib\w*\s+by\s+accident/i,/accidental\s+subscription/i,
+  /did(n'?t| not)\s+(remember|know|realiz|realis)/i,/\bunknowingly\b/i,
+  /without\s+(his|her|their)\s+knowledge/i];
 function scNorm(x){return String(x||"").replace(/\s+/g," ").trim().toLowerCase().replace(/[.]+$/,"");}
 function scClassify(realm,comment){
   const cfg=SC_REALMS[realm];
