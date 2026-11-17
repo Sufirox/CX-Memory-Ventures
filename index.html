@@ -243,7 +243,9 @@ padding:6px 14px;border-radius:7px;cursor:pointer}
 .rq-row .v{font-size:12.5px;font-weight:800;width:34px;text-align:right}
 .rq-warn{background:#FFF8E8;border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:11px 14px;
 font-size:11.5px;color:#7A5410;line-height:1.6;margin-top:12px}
-.rq-warn b{display:block;margin-bottom:2px}
+/* Only a leading bold is a heading. A bold mid-sentence stays inline, or
+   emphasis inside a note breaks the sentence across lines. */
+.rq-warn>b:first-child{display:block;margin-bottom:2px}
 .rq-tag{display:inline-block;font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:20px;white-space:nowrap}
 .rq-Urgent{background:#FDECE7;color:#D4604A}.rq-High{background:#FDF3E3;color:#B8721A}
 .rq-Medium{background:#EAF7F8;color:#2AACB8}.rq-Low{background:#F1F4F7;color:#8A9BAE}
@@ -4089,15 +4091,25 @@ function buildBacklog(){
   if(inbox.length){
     const mx=Math.max(...inbox.map(x=>x.open||0),1);
     const sumOpen=inbox.reduce((a,x)=>a+x.open,0);
+    // Each inbox's own history over the selected range, so the trend column
+    // moves with the range buttons like every chart on the page.
+    const hist={};
+    inbAll.forEach(r=>{(hist[r.name]=hist[r.name]||[]).push(r);});
+    Object.values(hist).forEach(a=>a.sort((p,q)=>p.d-q.d));
+    const lo=S[0].d.getTime();
     box.innerHTML=
-      `<thead><tr><th>Inbox</th><th>Open</th><th></th><th>Waiting</th><th>Unassigned</th><th>Change</th></tr></thead><tbody>`+
+      `<thead><tr><th>Inbox</th><th>Open</th><th>Share</th><th>Waiting</th><th>Unassigned</th>
+        <th>Change</th><th>Trend</th></tr></thead><tbody>`+
       inbox.map(x=>{
         const p=inboxPrev[x.name], dv=(p!==undefined)?x.open-p:null;
+        const ser=(hist[x.name]||[]).filter(r=>r.d.getTime()>=lo).map(r=>r.open);
         return `<tr><td>${x.name}</td><td><b>${bkN0(x.open)}</b></td>
           <td style="width:70px"><span class="bk-mini"><i style="width:${x.open/mx*100}%"></i></span></td>
           <td>${bkN0(x.waiting)}</td>
           <td>${x.unassigned>0?`<span class="bpill bgup">${bkN0(x.unassigned)}</span>`:"0"}</td>
-          <td>${dv===null?"—":`<span class="${dv<0?"bk-dn":"bk-up"}">${bkArrow(dv)} ${Math.abs(dv)}</span>`}</td></tr>`;
+          <td>${dv===null?"—":`<span class="${dv<0?"bk-dn":"bk-up"}">${bkArrow(dv)} ${Math.abs(dv)}</span>`}</td>
+          <td style="width:104px">${bkSpark(ser,(dv!==null&&dv>0)?"#D4604A":"#2D8A2D")||
+            `<span style="color:var(--gray);font-size:11px">one reading</span>`}</td></tr>`;
       }).join("")+`</tbody>`;
     const n=document.getElementById("bk-inbox-note");
     // A grower hiding inside a falling total is the thing worth saying out
@@ -4119,12 +4131,21 @@ function buildBacklog(){
   const ob=document.getElementById("bk-old");
   const withOld=inbox.filter(x=>x.oldest!==null).sort((a,b)=>b.oldest-a.oldest);
   if(withOld.length){
-    ob.innerHTML=`<thead><tr><th>Inbox</th><th>Oldest unreplied</th></tr></thead><tbody>`+
+    const oldHist={};
+    inbAll.filter(r=>r.oldest!==null).forEach(r=>{(oldHist[r.name]=oldHist[r.name]||[]).push(r);});
+    Object.values(oldHist).forEach(a=>a.sort((p,q)=>p.d-q.d));
+    const lo2=S[0].d.getTime();
+    ob.innerHTML=`<thead><tr><th>Inbox</th><th>Oldest unreplied</th><th>Trend</th></tr></thead><tbody>`+
       withOld.map(x=>{
         const col=x.oldest>365?"var(--coral-dark)":x.oldest>60?"var(--coral)":"var(--green)";
         const y=x.oldest/365;
+        // A line that climbs at a steady 45 degrees is the same conversation
+        // getting one day older every day, which is the thing worth seeing.
+        const ser=(oldHist[x.name]||[]).filter(r=>r.d.getTime()>=lo2).map(r=>r.oldest);
         return `<tr><td>${x.name}</td><td><b style="color:${col}">${bkN1(x.oldest)}</b>
-          <span style="color:var(--gray)">days${y>=1?", "+y.toFixed(1)+"y":""}</span></td></tr>`;
+          <span style="color:var(--gray)">days${y>=1?", "+y.toFixed(1)+"y":""}</span></td>
+          <td style="width:104px">${bkSpark(ser,col)||
+            `<span style="color:var(--gray);font-size:11px">one reading</span>`}</td></tr>`;
       }).join("")+`</tbody>`;
     // Ageing exactly one day per day means nobody has touched it.
     const worst=withOld[0];
