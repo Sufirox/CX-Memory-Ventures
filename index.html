@@ -71,6 +71,49 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .kt{display:flex;gap:0;margin-bottom:22px;border-bottom:2px solid var(--border)}
 .ktb{padding:10px 22px;font-size:13px;font-weight:600;color:var(--gray);border:none;background:0 0;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-2px}
 .ktb.active{color:var(--teal);border-bottom-color:var(--teal)}
+/* ── Backlog rework ── */
+.bk3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px;align-items:start}
+.bk21{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px;align-items:start}
+@media(max-width:1080px){.bk3{grid-template-columns:repeat(2,1fr)}.bk21{grid-template-columns:1fr}}
+@media(max-width:720px){.bk3{grid-template-columns:1fr}}
+.bk-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.bkt{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--teal);
+ border-radius:9px;padding:11px 13px}
+.bkt .l{font-size:9.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--gray);
+ display:flex;align-items:center}
+.bkt .v{font-size:24px;font-weight:800;letter-spacing:-.6px;margin:2px 0 1px}
+.bkt .s{font-size:10.5px;color:var(--gray);line-height:1.45}
+.bka{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;margin-bottom:9px}
+.bkb{font-size:25px;font-weight:800;letter-spacing:-.7px;line-height:1}
+.bku{font-size:10.5px;color:var(--gray)}
+.bkl{display:flex;gap:11px;flex-wrap:wrap;font-size:10px;color:var(--gray);margin-top:8px;align-items:center}
+.bkl span{display:flex;gap:5px;align-items:center}
+.sw{width:9px;height:9px;border-radius:2px;display:inline-block}
+.swl{width:13px;height:2px;border-radius:1px;display:inline-block}
+.bk-scope{display:inline-block;background:var(--bg);border:1px solid var(--border);border-radius:5px;
+ padding:1px 7px;font-size:9.5px;font-weight:700;color:var(--gray)}
+.bk-seg{display:inline-flex;background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.bk-seg button{border:0;background:none;font:inherit;font-size:11.5px;font-weight:600;color:var(--gray);
+ padding:6px 13px;cursor:pointer;border-right:1px solid var(--border)}
+.bk-seg button:last-child{border-right:0}
+.bk-seg button.on{background:var(--teal);color:#fff}
+/* Explanations live in these, so the page stays readable at a glance. */
+.i{display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border-radius:50%;
+ background:var(--border);color:var(--gray);font-size:9px;font-weight:800;cursor:help;position:relative;
+ vertical-align:middle;margin-left:6px;flex:none}
+.i:hover{background:var(--teal);color:#fff}
+.i::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);
+ background:var(--navy,#243B53);color:#fff;font-size:11px;font-weight:400;line-height:1.5;letter-spacing:0;
+ text-transform:none;padding:9px 11px;border-radius:7px;width:270px;opacity:0;pointer-events:none;
+ transition:opacity .12s;z-index:60;text-align:left;white-space:pre-line;
+ box-shadow:0 6px 22px rgba(26,43,60,.22)}
+.i::before{content:"";position:absolute;bottom:calc(100% + 3px);left:50%;transform:translateX(-50%);
+ border:5px solid transparent;border-top-color:var(--navy,#243B53);opacity:0;pointer-events:none;
+ transition:opacity .12s;z-index:61}
+.i:hover::after,.i:hover::before{opacity:1}
+.i.r::after{left:auto;right:-6px;transform:none}
+.i.d::after{bottom:auto;top:calc(100% + 8px);left:-10px;transform:none}
+.i.d::before{bottom:auto;top:calc(100% + 3px);border-top-color:transparent;border-bottom-color:var(--navy,#243B53)}
 /* ── Agent skills ── */
 .sk-tbl{width:100%;border-collapse:collapse;font-size:12px}
 .sk-tbl th,.sk-tbl td{padding:7px 9px;border-bottom:1px solid var(--border);text-align:center;white-space:nowrap}
@@ -187,6 +230,12 @@ padding:6px 14px;border-radius:7px;cursor:pointer}
 .bk-row .t{flex:1;display:block;height:10px;background:var(--bg);border-radius:5px;overflow:hidden}
 .bk-row .f{display:block;height:100%;border-radius:5px}
 .bk-row .v{font-size:12.5px;font-weight:800;width:40px;text-align:right}
+.bk-mini{width:100%;height:5px;background:var(--bg);border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle}
+.bk-mini i{display:block;height:100%;border-radius:3px;background:var(--teal)}
+.bk-wait{border:1px dashed var(--border);border-radius:9px;padding:20px 12px;text-align:center;
+ color:var(--gray);font-size:11.5px;line-height:1.6}
+.bk-sep{font-size:9.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--gray);
+ margin:12px 0 7px;padding-top:9px;border-top:1px dashed var(--border)}
 .rq-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
 .rq-row .n{font-size:12px;font-weight:600;width:142px;flex:0 0 142px}
 .rq-row .t{flex:1;display:block;height:9px;background:var(--bg);border-radius:5px;overflow:hidden}
@@ -748,56 +797,90 @@ height:auto;background:none;border-radius:0;overflow:visible;line-height:1.5}
 <div id="ops-view-backlog" style="display:none">
 <div class="page-header">
   <div><h1>Daily Operations</h1><p id="bk-range-sub">Backlog and inbox workload</p></div>
-  <div class="rf-range">
-    <label>From</label><input type="date" id="bk-from">
-    <label>To</label><input type="date" id="bk-to">
-    <div class="rf-preset">
-      <button class="dr-btn" data-bkr="7d">Last 7d</button>
-      <button class="dr-btn active" data-bkr="30d">Last 30d</button>
-      <button class="dr-btn" data-bkr="90d">Last 90d</button>
-      <button class="dr-btn" data-bkr="all">All</button>
-    </div>
+  <div class="bk-seg">
+    <button data-bkr="7">1W</button><button data-bkr="30">1M</button>
+    <button data-bkr="90" class="on">3M</button><button data-bkr="180">6M</button>
+    <button data-bkr="0">All</button>
   </div>
 </div>
-<div class="cd" id="bk-card" style="border-left:3px solid var(--amber)">
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
-    <div><div class="ct">Backlog status</div><div class="csb" id="bk-sub"></div></div></div>
-  <div class="bl" id="bk-strip" style="margin-top:14px"></div></div>
-<div class="cd"><div class="ct">How the backlog is moving</div>
-  <div class="csb">Level on top, change since the previous reading underneath. Red bars are readings where it grew.</div>
-  <div class="cw" style="height:130px"><canvas id="ch-bk1" height="170"></canvas></div>
-  <div class="cw" style="height:78px"><canvas id="ch-bk2" height="96"></canvas></div>
-  <div class="kg" id="bk-deltas"></div></div>
-<div class="gl2">
-  <div class="cd"><div class="ct">Cleared during the day against arrived overnight</div>
-    <div class="csb" id="bk-flow-sub">From the open and close readings of the same feed</div>
-    <div class="cw" style="height:145px"><canvas id="ch-bk4" height="165"></canvas></div>
-    <div class="kg" id="bk-flow-tiles"></div></div>
-  <div class="cd"><div class="ct">Unassigned over time</div>
-    <div class="csb">The share of the backlog that belongs to nobody</div>
-    <div class="cw" style="height:130px"><canvas id="ch-bk3" height="150"></canvas></div>
-    <div class="csb" id="bk-un-note" style="margin-top:8px"></div></div>
+<div class="bk-tiles" id="bk-strip"></div>
+
+<div class="bk3">
+  <div class="cd"><div class="ct">Open over time
+    <span class="i" data-tip="Two readings a day. The teal line is the pile at the start of the shift, the dashed green line is what was left at the end. The gap between them is a day's work. The green line breaks where no evening reading was taken, rather than drawing a line that was never measured.">i</span></div>
+    <div class="bka"><span class="bkb" style="color:var(--teal)" id="bk-now">&mdash;</span>
+      <span class="bku">open</span><span class="bku" id="bk-chg"></span></div>
+    <div class="cw" style="height:118px"><canvas id="ch-bk1"></canvas></div>
+    <div class="bkl"><span><i class="swl" style="background:var(--teal)"></i>start of shift</span>
+      <span><i class="swl" style="background:var(--green)"></i>end of shift</span></div></div>
+
+  <div class="cd"><div class="ct">Net change per day
+    <span class="i" data-tip="This morning's pile against the previous morning's, divided by the days between, so a Monday is not three nights counted as one. Below the line the pile shrank, above it grew. Hover a bar for how much was cleared during that day.">i</span></div>
+    <div class="bka"><span class="bkb" id="bk-net">&mdash;</span>
+      <span class="bku" id="bk-net-u"></span></div>
+    <div class="cw" style="height:118px"><canvas id="ch-bk2"></canvas></div>
+    <div class="bkl"><span><i class="sw" style="background:var(--green)"></i>pile shrank</span>
+      <span><i class="sw" style="background:var(--coral)"></i>pile grew</span></div></div>
+
+  <div class="cd"><div class="ct">When does it clear?
+    <span class="i" data-tip="The current pile divided by the average net change per day over the selected range. A straight line projection, so it assumes arrivals and clearing both hold. A pace check, not a promise.">i</span></div>
+    <div class="bka"><span class="bkb" style="color:var(--green)" id="bk-proj">&mdash;</span>
+      <span class="bku" id="bk-proj-u"></span></div>
+    <div class="cw" style="height:118px"><canvas id="ch-bk3"></canvas></div>
+    <div class="bkl"><span><i class="swl" style="background:var(--teal)"></i>measured</span>
+      <span><i class="swl" style="background:var(--gray);opacity:.6"></i>at current pace</span></div></div>
 </div>
-<div class="cd"><div class="ct">Workload received against resolution</div>
-  <div class="csb" id="wrc-sub">Weekly</div>
-  <div class="cw" style="height:160px"><canvas id="ch-wrc" height="160"></canvas></div>
-  <div class="kg" id="wrc-tiles"></div>
-  <div class="rq-warn" id="wrc-note"></div></div>
-<div class="cd"><div class="ct">Assigned against resolved</div>
-  <div class="csb" id="wr-sub">Weekly, from Front Data</div>
-  <div class="cw" style="height:160px"><canvas id="ch-wr" height="175"></canvas></div>
-  <div class="kg" id="wr-tiles"></div>
-  <div class="rq-warn" id="wr-note"></div></div>
-<div class="cd"><div class="ct">Workload by inbox</div>
-  <div class="csb">Share of the open backlog, how much of it belongs to nobody, and which way each one is moving</div>
-  <div class="tw"><table class="tb" id="bk-inbox"></table></div>
-  <div class="rq-warn" id="bk-inbox-note"></div></div>
-<div class="cd"><div class="ct">Assigned against unassigned</div>
-  <div class="csb">Who is carrying the backlog, and how much nobody is</div>
-  <div id="bk-team" style="margin-top:13px"></div>
-  <div class="rq-warn" id="bk-team-note"></div></div>
+
+<div class="bk3">
+  <div class="cd"><div class="ct">How long to respond?
+    <span class="i" data-tip="First reply time, averaged across the team, from the weekly Front export. This is the clock the customer actually feels.">i</span></div>
+    <div class="bka"><span class="bkb" style="color:var(--teal)" id="bk-frt">&mdash;</span>
+      <span class="bku">hours</span><span class="bku" id="bk-frt-d"></span></div>
+    <div class="cw" style="height:118px"><canvas id="ch-bk-frt"></canvas></div></div>
+
+  <div class="cd"><div class="ct">How long to resolve?
+    <span class="i" data-tip="Resolution time from the weekly Front export. Measured only on conversations someone actually marked resolved, which is not all of them, so read it as the speed of tracked work rather than of all work.">i</span></div>
+    <div class="bka"><span class="bkb" style="color:var(--amber)" id="bk-res">&mdash;</span>
+      <span class="bku">hours</span><span class="bku" id="bk-res-d"></span></div>
+    <div class="cw" style="height:118px"><canvas id="ch-bk-res"></canvas></div></div>
+
+  <div class="cd"><div class="ct">How many did we respond to?
+    <span class="i" data-tip="Counts, not a rate. The only denominator available is everything archived, which includes spam, duplicates, auto replies and deliberate bulk clearing, so any percentage built on it moves with cleanup activity instead of with service.">i</span></div>
+    <div class="bka"><span class="bkb" style="color:var(--teal)" id="bk-rep">&mdash;</span>
+      <span class="bku">closed with a reply</span></div>
+    <div class="cw" style="height:118px"><canvas id="ch-bk-rep"></canvas></div>
+    <div class="bkl" id="bk-rep-l"></div></div>
+</div>
+
+<div class="bk21">
+  <div class="cd"><div class="ct">Where is it sitting?
+    <span class="i" data-tip="Inbox rows sum to more than the total because Front counts a conversation in every inbox it belongs to while the total counts it once, and the size of the overlap varies run to run. Read the rows as directional, not additive.">i</span></div>
+    <div class="tw"><table class="tb" id="bk-inbox"></table></div>
+    <div class="rq-warn" id="bk-inbox-note"></div></div>
+
+  <div class="cd" style="background:#FAFBFC"><div class="ct" style="color:var(--gray)">Closed without needing a reply
+    <span class="i" data-tip="Not a spam count. The bucket holds auto replies, bounces, duplicates, anything settled on the phone, and deliberate bulk clearing of old backlog. To make it measurable, open 30 random ones from a normal week and tally what they are.">i</span></div>
+    <div class="bka"><span class="bkb" style="color:var(--gray)" id="bk-norep">&mdash;</span>
+      <span class="bku">last week</span>
+      <span class="bk-scope">not a performance number</span></div>
+    <div class="cw" style="height:118px"><canvas id="ch-bk-norep"></canvas></div></div>
+</div>
+
+<div class="gl2">
+  <div class="cd"><div class="ct">What is rotting?
+    <span class="i r" data-tip="Oldest conversation still waiting on a first reply, per inbox. Front gives this as the oldest unreplied rather than the oldest open, so a very old conversation that someone answered once will not appear here.">i</span></div>
+    <div class="tw"><table class="tb" id="bk-old"></table></div>
+    <div class="rq-warn" id="bk-old-note"></div></div>
+
+  <div class="cd"><div class="ct">Who is carrying it?
+    <span class="i r" data-tip="Front gives one assigned number per person and does not say which statuses it includes. It also ignores the inbox filter, so this counts a person's work across all of Front. It answers whether anyone's pile is growing, and cannot answer how much of ScanCafe is theirs.">i</span></div>
+    <div class="bka"><span class="bk-scope">scope: all of Front, not these six inboxes</span></div>
+    <div id="bk-team" style="margin-top:11px"></div>
+    <div class="rq-warn" id="bk-team-note"></div></div>
+</div>
+
 <div class="cd"><div class="ct">Daily log</div><div class="csb">The Total rows, exactly as entered</div>
-  <div class="tw" style="max-height:420px"><table class="tb" id="bk-log"></table></div></div>
+  <div class="tw" style="max-height:380px"><table class="tb" id="bk-log"></table></div></div>
 </div>
 </div>
 
@@ -1170,7 +1253,8 @@ async function loadAll(){
     const ci=(n)=>hdr.indexOf(n);
     const cDate=ci("date"),cPart=ci("part of day"),cScope=ci("scope"),cName=ci("name"),
           cOpen=ci("open"),cWait=ci("waiting"),cUn=ci("unassigned"),
-          cOld=ci("oldest (days)"),cFilt=ci("filter"),cNote=ci("note");
+          cOld=ci("oldest (days)"),cFilt=ci("filter"),cNote=ci("note"),
+          cStamp=ci("timestamp"),cSnooze=ci("snoozed"),cAsgn=ci("assigned");
     const numOrNull=(v)=>{const s=String(v==null?"":v).replace(/[$,%\s]/g,"");
       if(s==="")return null;const n=parseFloat(s);return isNaN(n)?null:n;};
     const parseD=(s)=>{const m=String(s||"").match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
@@ -1181,13 +1265,23 @@ async function loadAll(){
       const d=parseD(r[cDate]);if(!d)continue;
       const scope=String(r[cScope]||"").trim();
       const open=numOrNull(r[cOpen]);
-      // A row with no Open figure carries nothing the page can use.
-      if(open===null)continue;
+      const asgn=cAsgn>=0?numOrNull(r[cAsgn]):null;
+      // A row needs one of the two measures. Teammate rows carry only
+      // Assigned, because Front gives one number per person and no status
+      // split, so Open stays deliberately blank on them.
+      if(open===null&&asgn===null)continue;
       D.backlog.push({d:d,dateStr:String(r[cDate]).trim(),
         part:String(r[cPart]||"Open").trim(),scope:scope,
         name:String(r[cName]||"").trim(),open:open,
         waiting:numOrNull(r[cWait]),unassigned:numOrNull(r[cUn]),
         oldest:numOrNull(r[cOld]),
+        // Added Nov 2026 when the snapshot went twice daily. Timestamp carries
+        // the real moment of the reading, Snoozed is a partial count (Front only
+        // splits it in non-ticketing inboxes) and Assigned is the per-person
+        // number, which Front measures across ALL inboxes, not these six.
+        stamp:cStamp>=0?String(r[cStamp]||"").trim():"",
+        snoozed:cSnooze>=0?numOrNull(r[cSnooze]):null,
+        assigned:asgn,
         filter:cFilt>=0?String(r[cFilt]||"").trim():"",
         note:cNote>=0?String(r[cNote]||"").trim():""});
     }
@@ -1485,10 +1579,13 @@ async function loadAll(){
       // Scorecard fields. col 8 first reply (s), 14 archived with reply, 17 SLA achieved,
       // 23 resolved, 25 replies to resolution, 26 resolved on first reply.
       D.frontAgent[agent][wk]={replies:pn(r[5]),msgs:pn(r[6]),
+        assigned:pn(r[2]),touched:pn(r[3]),
         frtHrs:(pn(r[8])!==null?pn(r[8])/3600:null),
+        archived:pn(r[13]),
         closedWithReply:pn(r[14]),
         slaPct:(pn(r[17])!==null?pn(r[17])*100:null),
         resolved:pn(r[23]),
+        resTimeHrs:(pn(r[24])!==null?pn(r[24])/3600:null),
         replToRes:pn(r[25]),
         resFirstPct:(pn(r[26])!==null?pn(r[26])*100:null)};
     }
@@ -3718,159 +3815,388 @@ function renderBacklogFlow(){
            y:{...cb.scales.y,stacked:true,ticks:{...cb.scales.y.ticks,callback:v=>Math.abs(v)}}}}});
 }
 
+// ═══════════════ BACKLOG ═══════════════
+// Two feeds, each used for what it is actually good at.
+//
+//   The snapshot (twice daily, Mon to Fri) counts the pile. It answers how
+//   big, which way, how much is waiting on the customer and what is rotting.
+//   It can never answer how long anything took, because it counts objects
+//   rather than timing them.
+//
+//   The weekly Front export times things. It answers first reply and
+//   resolution, and how much work got an answer.
+//
+// Nothing here divides one feed by the other.
+
+const BKR={days:90};   // selected range in days; 0 = all
+let bkCh={};
+function bkMk(id,cfg){
+  if(bkCh[id])bkCh[id].destroy();
+  const el=document.getElementById(id);
+  if(el)bkCh[id]=new Chart(el,cfg);
+}
+const bkTip={backgroundColor:"#0D2137",padding:9,cornerRadius:6,displayColors:true,
+  boxWidth:8,boxHeight:8,boxPadding:4,titleFont:{size:11,weight:"700"},bodyFont:{size:11}};
+const bkAx=(o={})=>Object.assign({grid:{color:"#EDF1F5",drawTicks:false},border:{display:false},
+  ticks:{padding:4,maxRotation:0,autoSkipPadding:10}},o);
+const bkN0=v=>(v===null||v===undefined||isNaN(v))?"—":Math.round(v).toLocaleString();
+const bkN1=v=>(v===null||v===undefined||isNaN(v))?"—":v.toFixed(1);
+const bkArrow=v=>v<0?"▼":"▲";
+
+// ── Weekly Front totals, one row per week across the whole team ──
+function bkWeekly(){
+  const agg={};
+  for(const n in D.frontAgent){
+    for(const w in D.frontAgent[n]){
+      const f=D.frontAgent[n][w];
+      const a=agg[w]||(agg[w]={w:w,asg:0,repl:0,arch:0,archR:0,res:0,frt:[],rt:[]});
+      ["assigned","replies","archived","closedWithReply","resolved"].forEach((k,i)=>{
+        const v=f[k];if(v)a[["asg","repl","arch","archR","res"][i]]+=v;});
+      if(f.frtHrs>0)a.frt.push(f.frtHrs);
+      if(f.resTimeHrs>0)a.rt.push(f.resTimeHrs);
+    }
+  }
+  const pd=(w)=>{const m=String(w).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    return m?new Date(+m[3],+m[1]-1,+m[2]):null;};
+  const mean=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+  return Object.values(agg).filter(a=>pd(a.w)).map(a=>({...a,d:pd(a.w),
+    frtH:mean(a.frt),resH:mean(a.rt)})).sort((x,y)=>x.d-y.d);
+}
+
+// ── The snapshot series, one entry per day with both readings ──
+function bkDays(){
+  const byDay={};
+  (D.backlog||[]).filter(r=>r.scope==="Total").forEach(r=>{
+    const k=r.dateStr;
+    const e=byDay[k]||(byDay[k]={k:k,d:r.d,o:null,c:null,wo:null,wc:null,uo:null,uc:null,old:null});
+    if(r.part==="Close"){e.c=r.open;e.wc=r.waiting;e.uc=r.unassigned;}
+    else{e.o=r.open;e.wo=r.waiting;e.uo=r.unassigned;}
+    if(r.oldest!==null&&r.oldest!==undefined)e.old=r.oldest;
+  });
+  return Object.values(byDay).sort((a,b)=>a.d-b.d);
+}
+
+// Net change per day, from consecutive MORNING readings so every window is a
+// whole number of days. Dividing by the gap keeps a Monday from reading as a
+// single night when it actually carries the weekend.
+function bkNet(days){
+  const out=[];let prev=null;
+  days.forEach(s=>{
+    if(s.o===null)return;
+    if(prev){
+      const n=Math.round((s.d-prev.d)/864e5)||1;
+      out.push({k:s.k,d:s.d,days:n,raw:s.o-prev.o,net:(s.o-prev.o)/n,
+        cleared:(s.c!==null)?s.o-s.c:null,open:s.o});
+    }
+    prev=s;
+  });
+  return out;
+}
+
+function bkCut(rows){
+  if(!BKR.days||!rows.length)return rows;
+  const end=rows[rows.length-1].d.getTime();
+  const out=rows.filter(r=>r.d.getTime()>=end-BKR.days*864e5);
+  return out.length>1?out:rows.slice(-2);
+}
+
 function buildBacklog(){
-  // First run: default the range to the last 30 days of readings.
   if(!window._bkInit){
     window._bkInit=1;
-    bkSetRange("30d");
-    ["bk-from","bk-to"].forEach(id=>{const el=document.getElementById(id);
-      if(el)el.addEventListener("change",()=>{
-        document.querySelectorAll("#ops-view-backlog [data-bkr]").forEach(x=>x.classList.remove("active"));
-        bkReadInputs();buildBacklog();});});
     document.querySelectorAll("#ops-view-backlog [data-bkr]").forEach(btn=>
       btn.addEventListener("click",()=>{
-        document.querySelectorAll("#ops-view-backlog [data-bkr]").forEach(x=>x.classList.remove("active"));
-        btn.classList.add("active");bkSetRange(btn.dataset.bkr);buildBacklog();}));
+        document.querySelectorAll("#ops-view-backlog [data-bkr]").forEach(x=>x.classList.remove("on"));
+        btn.classList.add("on");
+        BKR.days=+btn.dataset.bkr;
+        buildBacklog();}));
   }
-  renderReceivedResolution();   // received against resolved, the headline
-  renderWorkloadResolution();   // assigned against resolved, kept underneath
-  renderBacklogFlow();          // intraday flow, from this feed
-  const T=bkTotals();
+
+  const ALL=bkDays();
   const strip=document.getElementById("bk-strip");
   if(!strip)return;
-  if(!T.length){
-    strip.innerHTML=`<div style="color:var(--gray);font-size:13px">The backlog tab has no usable rows yet.</div>`;
+  if(!ALL.length){
+    strip.innerHTML=`<div style="color:var(--gray);font-size:13px;grid-column:1/-1">
+      The backlog tab has no usable rows yet.</div>`;
     return;
   }
-  strip.innerHTML=bkStripHTML();
-  const last=T[T.length-1],first=T[0],prev=T.length>1?T[T.length-2]:null;
-  {const s=document.getElementById("bk-sub");
-   if(s)s.textContent=`${last.dateStr}, ${last.part==="Close"?"end":"start"} of day`+
-     (last.filter?` · filter: ${last.filter}`:"");}
+
+  const S=bkCut(ALL), NET=bkCut(bkNet(ALL)), W=bkCut(bkWeekly());
+  const last=S[S.length-1], first=S[0];
+  const cur=last.c!==null?last.c:last.o;
+  const lastAll=ALL[ALL.length-1], prevAll=ALL.length>1?ALL[ALL.length-2]:null;
+  const curAll=lastAll.c!==null?lastAll.c:lastAll.o;
+  const prevV=prevAll?(prevAll.c!==null?prevAll.c:prevAll.o):null;
+  const peak=ALL.reduce((a,x)=>Math.max(a,x.o||0,x.c||0),0);
+
+  // ── Inbox rows for the newest reading ──
+  const inbAll=(D.backlog||[]).filter(r=>r.scope==="Inbox");
+  const inbox=inbAll.filter(r=>r.dateStr===lastAll.k).sort((a,b)=>b.open-a.open);
+  const inboxPrev={};
+  if(prevAll)inbAll.filter(r=>r.dateStr===prevAll.k).forEach(r=>inboxPrev[r.name]=r.open);
+  const waitTot=inbox.reduce((a,x)=>a+(x.waiting||0),0)||
+    (lastAll.wc!==null?lastAll.wc:lastAll.wo)||0;
+  const unTot=lastAll.uc!==null?lastAll.uc:lastAll.uo;
+  const oldestRow=inbox.slice().sort((a,b)=>(b.oldest||0)-(a.oldest||0))[0];
+  const snooze=(D.backlog||[]).find(r=>r.scope==="Total"&&r.dateStr===lastAll.k&&r.snoozed!==null);
+
+  // ── Tiles ──
+  const pct=(a,b)=>b?((a-b)/b*100):0;
+  const names=inbox.map(x=>x.name);
+  const tip=names.length
+    ? `Counts these ${names.length} inboxes only:\n`+names.map(x=>"• "+x).join("\n")+
+      `\n\nAnything in another Front inbox is not in this number.`
+    : "The latest reading carried no inbox rows, so the inbox list is unknown.";
+  const T=[
+   {l:"Open now",v:bkN0(curAll),s:(names.length||"?")+" inboxes, "+lastAll.k,c:"var(--teal)",tip:tip},
+   prevV!==null
+    ? {l:"Since last reading",v:bkArrow(curAll-prevV)+" "+Math.abs(Math.round(curAll-prevV)),
+       s:bkN1(Math.abs(pct(curAll,prevV)))+"% from "+prevAll.k,
+       k:curAll<prevV?"bk-dn":"bk-up",c:curAll<prevV?"var(--green)":"var(--coral-dark)"}
+    : {l:"Since last reading",v:"—",s:"needs a second reading",c:"var(--gray)"},
+   {l:"Off the peak",v:bkN1(pct(curAll,peak))+"%",s:"peak "+bkN0(peak)+" on "+
+      ALL.find(x=>Math.max(x.o||0,x.c||0)===peak).k,c:"var(--green)"},
+   {l:"Waiting on customer",v:bkN0(waitTot),
+    s:curAll?Math.round(waitTot/curAll*100)+"% of open":"",c:"var(--amber)",
+    tip:"Front's Waiting status, meaning we replied and the ball is with the customer."+
+      (snooze?`\n\nSnoozed, where Front reports it separately: ${snooze.snoozed}. That is a partial count, because Front only splits snoozed out in inboxes without ticketing.`
+             :"\n\nSnoozed conversations are counted inside this and cannot be split out per inbox.")},
+   {l:"Unassigned",v:bkN0(unTot),
+    s:(unTot!==null&&curAll)?Math.round(unTot/curAll*100)+"% of open":"not recorded",c:"var(--teal)"},
+   {l:"Oldest unreplied",v:oldestRow?bkN0(oldestRow.oldest):"—",
+    s:oldestRow?"days, "+oldestRow.name:"not recorded",c:"var(--coral-dark)",
+    tip:"The oldest conversation still waiting on a first reply. Front gives the oldest unreplied rather than the oldest open, so a very old conversation that someone answered once does not appear here."}
+  ];
+  strip.innerHTML=T.map(t=>`<div class="bkt" style="border-left-color:${t.c}">
+    <div class="l">${t.l}${t.tip?`<span class="i d" data-tip="${t.tip.replace(/"/g,"&quot;")}">i</span>`:""}</div>
+    <div class="v" style="color:${t.c}">${t.v}</div>
+    <div class="s">${t.s}</div></div>`).join("");
+
   {const s=document.getElementById("bk-range-sub");
-   if(s)s.textContent=T.length
-     ? `Backlog and inbox workload · ${T[0].dateStr} to ${T[T.length-1].dateStr} · ${T.length} readings`
-     : "Backlog and inbox workload · no readings in this range";}
+   if(s)s.textContent=`${S.length} reading${S.length===1?"":"s"} · ${W.length} week${W.length===1?"":"s"} of Front data`+
+     (BKR.days>90||!BKR.days?` · snapshots start ${ALL[0].k}, so longer ranges show everything there is`:"");}
 
-  // ── movement
-  // Two readings a day, so the label says which one. Labels stay horizontal
-  // and are thinned, because rotated labels on a short chart eat the plot.
-  const L=T.map(r=>bkShort(r.dateStr)+(r.part==="Close"?" pm":" am"));
-  const xc={...cb.scales.x,ticks:{...cb.scales.x.ticks,maxRotation:0,minRotation:0,
-    autoSkip:true,maxTicksLimit:8}};
-  const openS=T.map(r=>r.open), unS=T.map(r=>r.unassigned);
-  const deltas=openS.map((v,i)=>i?v-openS[i-1]:0);
-  const grew=deltas.slice(1).filter(v=>v>0).length;
-  const wkIdx=Math.max(0,T.length-6);
-  if(T.length<2){
-    document.getElementById("bk-deltas").innerHTML=
-      `<div class="dsc" style="grid-column:1/-1"><div class="dsl">Movement</div>
-        <div class="dsv" style="font-size:14px">One reading so far</div>
-        <div class="dss">Change, trend and the charts above fill in from the second entry onward.</div></div>`;
-  } else {
-  document.getElementById("bk-deltas").innerHTML=
-    `<div class="dsc"><div class="dsl">Since ${prev?bkShort(prev.dateStr):"—"}</div>
-      <div class="dsv">${prev?bkDelta(last.open-prev.open):"—"}</div><div class="dss">previous reading</div></div>
-     <div class="dsc"><div class="dsl">Over 5 readings</div>
-      <div class="dsv">${bkDelta(last.open-T[wkIdx].open)}</div><div class="dss">about a week</div></div>
-     <div class="dsc${last.open>first.open?" hot":""}"><div class="dsl">Since ${bkShort(first.dateStr)}</div>
-      <div class="dsv">${bkDelta(last.open-first.open)}</div>
-      <div class="dss">${first.open?Math.round((last.open-first.open)/first.open*100)+"% over "+T.length+" readings":""}</div></div>
-     <div class="dsc"><div class="dsl">Readings it grew</div>
-      <div class="dsv">${grew} of ${Math.max(0,T.length-1)}</div><div class="dss">more in than out</div></div>`;
+  // ── Open over time ──
+  document.getElementById("bk-now").textContent=bkN0(cur);
+  document.getElementById("bk-chg").innerHTML=
+    `<span class="${cur<first.o?"bk-dn":"bk-up"}">${bkArrow(cur-first.o)} ${Math.abs(Math.round(cur-first.o))} over the range</span>`;
+  bkMk("ch-bk1",{type:"line",data:{labels:S.map(x=>bkShort(x.k)),datasets:[
+    {label:"Start of shift",data:S.map(x=>x.o),borderColor:"#2AACB8",backgroundColor:"#2AACB8",
+     borderWidth:2,pointRadius:2,pointHoverRadius:5,tension:.25,spanGaps:true},
+    // spanGaps off on purpose: a day with no evening reading breaks the line
+    // rather than drawing one that was never measured.
+    {label:"End of shift",data:S.map(x=>x.c),borderColor:"#2D8A2D",backgroundColor:"#2D8A2D",
+     borderWidth:2,pointRadius:2,pointHoverRadius:5,tension:.25,spanGaps:false,borderDash:[3,3]}]},
+   options:{maintainAspectRatio:false,interaction:{mode:"index",intersect:false},
+    plugins:{legend:{display:false},tooltip:{...bkTip,callbacks:{
+      label:c=>c.dataset.label+": "+(c.parsed.y==null?"not recorded":bkN0(c.parsed.y)+" open")}}},
+    scales:{x:bkAx(),y:bkAx({beginAtZero:true})}}});
+
+  // ── Net change per day ──
+  const avgNet=NET.length?NET.reduce((a,x)=>a+x.net,0)/NET.length:0;
+  const ne=document.getElementById("bk-net");
+  ne.textContent=NET.length?((avgNet<0?"−":"+")+Math.abs(avgNet).toFixed(1)):"—";
+  ne.style.color=avgNet<0?"var(--green)":"var(--coral-dark)";
+  document.getElementById("bk-net-u").textContent=
+    !NET.length?"needs two readings":avgNet<0?"average, shrinking":"average, growing";
+  bkMk("ch-bk2",{type:"bar",data:{labels:NET.map(x=>bkShort(x.k)),datasets:[
+    {data:NET.map(x=>x.net),backgroundColor:NET.map(x=>x.net<0?"#2D8A2D":"#E8967A"),
+     borderRadius:3,borderSkipped:false,barPercentage:.72,categoryPercentage:.84}]},
+   options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...bkTip,callbacks:{
+      title:i=>NET[i[0].dataIndex].k,
+      label:c=>{const r=NET[c.dataIndex];
+        return (r.net<0?"shrank ":"grew ")+Math.abs(r.net).toFixed(1)+" per day";},
+      afterBody:i=>{const r=NET[i[0].dataIndex],out=[];
+        if(r.days>1)out.push("over "+r.days+" days ("+(r.raw<0?"":"+")+Math.round(r.raw)+" total)");
+        if(r.cleared!==null)out.push("cleared "+bkN0(r.cleared)+" during that day");
+        out.push("pile ended at "+bkN0(r.open));return out;}}}},
+    scales:{x:bkAx(),y:bkAx({grid:{color:c=>c.tick.value===0?"#C9D4DF":"#EDF1F5"}})}}});
+
+  // ── When does it clear ──
+  const pv=document.getElementById("bk-proj"),pu=document.getElementById("bk-proj-u");
+  let labels=S.map(x=>bkShort(x.k)), measured=S.map(x=>x.o), ghost=S.map(()=>null);
+  if(avgNet<-0.5&&cur>0){
+    const dd=Math.ceil(cur/Math.abs(avgNet));
+    pv.textContent=dd>95?Math.round(dd/7)+"w":dd+"d";
+    pv.style.color="var(--green)";
+    pu.textContent="at the current pace";
+    const steps=5;
+    ghost[ghost.length-1]=cur;
+    for(let i=1;i<=steps;i++){
+      labels.push("+"+Math.round(dd/steps*i)+"d");
+      measured.push(null);
+      ghost.push(Math.max(0,cur-cur/steps*i));
+    }
+  }else{
+    pv.textContent="—";pv.style.color="var(--coral-dark)";
+    pu.textContent=NET.length?"not shrinking over this range":"needs two readings";
   }
+  bkMk("ch-bk3",{type:"line",data:{labels:labels,datasets:[
+    {label:"Measured",data:measured,borderColor:"#2AACB8",backgroundColor:"rgba(42,172,184,.10)",
+     borderWidth:2,pointRadius:2,pointHoverRadius:5,tension:.25,fill:true,spanGaps:false},
+    {label:"At current pace",data:ghost,borderColor:"#8A9BAE",borderWidth:2,borderDash:[4,4],
+     pointRadius:0,pointHoverRadius:4,tension:0,spanGaps:true}]},
+   options:{maintainAspectRatio:false,interaction:{mode:"index",intersect:false},
+    plugins:{legend:{display:false},tooltip:{...bkTip,callbacks:{
+      label:c=>c.parsed.y==null?null:c.dataset.label+": "+bkN0(c.parsed.y)+" open"}}},
+    scales:{x:bkAx(),y:bkAx({beginAtZero:true})}}});
 
-  // ── inbox table
-  const inbRows=(D.backlog||[]).filter(r=>r.scope==="Inbox");
-  const names=[...new Set(inbRows.map(r=>r.name))];
-  const series={};names.forEach(n=>series[n]=inbRows.filter(r=>r.name===n));
-  const latest=names.map(n=>({n,s:series[n],l:series[n][series[n].length-1]}))
-    .filter(x=>x.l&&x.l.dateStr===last.dateStr)
-    .sort((a,b)=>b.l.open-a.l.open);
-  if(latest.length){
-    const sumOpen=latest.reduce((s,x)=>s+x.l.open,0);
-    const sumUn=latest.reduce((s,x)=>s+(x.l.unassigned||0),0);
-    document.getElementById("bk-inbox").innerHTML=
-      `<thead><tr><th>Inbox</th><th>Open</th><th>Share</th><th>Unassigned</th><th>Unassigned %</th>
-        <th>1 reading</th><th>5 readings</th><th>Trend</th><th>Oldest</th></tr></thead><tbody>`+
-      latest.map(x=>{
-        const s=x.s,l=x.l,p=s.length>1?s[s.length-2]:null,w=s[Math.max(0,s.length-6)];
-        const d1=p?l.open-p.open:0,d5=w?l.open-w.open:0;
-        return `<tr><td>${x.n}</td><td>${l.open}</td><td>${last.open?Math.round(l.open/last.open*100):0}%</td>
-          <td>${l.unassigned!==null?l.unassigned:"—"}</td>
-          <td>${(l.unassigned!==null&&l.open)?Math.round(l.unassigned/l.open*100)+"%":"—"}</td>
-          <td>${bkDelta(d1)}</td><td>${bkDelta(d5)}</td>
-          <td>${bkSpark(s.map(r=>r.open),d5>0?"#D4604A":"#2D8A2D")}</td>
-          <td style="${l.oldest!==null&&l.oldest>30?'color:var(--coral-dark);font-weight:700':'color:var(--gray)'}">${l.oldest!==null?l.oldest+"d":"—"}</td></tr>`;
-      }).join("")+
-      `<tr style="font-weight:800;background:var(--teal-mist)"><td>Total of ${latest.length} inbox${latest.length===1?"":"es"}</td>
-        <td>${sumOpen}</td><td>${last.open?Math.round(sumOpen/last.open*100):0}%</td><td>${sumUn}</td>
-        <td>${sumOpen?Math.round(sumUn/sumOpen*100):0}%</td><td colspan="4"></td></tr></tbody>`;
-    const top=latest[0];
-    const miss=last.open-sumOpen;
+  // ── Speed, from the weekly Front export ──
+  function bkSpeed(id,key,color,nowId,dId){
+    const vals=W.map(x=>x[key]);
+    bkMk(id,{type:"line",data:{labels:W.map(x=>bkShort(x.w)),datasets:[
+      {data:vals,borderColor:color,backgroundColor:color+"1A",borderWidth:2,fill:true,
+       pointRadius:2,pointHoverRadius:5,tension:.3,spanGaps:true}]},
+     options:{maintainAspectRatio:false,plugins:{legend:{display:false},
+      tooltip:{...bkTip,callbacks:{label:c=>bkN1(c.parsed.y)+" hours"}}},
+      scales:{x:bkAx(),y:bkAx({beginAtZero:true,ticks:{padding:4,callback:v=>v+"h"}})}}});
+    const a=vals[vals.length-1],b=vals[vals.length-2];
+    document.getElementById(nowId).textContent=bkN1(a);
+    document.getElementById(dId).innerHTML=(a==null||b==null)?"":
+      `<span class="${a-b<0?"bk-dn":"bk-up"}">${bkArrow(a-b)} ${bkN1(Math.abs(a-b))}h vs prior</span>`;
+  }
+  bkSpeed("ch-bk-frt","frtH","#2AACB8","bk-frt","bk-frt-d");
+  bkSpeed("ch-bk-res","resH","#E0A800","bk-res","bk-res-d");
+
+  // ── How many did we respond to: counts, never a rate ──
+  // The only denominator available is everything archived, which includes
+  // spam, duplicates, auto replies and deliberate bulk clearing. A rate built
+  // on it falls when the team does a cleanup, so it measures the wrong thing.
+  const lw=W[W.length-1];
+  document.getElementById("bk-rep").textContent=lw?bkN0(lw.archR):"—";
+  document.getElementById("bk-rep-l").innerHTML=lw
+    ?`<span><i class="sw" style="background:var(--teal)"></i>${bkN0(lw.repl)} replies sent that week</span>`:"";
+  bkMk("ch-bk-rep",{type:"bar",data:{labels:W.map(x=>bkShort(x.w)),datasets:[
+    {data:W.map(x=>x.archR),backgroundColor:"#2AACB8",borderRadius:3,borderSkipped:false,
+     barPercentage:.68,categoryPercentage:.82}]},
+   options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...bkTip,callbacks:{
+      label:c=>bkN0(c.parsed.y)+" closed with a reply",
+      afterBody:i=>[bkN0(W[i[0].dataIndex].repl)+" replies sent that week"]}}},
+    scales:{x:bkAx(),y:bkAx({beginAtZero:true})}}});
+
+  // ── Closed without needing a reply: greyed, kept out of every ratio ──
+  const Wn=W.filter(x=>x.arch>0);
+  document.getElementById("bk-norep").textContent=
+    Wn.length?bkN0(Wn[Wn.length-1].arch-Wn[Wn.length-1].archR):"—";
+  bkMk("ch-bk-norep",{type:"bar",data:{labels:Wn.map(x=>bkShort(x.w)),datasets:[
+    {data:Wn.map(x=>x.arch-x.archR),backgroundColor:"#CFD9E3",
+     borderRadius:3,borderSkipped:false,barPercentage:.68,categoryPercentage:.82}]},
+   options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...bkTip,callbacks:{
+      label:c=>bkN0(c.parsed.y)+" closed without a reply"}}},
+    scales:{x:bkAx(),y:bkAx({beginAtZero:true})}}});
+
+  // ── Where is it sitting ──
+  const box=document.getElementById("bk-inbox");
+  if(inbox.length){
+    const mx=Math.max(...inbox.map(x=>x.open||0),1);
+    const sumOpen=inbox.reduce((a,x)=>a+x.open,0);
+    box.innerHTML=
+      `<thead><tr><th>Inbox</th><th>Open</th><th></th><th>Waiting</th><th>Unassigned</th><th>Change</th></tr></thead><tbody>`+
+      inbox.map(x=>{
+        const p=inboxPrev[x.name], dv=(p!==undefined)?x.open-p:null;
+        return `<tr><td>${x.name}</td><td><b>${bkN0(x.open)}</b></td>
+          <td style="width:70px"><span class="bk-mini"><i style="width:${x.open/mx*100}%"></i></span></td>
+          <td>${bkN0(x.waiting)}</td>
+          <td>${x.unassigned>0?`<span class="bpill bgup">${bkN0(x.unassigned)}</span>`:"0"}</td>
+          <td>${dv===null?"—":`<span class="${dv<0?"bk-dn":"bk-up"}">${bkArrow(dv)} ${Math.abs(dv)}</span>`}</td></tr>`;
+      }).join("")+`</tbody>`;
     const n=document.getElementById("bk-inbox-note");
-    if(n)n.innerHTML=(miss>0
-      ? `<b>${miss} open conversations are not in any inbox row.</b> The inbox rows add to ${sumOpen} against ${last.open} open, so some inboxes were not captured that day. `
-      : `<b>${top.n} is ${Math.round(top.l.open/last.open*100)}% of everything open.</b> `)+
-      ((top.l.unassigned!==null&&top.l.open)?`${Math.round(top.l.unassigned/top.l.open*100)}% of it is unassigned.`:"");
+    // A grower hiding inside a falling total is the thing worth saying out
+    // loud, because the headline reports it as a good week.
+    const growers=inbox.filter(x=>inboxPrev[x.name]!==undefined&&x.open>inboxPrev[x.name])
+      .sort((a,b)=>(b.open-inboxPrev[b.name])-(a.open-inboxPrev[a.name]));
+    const fellTotal=prevV!==null&&curAll<prevV;
+    if(n)n.innerHTML=(fellTotal&&growers.length
+      ? `<b>The headline is hiding something.</b> Total open fell ${Math.abs(Math.round(curAll-prevV))}, but ${growers[0].name} <b>grew</b> from ${inboxPrev[growers[0].name]} to ${growers[0].open}.`
+      : `<b>${inbox[0].name} is ${curAll?Math.round(inbox[0].open/curAll*100):0}% of everything open.</b>`)+
+      ` Inbox rows add to ${sumOpen} against ${curAll} open, because Front counts a conversation in every inbox it belongs to while the total counts it once.`;
+  }else{
+    box.innerHTML="";
+    const n=document.getElementById("bk-inbox-note");
+    if(n)n.textContent="The latest reading carried no inbox rows.";
   }
 
-  // ── teammates against unassigned
-  const tmRows=(D.backlog||[]).filter(r=>r.scope==="Teammate"&&r.dateStr===last.dateStr)
-    .sort((a,b)=>b.open-a.open);
+  // ── What is rotting ──
+  const ob=document.getElementById("bk-old");
+  const withOld=inbox.filter(x=>x.oldest!==null).sort((a,b)=>b.oldest-a.oldest);
+  if(withOld.length){
+    ob.innerHTML=`<thead><tr><th>Inbox</th><th>Oldest unreplied</th></tr></thead><tbody>`+
+      withOld.map(x=>{
+        const col=x.oldest>365?"var(--coral-dark)":x.oldest>60?"var(--coral)":"var(--green)";
+        const y=x.oldest/365;
+        return `<tr><td>${x.name}</td><td><b style="color:${col}">${bkN1(x.oldest)}</b>
+          <span style="color:var(--gray)">days${y>=1?", "+y.toFixed(1)+"y":""}</span></td></tr>`;
+      }).join("")+`</tbody>`;
+    // Ageing exactly one day per day means nobody has touched it.
+    const worst=withOld[0];
+    let note="";
+    if(prevAll){
+      const before=inbAll.find(r=>r.name===worst.name&&r.dateStr===prevAll.k&&r.oldest!==null);
+      if(before){
+        const gained=worst.oldest-before.oldest;
+        const elapsed=Math.round((lastAll.d-prevAll.d)/864e5)||1;
+        if(gained>=elapsed-0.5)
+          note=`<b>${worst.name}'s oldest aged ${bkN1(gained)} days in ${elapsed}.</b> Same conversation, untouched, while the backlog around it moved.`;
+      }
+    }
+    const n=document.getElementById("bk-old-note");
+    if(n)n.innerHTML=note;
+  }else{ob.innerHTML="";}
+
+  // ── Who is carrying it ──
+  // Front counts a person's assigned conversations across ALL inboxes and does
+  // not say which statuses it includes, so this is never shown as a share of
+  // the department total and never summed against it.
   const tmBox=document.getElementById("bk-team");
   if(tmBox){
-    const tmSum=tmRows.reduce((s,r)=>s+r.open,0);
-    const un=last.unassigned||0;
-    const mx=Math.max(...tmRows.map(r=>r.open),un,1);
-    tmBox.innerHTML=tmRows.map(r=>
-      `<div class="bk-row"><span class="n">${r.name.split(" ")[0]}</span>
-       <span class="t"><span class="f" style="width:${r.open/mx*100}%;background:var(--teal)"></span></span>
-       <span class="v">${r.open}</span></div>`).join("")+
-      (un?`<div class="bk-row"><span class="n" style="color:var(--coral-dark)">Nobody</span>
-       <span class="t"><span class="f" style="width:${un/mx*100}%;background:var(--coral-dark)"></span></span>
-       <span class="v" style="color:var(--coral-dark)">${un}</span></div>`:"");
-    const gap=tmSum+un-last.open;
-    const n=document.getElementById("bk-team-note");
-    if(n)n.innerHTML=tmRows.length
-      ? (Math.abs(gap)>2
-        ? `<b>The teammate split does not reconcile.</b> ${tmSum} assigned plus ${un} unassigned is ${tmSum+un},
-           against ${last.open} open. ${Math.abs(gap)} conversation${Math.abs(gap)===1?" is":"s are"}
-           ${gap>0?"counted twice or the two panels use different filters":"missing from both"}.`
-        : `<b>Assigned and unassigned add up.</b> ${tmSum} plus ${un} is ${tmSum+un} against ${last.open} open.`)
-      : "";
+    // Prefer readings that carry the Assigned column. Older teammate rows put
+    // the per-person count in Open, under a collection whose statuses were
+    // never pinned down, so once real Assigned rows exist the old ones stop
+    // being mixed in.
+    const tmAll=(D.backlog||[]).filter(r=>r.scope==="Teammate");
+    const withAsg=tmAll.filter(r=>r.assigned!==null&&r.assigned!==undefined);
+    const pool=withAsg.length?withAsg:tmAll;
+    const tmDates=[...new Set(pool.map(r=>r.dateStr))];
+    const tmDay=tmDates.length?tmDates[tmDates.length-1]:null;
+    const tm=pool.filter(r=>r.dateStr===tmDay)
+      .map(r=>({name:r.name,v:(r.assigned!==null&&r.assigned!==undefined)?r.assigned:r.open}))
+      .filter(r=>r.v!==null&&r.v!==undefined)
+      .sort((a,b)=>b.v-a.v);
+    if(!tm.length){
+      tmBox.innerHTML=`<div class="bk-wait">First reading lands with the next close run.<br>
+        Each person's pile and whether it is growing.</div>`;
+      const n=document.getElementById("bk-team-note");if(n)n.innerHTML="";
+    }else{
+      const mx=Math.max(...tm.map(r=>r.v),1);
+      // Front spells some names differently from the roster ("Mcleary" against
+      // "McLeary"), so match on lowercase or real people land under "not on
+      // the roster".
+      const rosterLC=ROSTER.map(p=>p.name.toLowerCase());
+      const human=tm.filter(r=>rosterLC.indexOf(String(r.name).toLowerCase())>=0);
+      const other=tm.filter(r=>human.indexOf(r)<0);
+      const colourOf=(n)=>{const p=ROSTER.find(x=>x.name.toLowerCase()===String(n).toLowerCase());
+        return p?(p.color||"var(--teal)"):"var(--gray)";};
+      const row=(r,grey)=>`<div class="bk-row"><span class="n">${r.name}</span>
+        <span class="t"><span class="f" style="width:${r.v/mx*100}%;background:${grey?"var(--gray)":colourOf(r.name)}"></span></span>
+        <span class="v">${bkN0(r.v)}</span></div>`;
+      tmBox.innerHTML=human.map(r=>row(r,false)).join("")+
+        (other.length?`<div class="bk-sep">not on the CX roster</div>`+
+          other.map(r=>row(r,true)).join(""):"");
+      const n=document.getElementById("bk-team-note");
+      if(n)n.innerHTML=`Reading of ${tmDay}. Front counts each person across every inbox, so these do not add up to the ${curAll} open in the six inboxes above, and the two cannot be reconciled.`;
+    }
   }
 
-  // ── charts
-  if(chBk1)chBk1.destroy();
-  chBk1=new Chart(document.getElementById("ch-bk1"),{type:"line",data:{labels:L,datasets:[
-    {label:"Open",data:openS,borderColor:"#B8721A",backgroundColor:"rgba(184,114,26,.10)",
-     borderWidth:2.5,pointRadius:0,tension:.25,fill:true},
-    {label:"Unassigned",data:unS,borderColor:"#D4604A",borderWidth:2,pointRadius:0,tension:.25,borderDash:[5,3]}
-  ]},options:{...cb,plugins:{...cb.plugins,legend:lgd},scales:{...cb.scales,x:xc}}});
-  if(chBk2)chBk2.destroy();
-  chBk2=new Chart(document.getElementById("ch-bk2"),{type:"bar",data:{labels:L,datasets:[
-    {label:"Change",data:deltas,backgroundColor:deltas.map(v=>v>0?"#D4604A":"#2D8A2D"),
-     borderRadius:3,barPercentage:.6}
-  ]},options:{...cb,scales:{...cb.scales,x:xc}}});
-  if(chBk3)chBk3.destroy();
-  const unPctS=T.map(r=>(r.unassigned!==null&&r.open)?Math.round(r.unassigned/r.open*100):null);
-  chBk3=new Chart(document.getElementById("ch-bk3"),{type:"line",data:{labels:L,datasets:[
-    {label:"Unassigned %",data:unPctS,borderColor:"#D4604A",backgroundColor:"rgba(212,96,74,.12)",
-     borderWidth:2.5,pointRadius:0,tension:.25,fill:true}
-  ]},options:{...cb,scales:{...cb.scales,x:xc,y:{...cb.scales.y,
-    ticks:{...cb.scales.y.ticks,callback:v=>v+"%"}}}}});
-  {const a=unPctS.find(v=>v!==null),b=[...unPctS].reverse().find(v=>v!==null);
-   const n=document.getElementById("bk-un-note");
-   if(n)n.textContent=(a!==undefined&&b!==undefined)?`Started at ${a}%, now ${b}%.`:"";}
-
-  // ── daily log
+  // ── Daily log ──
+  const TT=bkCut((D.backlog||[]).filter(r=>r.scope==="Total"));
   document.getElementById("bk-log").innerHTML=
-    `<thead><tr><th>Date</th><th>Open</th><th>Waiting</th><th>Unassigned</th><th>Change</th><th>Note</th></tr></thead><tbody>`+
-    T.slice().reverse().map((r)=>{
-      const i=T.indexOf(r),p=i>0?T[i-1]:null;
-      return `<tr><td>${r.dateStr}</td><td>${r.open}</td><td>${r.waiting!==null?r.waiting:"—"}</td>
-        <td>${r.unassigned!==null?r.unassigned:"—"}</td><td>${p?bkDelta(r.open-p.open):"—"}</td>
+    `<thead><tr><th>Date</th><th>When</th><th>Open</th><th>Waiting</th><th>Unassigned</th>
+      <th>Change</th><th>Note</th></tr></thead><tbody>`+
+    TT.slice().reverse().map((r,i,arr)=>{
+      const idx=TT.indexOf(r),p=idx>0?TT[idx-1]:null;
+      return `<tr><td>${r.dateStr}</td>
+        <td style="color:var(--gray)">${r.stamp||(r.part==="Close"?"end of shift":"start of shift")}</td>
+        <td>${bkN0(r.open)}</td><td>${bkN0(r.waiting)}</td><td>${bkN0(r.unassigned)}</td>
+        <td>${p?bkDelta(r.open-p.open):"—"}</td>
         <td style="color:var(--gray)">${r.note||""}</td></tr>`;}).join("")+`</tbody>`;
   initGlossary();
 }
