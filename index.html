@@ -250,6 +250,37 @@ font-size:11.5px;color:#7A5410;line-height:1.6;margin-top:12px}
 .rq-Urgent{background:#FDECE7;color:#D4604A}.rq-High{background:#FDF3E3;color:#B8721A}
 .rq-Medium{background:#EAF7F8;color:#2AACB8}.rq-Low{background:#F1F4F7;color:#8A9BAE}
 .rq-Unset{background:#F1F4F7;color:#8A9BAE}
+.rq-kg{grid-template-columns:repeat(auto-fit,minmax(142px,1fr))}
+.rq3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px;align-items:stretch}
+.rq3>.cd{margin-bottom:0;display:flex;flex-direction:column}
+@media(max-width:1060px){.rq3{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.rq3{grid-template-columns:1fr}}
+.rq-ages{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-top:4px}
+.rq-age{background:var(--bg);border-radius:9px;padding:10px 12px;border-left:3px solid var(--teal)}
+.rq-age .l{font-size:9.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--gray)}
+.rq-age .v{font-size:21px;font-weight:800;letter-spacing:-.6px;margin:2px 0 1px}
+.rq-age .s{font-size:10px;color:var(--gray)}
+.rq-mv{padding:7px 0;border-bottom:1px solid var(--border)}
+.rq-mv:last-child{border-bottom:none}
+.rq-mvtop{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.rq-mvnm{font-weight:600;font-size:11.5px}
+.rq-mvpc{font-weight:800;font-size:11.5px}
+.rq-mvln{display:flex;align-items:center;gap:8px;margin-top:4px}
+.rq-mvbar{flex:1;height:5px;background:var(--bg);border-radius:3px;overflow:hidden;
+ display:block;min-width:0}
+.rq-mvbar i{display:block;height:100%;border-radius:3px}
+.rq-mvlb{font-size:9.5px;color:var(--gray);width:66px;text-align:right;flex:none;
+ background:none;height:auto}
+details.rq-det{padding:0}
+details.rq-det>summary{list-style:none;cursor:pointer;padding:13px 15px;display:flex;
+ justify-content:space-between;align-items:center;gap:10px;border-radius:11px}
+details.rq-det>summary::-webkit-details-marker{display:none}
+details.rq-det>summary:hover{background:var(--teal-mist)}
+details[open].rq-det>summary{border-bottom:1px solid var(--border);border-radius:11px 11px 0 0}
+.rq-sumL{display:flex;flex-direction:column}
+.rq-chev{color:var(--gray);font-size:11px;font-weight:700;display:flex;align-items:center;gap:7px;flex:none}
+.rq-chev svg{transition:transform .16s}
+details[open] .rq-chev svg{transform:rotate(180deg)}
 #rq-tbl tr.flag td{background:#FDF4F1}
 #rq-tbl td.ord{font-family:ui-monospace,Menlo,monospace;font-size:11px}
 .dsc.hot{background:#FDF1EE}
@@ -767,33 +798,57 @@ height:auto;background:none;border-radius:0;overflow:visible;line-height:1.5}
 <div class="page-header"><div><h1>Daily Operations</h1><p>Interdepartmental requests</p></div></div>
 <div class="cd"><div class="ct">Open interdepartmental requests</div>
   <div class="csb" id="rq-sub"></div>
-  <div class="kg" id="rq-tiles" style="margin-top:13px"></div></div>
-<div class="gl2">
-  <div class="cd"><div class="ct">Raised and closed per week</div>
+  <div class="kg rq-kg" id="rq-tiles" style="margin-top:13px"></div></div>
+<div class="rq3">
+  <div class="cd"><div class="ct">Raised and closed per week
+    <span class="i" data-tip="Both bars are keyed to the week the request was raised. Closed counts requests raised that week which are now Done, so a recent week's closed bar is always low: its slow items have not finished yet.">i</span></div>
     <div class="csb" id="rq-wk-sub">By created date</div>
-    <div class="cw"><canvas id="ch-rq" height="200"></canvas></div></div>
-  <div class="cd"><div class="ct">Status</div><div class="csb" id="rq-st-sub"></div>
-    <div id="rq-status" style="margin-top:13px"></div>
-    <div class="csb" id="rq-st-note" style="margin-top:10px"></div></div>
+    <div class="cw" style="height:132px"><canvas id="ch-rq"></canvas></div></div>
+  <div class="cd"><div class="ct">Open by request type
+    <span class="i" data-tip="Requests are multi-tagged, so one request counts in each type it carries. The column therefore adds to more than the number of open requests.">i</span></div>
+    <div class="csb">Open only</div>
+    <div id="rq-types" style="margin-top:10px"></div></div>
+  <div class="cd"><div class="ct">Status
+    <span class="i r" data-tip="Every request ever raised. For CS to update CX means the other department has finished its part and the request is waiting on your team to go back to the customer.">i</span></div>
+    <div class="csb" id="rq-st-sub"></div>
+    <div id="rq-status" style="margin-top:10px"></div></div>
 </div>
-<div class="g2">
-  <div class="cd"><div class="ct">Age of what is open</div><div class="csb">Days since the request was raised</div>
-    <div id="rq-age" style="margin-top:13px"></div></div>
-  <div class="cd"><div class="ct">Open by owner</div><div class="csb">One assignee per request</div>
-    <div id="rq-owner" style="margin-top:13px"></div>
-    <div class="csb" id="rq-owner-note" style="margin-top:10px"></div></div>
+<div class="rq3">
+  <div class="cd"><div class="ct">Open by priority
+    <span class="i" data-tip="Priority is set by whoever raises the request and is never revisited, so read it as how urgent it felt on day one rather than how it ranks today.">i</span></div>
+    <div class="csb">As set when raised</div>
+    <div id="rq-pri" style="margin-top:10px"></div></div>
+  <div class="cd"><div class="ct">Falling
+    <span class="i" data-tip="The first full month of the tracker against the current month paced to a full 30 days, so a part-month is never read as a drop. Ranked by percentage change.">i</span></div>
+    <div class="csb" id="rq-down-sub"></div>
+    <div id="rq-down"></div></div>
+  <div class="cd"><div class="ct">Climbing
+    <span class="i r" data-tip="Same comparison the other way. A category with a small total still appears if it is climbing fast right now, which is how a new problem surfaces before its total catches up.">i</span></div>
+    <div class="csb" id="rq-up-sub"></div>
+    <div id="rq-up"></div></div>
 </div>
-<div class="g2">
-  <div class="cd"><div class="ct">Open by request type</div>
-    <div class="csb">Multi-tagged, so a request counts in each of its types</div>
-    <div id="rq-types" style="margin-top:13px"></div></div>
-  <div class="cd"><div class="ct">Open by priority</div><div class="csb">As set when the request was raised</div>
-    <div id="rq-pri" style="margin-top:13px"></div>
-    <div class="rq-warn" id="rq-pri-note"></div></div>
-</div>
-<div class="cd"><div class="ct">Oldest open requests</div>
-  <div class="csb">Shaded where the request is Urgent or High and over 30 days old</div>
-  <div class="tw" style="max-height:480px"><table class="tb" id="rq-tbl"></table></div></div>
+<div class="cd"><div class="ct">Age of what is open
+  <span class="i" data-tip="Days since the request was raised. Anything past 30 days has sat through two full cycles of everything else.">i</span></div>
+  <div class="csb">Days since the request was raised</div>
+  <div class="rq-ages" id="rq-age"></div></div>
+<details class="cd rq-det">
+  <summary><span class="rq-sumL">
+    <span class="ct" style="margin-bottom:0">Oldest open requests</span>
+    <span class="csb" style="margin-bottom:0" id="rq-old-sub">&nbsp;</span></span>
+    <span class="rq-chev"><span>Show</span>
+      <svg width="11" height="7" viewBox="0 0 11 7" fill="none"><path d="M1 1l4.5 4.5L10 1"
+        stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></summary>
+  <div class="tw" style="padding:0 16px 14px;max-height:440px"><table class="tb" id="rq-tbl"></table></div>
+</details>
+<details class="cd rq-det">
+  <summary><span class="rq-sumL">
+    <span class="ct" style="margin-bottom:0">Every category, before against now</span>
+    <span class="csb" style="margin-bottom:0" id="rq-cat-sub">&nbsp;</span></span>
+    <span class="rq-chev"><span>Show</span>
+      <svg width="11" height="7" viewBox="0 0 11 7" fill="none"><path d="M1 1l4.5 4.5L10 1"
+        stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></summary>
+  <div class="tw" style="padding:0 16px 14px;max-height:440px"><table class="tb" id="rq-cat"></table></div>
+</details>
 </div>
 
 <div id="ops-view-backlog" style="display:none">
@@ -4348,6 +4403,98 @@ function rqTile(l,v,s,color,hot){
     `<div class="dsv"${color?` style="color:${color}"`:""}>${v}</div><div class="dss">${s}</div></div>`;
 }
 
+// Monthly counts per category, plus the comparison that drives Falling and
+// Climbing. The baseline is the first FULL month of the tracker and the
+// comparison is the current month paced to 30 days, so neither end is a
+// part-month read at face value.
+function rqMovers(all){
+  const down=document.getElementById("rq-down"),up=document.getElementById("rq-up");
+  if(!down||!up)return;
+  const key=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+  const byMonth={},cat={};
+  all.forEach(r=>{
+    if(!r.created)return;
+    const k=key(r.created);
+    byMonth[k]=(byMonth[k]||0)+1;
+    (r.types.length?r.types:["Uncategorised"]).forEach(t=>{
+      (cat[t]=cat[t]||{})[k]=((cat[t]||{})[k]||0)+1;});
+  });
+  const months=Object.keys(byMonth).sort();
+  if(months.length<2){down.innerHTML=up.innerHTML=
+    `<div style="color:var(--gray);font-size:11.5px;padding:10px 0">Needs two months of history.</div>`;
+   return;}
+  // Days of data in each month, so a partial first or last month can be paced.
+  const today=rfToday();
+  const span=(k)=>{
+    const [y,m]=k.split("-").map(Number);
+    const first=all.reduce((a,r)=>(r.created&&key(r.created)===k&&(!a||r.created<a)?r.created:a),null);
+    const dim=new Date(y,m,0).getDate();
+    if(k===key(today))return Math.max(1,today.getDate());
+    if(k===months[0]&&first)return Math.max(1,dim-first.getDate()+1);
+    return dim;
+  };
+  const base=months.length>2?months[1]:months[0];   // first FULL month
+  const now=months[months.length-1];
+  const pace=(k,v)=>v/span(k)*30;
+  const MN=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const lab=k=>MN[+k.split("-")[1]-1];
+  const rows=Object.entries(cat).map(([n,m])=>{
+    const s=m[base]||0, e=pace(now,m[now]||0);
+    return {n:n,sep:s,nov:e,t:Object.values(m).reduce((a,b)=>a+b,0),
+      delta:s?((e-s)/s*100):(e>0?null:0)};
+  // Enough volume to be real: a solid total, or a small total climbing fast
+  // right now. The second test is what lets a new problem surface before its
+  // all-time total catches up.
+  }).filter(r=>(r.t>=20||r.nov>=10)&&r.n!=="Other"&&r.n!=="Uncategorised")
+    .sort((a,b)=>(a.delta===null?1e9:a.delta)-(b.delta===null?1e9:b.delta));
+  const mx=Math.max(...rows.map(r=>Math.max(r.sep,r.nov)),1);
+  const row=r=>{
+    const nw=r.delta===null, flat=!nw&&Math.abs(r.delta)<5, good=!nw&&r.delta<0;
+    const col=nw?"var(--coral-dark)":flat?"var(--gray)":good?"var(--green)":"var(--coral-dark)";
+    const mark=nw?"new":flat?"flat":(good?"▼":"▲")+" "+Math.abs(Math.round(r.delta))+"%";
+    return `<div class="rq-mv"><div class="rq-mvtop"><span class="rq-mvnm">${r.n}</span>
+      <span class="rq-mvpc" style="color:${col}">${mark}</span></div>
+      <div class="rq-mvln"><span class="rq-mvbar"><i style="width:${r.sep/mx*100}%;background:#CFD9E3"></i></span>
+        <span class="rq-mvlb">${lab(base)} ${Math.round(r.sep)}</span></div>
+      <div class="rq-mvln"><span class="rq-mvbar"><i style="width:${r.nov/mx*100}%;background:${col}"></i></span>
+        <span class="rq-mvlb">${lab(now)} ${Math.round(r.nov)}</span></div></div>`;
+  };
+  const sub=`${lab(base)} against ${lab(now)}`;
+  {const a=document.getElementById("rq-down-sub"),b=document.getElementById("rq-up-sub");
+   if(a)a.textContent=sub; if(b)b.textContent=sub;}
+  const fall=rows.filter(r=>r.delta!==null&&r.delta<=-5).slice(0,4);
+  const rise=rows.filter(r=>r.delta===null||r.delta>=5).reverse().slice(0,4);
+  const none=`<div style="color:var(--gray);font-size:11.5px;padding:10px 0">Nothing moved more than 5%.</div>`;
+  down.innerHTML=fall.length?fall.map(row).join(""):none;
+  up.innerHTML=rise.length?rise.map(row).join(""):none;
+
+  // ── full table, behind the dropdown ──
+  const show=months.slice(-4);
+  const all_=Object.entries(cat).map(([n,m])=>({n:n,m:m,
+    t:Object.values(m).reduce((a,b)=>a+b,0)})).filter(r=>r.t>=5).sort((a,b)=>b.t-a.t);
+  const openCat={};
+  all.filter(r=>r.status!=="Done").forEach(r=>
+    (r.types.length?r.types:["Uncategorised"]).forEach(t=>{openCat[t]=(openCat[t]||0)+1;}));
+  {const s=document.getElementById("rq-cat-sub");
+   if(s)s.textContent=`${all_.length} categories · ${all.length} requests since `+
+     (all.reduce((a,r)=>(r.created&&(!a||r.created<a)?r.created:a),null)||today).toLocaleDateString("en-US",{month:"long",day:"numeric"});}
+  const t=document.getElementById("rq-cat");
+  if(t)t.innerHTML=`<thead><tr><th>Category</th>`+
+    show.map(k=>`<th>${lab(k)}</th>`).join("")+
+    `<th>${lab(now)} paced</th><th>Total</th><th>Open</th><th>${lab(base)} to ${lab(now)}</th></tr></thead><tbody>`+
+    all_.map(r=>{
+      const s=r.m[base]||0, e=pace(now,r.m[now]||0), d=s?((e-s)/s*100):null;
+      const op=openCat[r.n]||0;
+      return `<tr><td>${r.n}</td>`+
+        show.map(k=>`<td>${r.m[k]||""}</td>`).join("")+
+        `<td style="color:var(--gray)">${Math.round(e)}</td><td><b>${r.t}</b></td>`+
+        `<td>${op?`<span class="bpill bgup">${op}</span>`:"0"}</td>`+
+        `<td>${d===null?`<span style="color:var(--gray)">new</span>`
+          :Math.abs(d)<5?`<span style="color:var(--gray)">flat</span>`
+          :`<span style="font-weight:700;color:${d<0?"var(--green)":"var(--coral-dark)"}">${d<0?"▼":"▲"} ${Math.abs(Math.round(d))}%</span>`}</td></tr>`;
+    }).join("")+`</tbody>`;
+}
+
 function buildReq(){
   const all=D.interdept||[];
   const wrap=document.getElementById("rq-tiles");if(!wrap)return;
@@ -4399,25 +4546,16 @@ function buildReq(){
   {const cs=st["For CS to update CX"]||0;const n=document.getElementById("rq-st-note");
    if(n)n.innerHTML=cs?`<b>For CS to update CX</b> at ${cs} is work finished on the other side, waiting on us to tell the customer.`:"";}
 
-  // ── age
+  // ── age, as inline blocks rather than bars so it costs one short row
   const ageCount=RQ_AGE.map(b=>[b[0],aged.filter(x=>x.a>=b[1]&&x.a<=b[2]).length,b[3]]);
-  const ageMax=Math.max(...ageCount.map(x=>x[1]),1);
   document.getElementById("rq-age").innerHTML=
-    ageCount.map(x=>rqBar(x[0]+" days",x[1],ageMax,x[2],96)).join("");
-
-  // ── owner
-  const ow={};open.forEach(r=>{ow[r.owner]=(ow[r.owner]||0)+1;});
-  const owArr=Object.entries(ow).sort((a,b)=>b[1]-a[1]);
-  const owMax=owArr[0]?owArr[0][1]:1;
-  document.getElementById("rq-owner").innerHTML=
-    owArr.map(([k,v])=>rqBar(k,v,owMax,REQ_EXTERNAL.indexOf(k)>=0?"#6C5CE7":"#2AACB8",96)).join("");
-  {const ext=owArr.filter(x=>REQ_EXTERNAL.indexOf(x[0])>=0).reduce((s,x)=>s+x[1],0);
-   const n=document.getElementById("rq-owner-note");
-   if(n)n.innerHTML=`Purple is the other side, teal is ours. <b>${ext}</b> of ${open.length} sit outside CS.`;}
+    ageCount.map(x=>`<div class="rq-age" style="border-left-color:${x[2]}">
+      <div class="l">${x[0]} days</div><div class="v" style="color:${x[2]}">${x[1]}</div>
+      <div class="s">${open.length?Math.round(x[1]/open.length*100):0}% of open</div></div>`).join("");
 
   // ── types
   const ty={};open.forEach(r=>r.types.forEach(t=>{ty[t]=(ty[t]||0)+1;}));
-  const tyArr=Object.entries(ty).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const tyArr=Object.entries(ty).sort((a,b)=>b[1]-a[1]).slice(0,6);
   const tyMax=tyArr[0]?tyArr[0][1]:1;
   document.getElementById("rq-types").innerHTML=
     tyArr.map(([k,v])=>rqBar(k,v,tyMax,"#2AACB8")).join("");
@@ -4426,13 +4564,16 @@ function buildReq(){
   const priMax=Math.max(...RQ_PRI.map(k=>pri[k]||0),1);
   document.getElementById("rq-pri").innerHTML=
     RQ_PRI.filter(k=>pri[k]).map(k=>rqBar(k,pri[k],priMax,RQ_PCOL[k],96)).join("");
-  {const n=document.getElementById("rq-pri-note");
-   if(n)n.innerHTML=hot?`<b>${hot} requests are Urgent or High and older than two weeks.</b> `+
-     `That is ${Math.round(hot/open.length*100)}% of everything open.`:
-     `<b>Nothing Urgent or High has been open longer than two weeks.</b>`;}
+  // ── before against now ──
+  // Every row carries a Created time, so the whole history is already in this
+  // one export. Partial months are paced to 30 days, or a month that is three
+  // weeks in always reads as an improvement.
+  rqMovers(all);
 
   // ── oldest table
-  const rows=aged.slice(0,15);
+  const rows=aged.slice(0,30);
+  {const s=document.getElementById("rq-old-sub");
+   if(s)s.textContent=`${rows.length} shown${rows[0]?", oldest "+rows[0].a+" days":""}`;}
   document.getElementById("rq-tbl").innerHTML=
     `<thead><tr><th>Order</th><th>Type</th><th>Status</th><th>Owner</th><th>Priority</th><th>Age</th></tr></thead><tbody>`+
     rows.map(x=>{const r=x.r,flag=(r.priority==="Urgent"||r.priority==="High")&&x.a>30;
@@ -4451,6 +4592,11 @@ function buildReq(){
     {label:"Of those, closed",data:wks.map(w=>w.done),backgroundColor:"#2D8A2D",borderRadius:4,barPercentage:.45}
   ]},options:{...cb,plugins:{...cb.plugins,legend:lgd}}});
 
+  document.querySelectorAll("#ops-view-req details.rq-det").forEach(d=>{
+    if(d.dataset.wired)return; d.dataset.wired="1";
+    d.addEventListener("toggle",()=>{
+      d.querySelector(".rq-chev span").textContent=d.open?"Hide":"Show";});
+  });
   initGlossary();
 }
 
