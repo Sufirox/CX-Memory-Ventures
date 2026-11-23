@@ -712,89 +712,10 @@ height:auto;background:none;border-radius:0;overflow:visible;line-height:1.5}
 
 <div id="page-ops" class="page">
 <div class="ops-subnav">
-  <button class="ops-sub active" data-osub="issues">Issues Tracker</button>
-  <button class="ops-sub" data-osub="front">Front Daily Records</button>
-  <button class="ops-sub" data-osub="req">Interdept Requests</button>
+  <button class="ops-sub active" data-osub="req">Interdept Requests</button>
   <button class="ops-sub" data-osub="backlog">Backlog</button>
 </div>
-<div id="ops-view-issues">
-<div class="page-header">
-  <div><h1>Daily Operations</h1><p id="ops-sub">Issues tracker</p></div>
-  <div class="rf-range">
-    <label>From</label><input type="date" id="ops-from">
-    <label>To</label><input type="date" id="ops-to">
-    <div class="rf-preset">
-      <button class="dr-btn" data-opsr="mtd">This Month</button>
-      <button class="dr-btn" data-opsr="30d">Last 30d</button>
-      <button class="dr-btn" data-opsr="ytd">YTD</button>
-      <button class="dr-btn active" data-opsr="all">All</button>
-    </div>
-  </div>
-</div>
-<div class="stats-row" id="ops-stats"></div>
-<div class="g2"><div class="cd"><div class="ct">Issues &amp; Department in Charge of Reviewing</div><div class="csb" id="ops-dept-sub">Selected range</div><div class="cw"><canvas id="ch-dept" height="190"></canvas></div></div>
-<div class="cd"><div class="ct">Top Issue Categories</div><div class="csb" id="ops-cat-sub">Most frequent</div><div class="cw"><canvas id="ch-cat" height="190"></canvas></div></div></div>
-<div class="cd" style="margin-top:20px"><div class="ct">Recent Issues Log</div><div class="csb" id="ops-log-sub">Filterable</div>
-<div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
-<select class="sel" id="ops-df"><option value="All">All Depts</option></select>
-<select class="sel" id="ops-if"><option value="All">All Impact</option><option value="High">High</option><option value="Medium">Medium</option><option value="Low">Low</option></select></div>
-<div class="tw" style="max-height:450px"><table class="tb" id="ops-tbl"></table></div></div>
-</div>
-
-<div id="ops-view-front" style="display:none">
-<div class="page-header">
-  <div><h1>Front Daily Records</h1><p id="fd-sub">Inbox at open and at close, each working day</p></div>
-  <div class="rf-range">
-    <label>Who</label>
-    <select class="sel" id="fd-who" style="margin-right:10px">
-      <option value="ALL">Whole team</option>
-      <option value="Angel">Angel</option>
-      <option value="Fatima">Fatima</option>
-      <option value="Luisa">Luisa</option>
-      <option value="Ivan">Ivan (social, past)</option>
-      <option value="Vanessa">Vanessa (social, past)</option>
-    </select>
-    <label>From</label><input type="date" id="fd-from">
-    <label>To</label><input type="date" id="fd-to">
-    <div class="rf-preset">
-      <button class="dr-btn" data-fdr="mtd">This Month</button>
-      <button class="dr-btn active" data-fdr="30d">Last 30d</button>
-      <button class="dr-btn" data-fdr="90d">Last 90d</button>
-      <button class="dr-btn" data-fdr="ytd">YTD</button>
-      <button class="dr-btn" data-fdr="all">All</button>
-    </div>
-  </div>
-</div>
-
-<div class="stats-row" id="fd-stats"></div>
-
-<div class="cd" style="margin-bottom:16px">
-  <div class="ct">Inbox Through the Day</div>
-  <div class="csb" id="fd-trend-sub">Tickets waiting at open versus left at close</div>
-  <div class="cw" style="height:160px"><canvas id="fd-trend"></canvas></div>
-</div>
-
-<div class="g2">
-  <div class="cd">
-    <div class="ct" style="font-size:13px;font-weight:600">Cleared per Day by Agent</div>
-    <div class="csb">Tickets taken off the board, averaged across the range</div>
-    <div class="cw"><canvas id="fd-agent" height="215"></canvas></div>
-  </div>
-  <div class="cd">
-    <div class="ct" style="font-size:13px;font-weight:600">Backlog Age &amp; Snoozed</div>
-    <div class="csb" id="fd-age-sub">Oldest waiting ticket, in days</div>
-    <div class="cw"><canvas id="fd-age" height="215"></canvas></div>
-  </div>
-</div>
-
-<div class="cd" style="margin-top:16px">
-  <div class="ct" style="font-size:13px;font-weight:600">Daily Log</div>
-  <div class="csb" id="fd-log-sub">Newest first</div>
-  <div class="tw" style="max-height:460px"><table class="tb" id="fd-tbl"></table></div>
-</div>
-</div>
-
-<div id="ops-view-req" style="display:none">
+<div id="ops-view-req">
 <div class="page-header"><div><h1>Daily Operations</h1><p>Interdepartmental requests</p></div></div>
 <div class="cd"><div class="ct">Open interdepartmental requests</div>
   <div class="csb" id="rq-sub"></div>
@@ -2959,8 +2880,7 @@ function attachRangePicker(fromId,toId){
 
 // Every range control on the dashboard, wired once the page is up.
 function initRangePickers(){
-  [["ops-from","ops-to"],["fd-from","fd-to"],["bk-from","bk-to"],
-   ["rf-from","rf-to"],["rf-d-from","rf-d-to"],["cb-from","cb-to"],
+  [["rf-from","rf-to"],["rf-d-from","rf-d-to"],["cb-from","cb-to"],
    ["date-from","date-to"]].forEach(([a,b])=>attachRangePicker(a,b));
   // Presets set input values in code, which fires no change event, so the
   // labels are refreshed after any preset click rather than by listening.
@@ -4600,45 +4520,22 @@ function buildReq(){
   initGlossary();
 }
 
+// Daily Operations now holds two views. The Issues Tracker and Front Daily
+// Records tabs were removed in Nov 2026; their feeds are still parsed and are
+// still used elsewhere on the dashboard.
 function buildOps(){window._o=1;
   document.querySelectorAll("#page-ops [data-osub]").forEach(b=>{
     b.addEventListener("click",()=>{
       document.querySelectorAll("#page-ops [data-osub]").forEach(x=>x.classList.remove("active"));
       b.classList.add("active");
       const v=b.dataset.osub;
-      document.getElementById("ops-view-issues").style.display=v==="issues"?"":"none";
-      document.getElementById("ops-view-front").style.display=v==="front"?"":"none";
       document.getElementById("ops-view-req").style.display=v==="req"?"":"none";
       document.getElementById("ops-view-backlog").style.display=v==="backlog"?"":"none";
-      if(v==="front")buildFrontDaily();
       if(v==="req")buildReq();
       if(v==="backlog")buildBacklog();
     });
   });
-
-  const fromEl=document.getElementById("ops-from"),toEl=document.getElementById("ops-to");
-  opsApplyPreset("all",fromEl,toEl);
-
-  // Department options come from the data, not a hardcoded list
-  const dfEl=document.getElementById("ops-df");
-  const depts=[...new Set(D.issues.map(i=>i.dept).filter(Boolean))].sort();
-  dfEl.innerHTML=`<option value="All">All Depts</option>`+depts.map(d=>`<option value="${d}">${d}</option>`).join("");
-
-  fromEl.addEventListener("change",renderOps);
-  toEl.addEventListener("change",renderOps);
-  document.querySelectorAll("#page-ops [data-opsr]").forEach(btn=>{
-    btn.addEventListener("click",()=>{
-      document.querySelectorAll("#page-ops [data-opsr]").forEach(x=>x.classList.remove("active"));
-      btn.classList.add("active");
-      opsApplyPreset(btn.dataset.opsr,fromEl,toEl);renderOps();
-    });
-  });
-  [fromEl,toEl].forEach(el=>{
-    el.addEventListener("click",()=>{if(typeof el.showPicker==="function"){try{el.showPicker();}catch(e){}}});
-  });
-  document.getElementById("ops-df").addEventListener("change",renderOps);
-  document.getElementById("ops-if").addEventListener("change",renderOps);
-  renderOps();
+  buildReq();
 }
 
 function renderOps(){
