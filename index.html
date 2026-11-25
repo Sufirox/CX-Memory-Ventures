@@ -385,9 +385,7 @@ padding:8px 0;border-bottom:1px solid #F6F8FA;font-size:12px}
 .rf-cat .cbf{display:block;height:100%;border-radius:4px}
 .rf-cat .cv{text-align:right;font-weight:700;font-size:11.5px}
 .rf-cat .cc{text-align:right;font-size:11px;color:var(--gray)}
-.pq-trend{margin:16px 0 4px;padding-top:14px;border-top:1px solid var(--border)}
-.pq-th{font-size:12px;font-weight:700;display:flex;align-items:center}
-.pq-ts{font-size:10.5px;color:var(--gray);margin:2px 0 10px}
+.pq-ts{font-size:10.5px;color:var(--gray);margin:0 0 10px;line-height:1.5}
 .pq-leg{display:flex;gap:12px;flex-wrap:wrap;font-size:10px;color:var(--gray);margin-top:8px;align-items:center}
 .pq-leg span{display:flex;gap:5px;align-items:center}
 .rf-pend{font-size:8.5px;font-weight:800;background:#FFF4E6;color:#B8721A;padding:1px 6px;border-radius:8px;margin-left:6px}
@@ -894,17 +892,18 @@ height:auto;background:none;border-radius:0;overflow:visible;line-height:1.5}
     <div class="ct" id="pend-title">Pending to Process</div>
     <div class="csb" style="margin:2px 0 13px" id="pend-sub"></div>
     <div id="pend-tiles"></div>
-    <div class="pq-trend" id="pq-trend-wrap">
-      <div class="pq-th">Received against cleared, by the week it came in
-        <span class="i" data-tip="Each bar is the week a request was submitted, split into the part now cleared and the part still pending. The line is the share of that week's intake which has been cleared.
-
-The form records no resolution date, so this cannot show work done per week. It shows how each intake week has fared since.">i</span></div>
-      <div class="pq-ts">Pale bars arrived in the last 14 days and are too recent to judge</div>
-      <div class="cw" style="height:150px"><canvas id="ch-pq"></canvas></div>
-      <div class="pq-leg">
-        <span><i class="sw" style="background:var(--green)"></i>cleared</span>
-        <span><i class="sw" style="background:var(--coral)"></i>still pending</span>
-        <span><i class="swl" style="background:#0D2137"></i>share cleared</span>
+    <div class="inline-fold" id="pq-trend-wrap">
+      <div class="inline-hd"><span class="a2">&#9654;</span> Show received against cleared, by intake week</div>
+      <div class="inline-body">
+        <div class="pq-ts">Each bar is the week a request came in, split into the part now cleared
+          and the part still pending. Pale bars arrived in the last 14 days and are too recent to judge.
+          <span class="i" data-tip="The form records no resolution date, so this cannot show work done per week. It shows how each intake week has fared since.">i</span></div>
+        <div class="cw" style="height:150px"><canvas id="ch-pq"></canvas></div>
+        <div class="pq-leg">
+          <span><i class="sw" style="background:var(--green)"></i>cleared</span>
+          <span><i class="sw" style="background:var(--coral)"></i>still pending</span>
+          <span><i class="swl" style="background:#0D2137"></i>share cleared</span>
+        </div>
       </div>
     </div>
     <div class="inline-fold" id="pend-more">
@@ -5039,6 +5038,9 @@ function pqTrend(){
   const el=document.getElementById("ch-pq");
   const wrap=document.getElementById("pq-trend-wrap");
   if(!el||!wrap)return;
+  // Chart.js measures its container, and a collapsed fold has no height, so a
+  // chart built while hidden comes back flat. Build it on first open instead.
+  if(!wrap.classList.contains("open"))return;
   const rows=(D.pending||[]).map(x=>{
     const m=String(x.stamp||"").match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
     if(!m)return null;
@@ -5046,7 +5048,6 @@ function pqTrend(){
     return {d:new Date(y,+m[1]-1,+m[2]),res:!!x.handled};
   }).filter(Boolean).sort((a,b)=>a.d-b.d);
   if(rows.length<4){wrap.style.display="none";return;}
-  wrap.style.display="";
 
   const wk={};
   rows.forEach(r=>{
@@ -5446,7 +5447,11 @@ async function buildRefunds(){
   document.querySelectorAll("#page-refunds .foldhd").forEach(hd=>
     hd.addEventListener("click",()=>hd.parentElement.classList.toggle("open")));
   document.querySelectorAll("#page-refunds .inline-hd").forEach(hd=>
-    hd.addEventListener("click",()=>hd.parentElement.classList.toggle("open")));
+    hd.addEventListener("click",()=>{
+      const fold=hd.parentElement;
+      fold.classList.toggle("open");
+      if(fold.id==="pq-trend-wrap"&&fold.classList.contains("open"))pqTrend();
+    }));
 
   // Make entire date input clickable (not just the tiny calendar icon)
   [fromEl,toEl,dFromEl,dToEl].forEach(el=>{
