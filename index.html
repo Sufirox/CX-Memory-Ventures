@@ -385,6 +385,11 @@ padding:8px 0;border-bottom:1px solid #F6F8FA;font-size:12px}
 .rf-cat .cbf{display:block;height:100%;border-radius:4px}
 .rf-cat .cv{text-align:right;font-weight:700;font-size:11.5px}
 .rf-cat .cc{text-align:right;font-size:11px;color:var(--gray)}
+.pq-trend{margin:16px 0 4px;padding-top:14px;border-top:1px solid var(--border)}
+.pq-th{font-size:12px;font-weight:700;display:flex;align-items:center}
+.pq-ts{font-size:10.5px;color:var(--gray);margin:2px 0 10px}
+.pq-leg{display:flex;gap:12px;flex-wrap:wrap;font-size:10px;color:var(--gray);margin-top:8px;align-items:center}
+.pq-leg span{display:flex;gap:5px;align-items:center}
 .rf-pend{font-size:8.5px;font-weight:800;background:#FFF4E6;color:#B8721A;padding:1px 6px;border-radius:8px;margin-left:6px}
 .rf-oth{background:var(--bg);border-radius:8px;padding:10px 12px;margin:4px 0 8px;display:none}
 .rf-oth.on{display:block}
@@ -889,6 +894,19 @@ height:auto;background:none;border-radius:0;overflow:visible;line-height:1.5}
     <div class="ct" id="pend-title">Pending to Process</div>
     <div class="csb" style="margin:2px 0 13px" id="pend-sub"></div>
     <div id="pend-tiles"></div>
+    <div class="pq-trend" id="pq-trend-wrap">
+      <div class="pq-th">Received against cleared, by the week it came in
+        <span class="i" data-tip="Each bar is the week a request was submitted, split into the part now cleared and the part still pending. The line is the share of that week's intake which has been cleared.
+
+The form records no resolution date, so this cannot show work done per week. It shows how each intake week has fared since.">i</span></div>
+      <div class="pq-ts">Pale bars arrived in the last 14 days and are too recent to judge</div>
+      <div class="cw" style="height:150px"><canvas id="ch-pq"></canvas></div>
+      <div class="pq-leg">
+        <span><i class="sw" style="background:var(--green)"></i>cleared</span>
+        <span><i class="sw" style="background:var(--coral)"></i>still pending</span>
+        <span><i class="swl" style="background:#0D2137"></i>share cleared</span>
+      </div>
+    </div>
     <div class="inline-fold" id="pend-more">
       <div class="inline-hd"><span class="a2">&#9654;</span> Show priority breakdown and the full queue</div>
       <div class="inline-body" id="pend-body"></div>
@@ -1318,7 +1336,7 @@ async function loadAll(){
   }
 
   // ═══ PARSE PENDING REFUND REQUESTS ═══
-  // A=Handled TRUE/FALSE, C=date of request, D=company, E=team member,
+  // A=Handled TRUE/FALSE, B=form timestamp, C=date of request, D=company, E=team member,
   // F=order id, G=email, H=amount, I=reason, J=description, K=priority
   for(let i=1;i<pendRef.length;i++){
     const r=pendRef[i];
@@ -1328,6 +1346,9 @@ async function loadAll(){
     const amt=(clean!==""&&!isNaN(parseFloat(clean))&&/^-?[\d.]+$/.test(clean))?parseFloat(clean):null;
     D.pending.push({
       handled:String(r[0]).trim().toUpperCase()==="TRUE",
+      // B is the form submission time, C is the date the agent typed in. The
+      // trend uses B because it is machine-written and always present.
+      stamp:String(r[1]||"").trim(),
       date:String(r[2]||"").trim(),
       brand:String(r[3]||"").trim()||"(not set)",
       member:String(r[4]||"").trim()||"(not set)",
@@ -3999,19 +4020,45 @@ function buildBacklog(){
   const cur=last.c!==null?last.c:last.o;
   const lastAll=ALL[ALL.length-1], prevAll=ALL.length>1?ALL[ALL.length-2]:null;
   const curAll=lastAll.c!==null?lastAll.c:lastAll.o;
-  const prevV=prevAll?(prevAll.c!==null?prevAll.c:prevAll.o):null;
+  // "Since last reading" means the reading before this one, which since the
+  // snapshot went twice daily is usually this morning rather than yesterday.
+  const flat=[];
+  ALL.forEach(x=>{
+    if(x.o!==null)flat.push({k:x.k,part:"start of shift",v:x.o,d:x.d});
+    if(x.c!==null)flat.push({k:x.k,part:"end of shift",v:x.c,d:x.d});
+  });
+  const prevFlat=flat.length>1?flat[flat.length-2]:null;
+  const prevV=prevFlat?prevFlat.v:null;
   const peak=ALL.reduce((a,x)=>Math.max(a,x.o||0,x.c||0),0);
 
   // ── Inbox rows for the newest reading ──
   const inbAll=(D.backlog||[]).filter(r=>r.scope==="Inbox");
-  const inbox=inbAll.filter(r=>r.dateStr===lastAll.k).sort((a,b)=>b.open-a.open);
+  // Since the snapshot went twice daily each date carries BOTH an Open and a
+  // Close reading, so a row has to be picked by date AND part of day. Matching
+  // on date alone lists every inbox twice.
+  const bkReadings=(rows)=>{
+    const seen={},out=[];
+    rows.forEach(r=>{
+      const k=r.dateStr+"|"+(r.part||"Open");
+      if(seen[k])return; seen[k]=1;
+      out.push({k:r.dateStr,part:r.part||"Open",d:r.d});
+    });
+    return out.sort((a,b)=>a.d-b.d||(a.part==="Open"?-1:1));
+  };
+  const inbReads=bkReadings(inbAll);
+  const lastRead=inbReads[inbReads.length-1]||null;
+  const prevRead=inbReads.length>1?inbReads[inbReads.length-2]:null;
+  const atRead=(rd)=>rd?inbAll.filter(r=>r.dateStr===rd.k&&(r.part||"Open")===rd.part):[];
+  const inbox=atRead(lastRead).sort((a,b)=>b.open-a.open);
   const inboxPrev={};
-  if(prevAll)inbAll.filter(r=>r.dateStr===prevAll.k).forEach(r=>inboxPrev[r.name]=r.open);
+  atRead(prevRead).forEach(r=>inboxPrev[r.name]=r.open);
   const waitTot=inbox.reduce((a,x)=>a+(x.waiting||0),0)||
     (lastAll.wc!==null?lastAll.wc:lastAll.wo)||0;
   const unTot=lastAll.uc!==null?lastAll.uc:lastAll.uo;
   const oldestRow=inbox.slice().sort((a,b)=>(b.oldest||0)-(a.oldest||0))[0];
-  const snooze=(D.backlog||[]).find(r=>r.scope==="Total"&&r.dateStr===lastAll.k&&r.snoozed!==null);
+  const snooze=(D.backlog||[]).find(r=>r.scope==="Total"&&lastRead&&r.dateStr===lastRead.k
+    &&(r.part||"Open")===lastRead.part&&r.snoozed!==null)
+    ||(D.backlog||[]).find(r=>r.scope==="Total"&&r.dateStr===(lastRead?lastRead.k:"")&&r.snoozed!==null);
 
   // ── Tiles ──
   const pct=(a,b)=>b?((a-b)/b*100):0;
@@ -4024,7 +4071,7 @@ function buildBacklog(){
    {l:"Open now",v:bkN0(curAll),s:(names.length||"?")+" inboxes, "+lastAll.k,c:"var(--teal)",tip:tip},
    prevV!==null
     ? {l:"Since last reading",v:bkArrow(curAll-prevV)+" "+Math.abs(Math.round(curAll-prevV)),
-       s:bkN1(Math.abs(pct(curAll,prevV)))+"% from "+prevAll.k,
+       s:bkN1(Math.abs(pct(curAll,prevV)))+"% from "+(prevFlat?prevFlat.k+" "+prevFlat.part:""),
        k:curAll<prevV?"bk-dn":"bk-up",c:curAll<prevV?"var(--green)":"var(--coral-dark)"}
     : {l:"Since last reading",v:"—",s:"needs a second reading",c:"var(--gray)"},
    {l:"Off the peak",v:bkN1(pct(curAll,peak))+"%",s:"peak "+bkN0(peak)+" on "+
@@ -4230,11 +4277,12 @@ function buildBacklog(){
     // Ageing exactly one day per day means nobody has touched it.
     const worst=withOld[0];
     let note="";
-    if(prevAll){
-      const before=inbAll.find(r=>r.name===worst.name&&r.dateStr===prevAll.k&&r.oldest!==null);
+    if(prevRead){
+      const before=inbAll.find(r=>r.name===worst.name&&r.dateStr===prevRead.k
+        &&(r.part||"Open")===prevRead.part&&r.oldest!==null);
       if(before){
         const gained=worst.oldest-before.oldest;
-        const elapsed=Math.round((lastAll.d-prevAll.d)/864e5)||1;
+        const elapsed=Math.max(1,Math.round((lastRead.d-prevRead.d)/864e5));
         if(gained>=elapsed-0.5)
           note=`<b>${worst.name}'s oldest aged ${bkN1(gained)} days in ${elapsed}.</b> Same conversation, untouched, while the backlog around it moved.`;
       }
@@ -4256,9 +4304,13 @@ function buildBacklog(){
     const tmAll=(D.backlog||[]).filter(r=>r.scope==="Teammate");
     const withAsg=tmAll.filter(r=>r.assigned!==null&&r.assigned!==undefined);
     const pool=withAsg.length?withAsg:tmAll;
-    const tmDates=[...new Set(pool.map(r=>r.dateStr))];
-    const tmDay=tmDates.length?tmDates[tmDates.length-1]:null;
-    const tm=pool.filter(r=>r.dateStr===tmDay&&BK_HIDE.indexOf(r.name)<0)
+    // Date AND part of day, or every person is listed twice once the snapshot
+    // runs morning and evening.
+    const tmReads=bkReadings(pool);
+    const tmRead=tmReads[tmReads.length-1]||null;
+    const tmDay=tmRead?tmRead.k:null;
+    const tm=pool.filter(r=>tmRead&&r.dateStr===tmRead.k&&(r.part||"Open")===tmRead.part
+        &&BK_HIDE.indexOf(r.name)<0)
       .map(r=>({name:r.name,v:(r.assigned!==null&&r.assigned!==undefined)?r.assigned:r.open}))
       .filter(r=>r.v!==null&&r.v!==undefined)
       .sort((a,b)=>b.v-a.v);
@@ -4647,10 +4699,10 @@ const SC_REALMS={
       "I experienced technical issues with accessing my media",
       "I am not satisfied with the quality of the service",
       "The service is too expensive","Other"],
-    pending:["Accidental subscription"]},
+    pending:[]},
   Order:{label:"Order",color:"#E8967A",
     cats:["Customer Cancellation","Payment Error","Overpayment","Service Issue","Duplicate Order","Other"],
-    pending:["Overpayment"]}
+    pending:[]}
 };
 // The three free-text spellings of the same event.
 // Inside the Subscription realm, "not aware" always means the customer did not
@@ -4975,6 +5027,71 @@ function pqDays(dateStr){
   const d=new Date(+m[3],+m[1]-1,+m[2]);
   return Math.floor((rfToday()-d)/864e5);
 }
+// ═══ PENDING REFUNDS, INTAKE TREND ═══
+// Deliberately not a received-against-processed chart. The form has a Resolved
+// checkbox and no resolution date, so throughput per week does not exist in
+// this data. What does exist is how each intake week has fared since, which is
+// what this shows: bars split cleared against still pending, line is the share
+// cleared. Adding a "Resolved date" column to the form would make true
+// throughput measurable from that day on.
+let pqChart=null;
+function pqTrend(){
+  const el=document.getElementById("ch-pq");
+  const wrap=document.getElementById("pq-trend-wrap");
+  if(!el||!wrap)return;
+  const rows=(D.pending||[]).map(x=>{
+    const m=String(x.stamp||"").match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+    if(!m)return null;
+    let y=+m[3]; if(y<100)y+=2000;
+    return {d:new Date(y,+m[1]-1,+m[2]),res:!!x.handled};
+  }).filter(Boolean).sort((a,b)=>a.d-b.d);
+  if(rows.length<4){wrap.style.display="none";return;}
+  wrap.style.display="";
+
+  const wk={};
+  rows.forEach(r=>{
+    const s=new Date(r.d.getFullYear(),r.d.getMonth(),r.d.getDate());
+    s.setDate(s.getDate()-s.getDay());           // Sunday start, like Front
+    const k=s.getTime();
+    const e=wk[k]||(wk[k]={d:s,recv:0,res:0});
+    e.recv++; if(r.res)e.res++;
+  });
+  const W=Object.values(wk).sort((a,b)=>a.d-b.d).slice(-20);
+  // The newest two intake weeks have not had time to clear, so they are drawn
+  // pale rather than read as a collapse in performance.
+  const RECENT=2;
+  const lab=d=>(d.getMonth()+1)+"/"+d.getDate();
+  if(pqChart)pqChart.destroy();
+  pqChart=new Chart(el,{
+    data:{labels:W.map(w=>lab(w.d)),datasets:[
+      {type:"bar",label:"Cleared",data:W.map(w=>w.res),backgroundColor:"#2D8A2D",
+       stack:"a",borderRadius:{bottomLeft:3,bottomRight:3},borderSkipped:false,
+       barPercentage:.68,categoryPercentage:.84,order:2,yAxisID:"y"},
+      {type:"bar",label:"Still pending",data:W.map(w=>w.recv-w.res),
+       backgroundColor:W.map((w,i)=>i>=W.length-RECENT?"rgba(232,150,122,.45)":"#E8967A"),
+       stack:"a",borderRadius:{topLeft:3,topRight:3},borderSkipped:false,
+       barPercentage:.68,categoryPercentage:.84,order:3,yAxisID:"y"},
+      {type:"line",label:"Share cleared",data:W.map(w=>w.recv?w.res/w.recv*100:null),
+       borderColor:"#0D2137",backgroundColor:"#0D2137",borderWidth:2,
+       pointRadius:2.5,pointHoverRadius:6,tension:.25,order:1,yAxisID:"y1"}]},
+    options:{maintainAspectRatio:false,interaction:{mode:"index",intersect:false},
+      plugins:{legend:{display:false},tooltip:{backgroundColor:"#0D2137",padding:9,cornerRadius:6,
+        boxWidth:8,boxHeight:8,boxPadding:4,titleFont:{size:11,weight:"700"},bodyFont:{size:11},
+        callbacks:{
+          title:i=>"Week of "+lab(W[i[0].dataIndex].d),
+          label:c=>c.dataset.label==="Share cleared"
+            ? "Share cleared: "+Math.round(c.parsed.y)+"%"
+            : c.dataset.label+": "+c.parsed.y,
+          afterBody:i=>(W.length-1-i[0].dataIndex)<RECENT?["too recent to judge"]:[]}}},
+      scales:{
+        x:{stacked:true,grid:{color:"#EDF1F5",drawTicks:false},border:{display:false},
+           ticks:{padding:4,maxRotation:0,autoSkipPadding:10}},
+        y:{stacked:true,beginAtZero:true,grid:{color:"#EDF1F5",drawTicks:false},
+           border:{display:false},ticks:{padding:4}},
+        y1:{position:"right",min:0,max:100,grid:{display:false},border:{display:false},
+            ticks:{padding:4,callback:v=>v+"%",color:"#0D2137"}}}}});
+}
+
 function renderPending(){
   const body=document.getElementById("pend-body");
   const tiles=document.getElementById("pend-tiles");
@@ -4992,6 +5109,8 @@ function renderPending(){
   const ages=all.map(x=>pqDays(x.date)).filter(v=>v!==null);
   const oldest=ages.length?Math.max.apply(null,ages):null;
   const days=total/PQ_CAP;
+
+  pqTrend();
 
   const noBrand=all.filter(x=>x.brand==="(not set)").length;
   if(sub)sub.textContent=`${all.length} request${all.length===1?"":"s"} submitted and not yet processed`+
